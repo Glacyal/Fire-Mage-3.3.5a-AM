@@ -60,7 +60,7 @@ Fire Mage HUD (root: group, internalVersion: 52)
 ├── 05 - Trinket 2 (icon: item Cooldown Progress slot 14, xOffset: 0, yOffset: -48)
 ├── 06 - Cloak (icon: item Cooldown Progress slot 15, xOffset: +32, yOffset: -48)
 │
-├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -26, width: 240, height: 14)
+├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -26, width: 240, height: 14, % 2 decimali)
 ├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 240, height: 22)
 ├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -13, width: 240, height: 4)
 │

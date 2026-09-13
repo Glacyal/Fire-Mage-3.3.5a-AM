@@ -61,7 +61,7 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTO il pacchetto)
 ├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar)
 ├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar)
 │
-├── 07 - Mana Bar (Progress Bar: % e Valori correnti sotto il GCD)
+├── 07 - Mana Bar (Progress Bar: % con due cifre decimali, es. 85.24%, e Valori correnti)
 ├── 08 - Castbar (Progress Bar: Cast standard, Channeling, Icona e Tempo)
 ├── 09 - GCD (Barra sottile orizzontale tra Castbar e Mana Bar)
 │

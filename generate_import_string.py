@@ -106,8 +106,8 @@ def generate_wa_string(data_table):
     encoded = libdeflate_encode_for_print(compressed)
     return f"!WA:1!{encoded}"
 
-def make_subtext(text, justify="CENTER", anchor_point="INNER_BOTTOM", font_size=12, y_offset=0):
-    return {
+def make_subtext(text, justify="CENTER", anchor_point="INNER_BOTTOM", font_size=12, y_offset=0, extra_props=None):
+    res = {
         "type": "subtext",
         "text_text": text,
         "text_justify": justify,
@@ -126,6 +126,9 @@ def make_subtext(text, justify="CENTER", anchor_point="INNER_BOTTOM", font_size=
         "text_shadowYOffset": -1,
         "text_shadowColor": [0, 0, 0, 1],
     }
+    if extra_props:
+        res.update(extra_props)
+    return res
 
 def build_wa_tree():
     data = {
@@ -666,6 +669,8 @@ def build_wa_tree():
                 "barColor": [0.09, 0.55, 1.0, 1.0],
                 "backgroundColor": [0.1, 0.1, 0.1, 0.8],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
+                "displayText_format_1.percentpower_format": "Number",
+                "displayText_format_1.percentpower_decimal_precision": 2,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -683,7 +688,16 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
-                    make_subtext("%1.percentpower%%  |  %1.power / %1.totalpower", justify="CENTER", anchor_point="CENTER", font_size=10),
+                    make_subtext(
+                        "%1.percentpower%%  |  %1.power / %1.totalpower",
+                        justify="CENTER",
+                        anchor_point="CENTER",
+                        font_size=10,
+                        extra_props={
+                            "text_text_format_1.percentpower_format": "Number",
+                            "text_text_format_1.percentpower_decimal_precision": 2,
+                        }
+                    ),
                 ],
             },
 
