@@ -142,17 +142,17 @@ def build_wa_tree():
             "internalVersion": 52,
             "scale": 1,
             "xOffset": 0,
-            "yOffset": 0,
+            "yOffset": -150,
             "anchorPoint": "CENTER",
             "selfPoint": "CENTER",
             "controlledChildren": [
                 "01 - Procs",
                 "02 - Molten Armor",
-                "03 - Target",
                 "04 - Focus Magic",
                 "05 - Trinket 1",
                 "05 - Trinket 2",
                 "06 - Cloak",
+                "06 - Mana Gem",
                 "07 - Mana Bar",
                 "08 - Castbar",
                 "09 - GCD",
@@ -443,34 +443,6 @@ def build_wa_tree():
             },
 
             # =================================================================
-            # 03 - TARGET STATUS (Centered under HUD)
-            # =================================================================
-            {
-                "id": "03 - Target",
-                "uid": "FMHUD_TARGET",
-                "parent": "Fire Mage HUD",
-                "regionType": "text",
-                "internalVersion": 52,
-                "xOffset": 0,
-                "yOffset": -70,
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "unit",
-                            "event": "Unit Characteristics",
-                            "unit": "target",
-                            "use_unit": True,
-                        },
-                        "untrigger": {}
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    make_subtext("%1.target%  -  %1.percenthealth%% (%1.health / %1.totalhealth)", justify="CENTER", anchor_point="CENTER", font_size=11)
-                ],
-            },
-
-            # =================================================================
             # 04 - FOCUS MAGIC (Icon Group - Focus Magic Monitor)
             # =================================================================
             {
@@ -518,7 +490,7 @@ def build_wa_tree():
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
-            # Focus Magic OFF (Gray Icon when not applied)
+            # Focus Magic OFF (Gray Icon when not applied - scans player, target, focus, raid, party)
             {
                 "id": "Focus Magic - OFF",
                 "uid": "FMHUD_FOCUS_OFF",
@@ -528,20 +500,110 @@ def build_wa_tree():
                 "width": 36,
                 "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
-                "auto": True,
                 "desaturate": True,
                 "color": [0.6, 0.6, 0.6, 0.8],
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "aura2",
-                            "unit": "player",
-                            "auranames": ["Focus Magic"],
-                            "useName": True,
-                            "debuffType": "HELPFUL",
-                            "matchesShowOn": "showOnMissing",
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD",
+                            "custom": """function()
+    local b = "Focus Magic"
+    for i = 1, 40 do
+        local n = UnitBuff("player", i)
+        if not n then break end
+        if n == b then return false end
+    end
+    if UnitExists("target") and UnitIsFriend("player", "target") then
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, c = UnitBuff("target", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then return false end
+        end
+    end
+    if UnitExists("focus") and UnitIsFriend("player", "focus") then
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then return false end
+        end
+    end
+    local nr = GetNumRaidMembers()
+    if nr and nr > 0 then
+        for r = 1, nr do
+            local u = "raid"..r
+            for i = 1, 40 do
+                local n, _, _, _, _, _, _, c = UnitBuff(u, i)
+                if not n then break end
+                if n == b and (c == "player" or not c) then return false end
+            end
+        end
+    else
+        local np = GetNumPartyMembers()
+        if np and np > 0 then
+            for p = 1, np do
+                local u = "party"..p
+                for i = 1, 40 do
+                    local n, _, _, _, _, _, _, c = UnitBuff(u, i)
+                    if not n then break end
+                    if n == b and (c == "player" or not c) then return false end
+                end
+            end
+        end
+    end
+    return true
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function()
+    local b = "Focus Magic"
+    for i = 1, 40 do
+        local n = UnitBuff("player", i)
+        if not n then break end
+        if n == b then return true end
+    end
+    if UnitExists("target") and UnitIsFriend("player", "target") then
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, c = UnitBuff("target", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then return true end
+        end
+    end
+    if UnitExists("focus") and UnitIsFriend("player", "focus") then
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then return true end
+        end
+    end
+    local nr = GetNumRaidMembers()
+    if nr and nr > 0 then
+        for r = 1, nr do
+            local u = "raid"..r
+            for i = 1, 40 do
+                local n, _, _, _, _, _, _, c = UnitBuff(u, i)
+                if not n then break end
+                if n == b and (c == "player" or not c) then return true end
+            end
+        end
+    else
+        local np = GetNumPartyMembers()
+        if np and np > 0 then
+            for p = 1, np do
+                local u = "party"..p
+                for i = 1, 40 do
+                    local n, _, _, _, _, _, _, c = UnitBuff(u, i)
+                    if not n then break end
+                    if n == b and (c == "player" or not c) then return true end
+                end
+            end
+        end
+    end
+    return false
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
@@ -560,7 +622,7 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -32,
+                "xOffset": -51,
                 "yOffset": -48,
                 "width": 26,
                 "height": 26,
@@ -594,7 +656,7 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 0,
+                "xOffset": -17,
                 "yOffset": -48,
                 "width": 26,
                 "height": 26,
@@ -628,7 +690,7 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 32,
+                "xOffset": 17,
                 "yOffset": -48,
                 "width": 26,
                 "height": 26,
@@ -650,6 +712,62 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                ],
+            },
+
+            # =================================================================
+            # 06 - MANA GEM (Item 33312 / 22044 - Centered row under Mana Bar)
+            # =================================================================
+            {
+                "id": "06 - Mana Gem",
+                "uid": "FMHUD_MANAGEM",
+                "parent": "Fire Mage HUD",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 51,
+                "yOffset": -48,
+                "width": 26,
+                "height": 26,
+                "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
+                "cooldownSwipe": True,
+                "customTextUpdate": "update",
+                "customText": """function()
+    local c = GetItemCount(33312, nil, true) or 0
+    if c == 0 then
+        c = GetItemCount(22044, nil, true) or 0
+    end
+    if c > 0 then
+        return tostring(c)
+    end
+    return "|cFFFF22220|r"
+end""",
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "item",
+                            "event": "Cooldown Progress (Item)",
+                            "itemName": 33312,
+                            "use_itemName": True,
+                            "genericShowOn": "showAlways",
+                            "use_genericShowOn": True,
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                    make_subtext(
+                        "%c",
+                        justify="RIGHT",
+                        anchor_point="INNER_BOTTOMRIGHT",
+                        font_size=9,
+                        extra_props={
+                            "anchorXOffset": -1,
+                            "anchorYOffset": 1,
+                        }
+                    ),
                 ],
             },
 
@@ -689,7 +807,7 @@ def build_wa_tree():
                     { "type": "subbackground" },
                     { "type": "subforeground" },
                     make_subtext(
-                        "%1.percentpower%%  |  %1.power / %1.totalpower",
+                        "%1.percentpower%%",
                         justify="CENTER",
                         anchor_point="CENTER",
                         font_size=10,

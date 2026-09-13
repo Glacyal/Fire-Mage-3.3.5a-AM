@@ -37,7 +37,7 @@ end
 -- TESTO PERSONALIZZATO (%c) PER WEAKAURAS
 -- =========================================================================
 -- Inserisci questo codice nel campo "Custom Function" del testo della barra (%c).
--- Mostra: Percentuale con due decimali e Valori Correnti / Massimi (es. "85.24% | 14.8k / 16.0k")
+-- Mostra: Solo la Percentuale con due decimali (es. "85.24%")
 
 function FireMageHUD_Mana_CustomText()
     local cur = UnitPower("player", 0) or UnitMana("player") or 0
@@ -45,18 +45,7 @@ function FireMageHUD_Mana_CustomText()
     if max <= 0 then max = 1 end
     local pct = (cur / max) * 100
 
-    -- Formattazione cifre
-    local formatNum = function(v)
-        if v >= 1000000 then
-            return string.format("%.1fM", v / 1000000)
-        elseif v >= 1000 then
-            return string.format("%.1fk", v / 1000)
-        else
-            return string.format("%d", v)
-        end
-    end
-
-    return string.format("%.2f%%  |  %s / %s", pct, formatNum(cur), formatNum(max))
+    return string.format("%.2f%%", pct)
 end
 
 -- =========================================================================

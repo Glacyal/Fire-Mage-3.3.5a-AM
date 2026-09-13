@@ -11,13 +11,17 @@ L'intero pacchetto e' contenuto nella stringa di importazione IMPORT_STRING.txt
 ed e' pronto all'uso al 100% dentro l'addon WeakAuras.
 
 La suite e' compilata con i prototipi nativi di WeakAuras 4.0.0 (internalVersion 52):
-- Reattivita' immediata al combattimento e alle magie (nessun lag o testo fittizio).
-- La Castbar compare SOLO quando lanci magie e mostra icona, nome e tempo residuo.
-- Molten Armor mostra subito lo stato attivo (timer) o mancante (allarme rosso).
-- Mana Bar dinamica con percentuale e valori numerici correnti/massimi.
-- Hot Streak si illumina al proc e scatena l'Alert centrale a schermo.
+- Ottimizzata specificamente per la visuale da Raid (Ulduar/ICC): posizionata
+  nella tasca centrale libera sopra le action bar (yOffset = -150), senza alcuna
+  interferenza con i raid frames a sinistra, Omen3 a destra o il modello 3D del pg.
+- Mana Bar essenziale: mostra ESCLUSIVAMENTE la percentuale con 2 decimali (es. 85.24%).
+- Focus Magic intelligente: scansione automatica di tutto il Raid (1-40), Party (1-4),
+  Target e Focus. Se applicato ad un alleato, l'avviso "OFF" scompare completamente;
+  quando il proc da critico si attiva sul Mago, mostra l'icona attiva con conto alla rovescia.
+- Gemma del Mana (Mana Gem): monitora cooldown (2 min) e cariche residue (3, 2, 1);
+  mostra uno "0" rosso di allarme quando esaurita per ricordarti di evocarla.
 - TUTTI I MODULI SONO RIGOROSAMENTE RAGGRUPPATI dentro "Fire Mage HUD":
-  puoi eliminare o spostare tutta la HUD in un colpo solo.
+  puoi eliminare o spostare l'intera interfaccia in un colpo solo.
 
 ================================================================================
 COME PULIRE E IMPORTARE LA WEAKAURA IN GIOCO (30 SECONDI)
@@ -39,7 +43,7 @@ COME PULIRE E IMPORTARE LA WEAKAURA IN GIOCO (30 SECONDI)
 STRUTTURA DEI MODULI IN WEAKAURAS (/wa)
 ================================================================================
 
-Fire Mage HUD (Gruppo Master - Contiene TUTTO il pacchetto)
+Fire Mage HUD (Gruppo Master - yOffset = -150 sopra le barre delle azioni)
 ├── 01 - Procs (Dynamic Group orizzontale - Auto-allineato sopra la Castbar)
 │   ├── Hot Streak (Icona + Timer + Glow all'attivazione)
 │   ├── Living Bomb (Icona + Timer debuff sul Target)
@@ -47,73 +51,54 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTO il pacchetto)
 │   ├── Combustion (Icona intelligente con Cooldown Progress)
 │   └── Molten Fury (Icona attiva solo con Target HP <= 35%)
 │
-├── 02 - Molten Armor (Ala Sinistra HUD - Monitor Permanente)
+├── 02 - Molten Armor (Ala Sinistra HUD - Monitor Permanente x = -155)
 │   ├── Molten Armor - Active (Icona attiva con timer dei minuti residui)
-│   └── Molten Armor - OFF (Icona desaturata grigia con testo OFF)
+│   └── Molten Armor - OFF (Icona desaturata grigia con testo OFF se assente)
 │
-├── 03 - Target (Aura Text: Nome Target, % HP e Valori salute - Centrato sotto HUD)
+├── 04 - Focus Magic (Ala Destra HUD - Monitor Permanente x = +155)
+│   ├── Focus Magic - Active (Icona attiva con timer %p quando il proc e' attivo)
+│   └── Focus Magic - OFF (Icona grigia OFF se non assegnato a nessuno;
+│                          SCOMPARE non appena applicato ad un alleato in raid/party)
 │
-├── 04 - Focus Magic (Ala Destra HUD - Monitor Permanente, simmetrico a Molten Armor)
-│   ├── Focus Magic - Active (Icona attiva con timer del proc crit o durata residua)
-│   └── Focus Magic - OFF (Icona desaturata grigia con testo OFF quando non applicato)
+├── 05 - Trinket 1 (Icona Slot 13: Fila centrata sotto la Mana Bar, x = -51)
+├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar, x = -17)
+├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar, x = +17)
+├── 06 - Mana Gem (Gemma del Mana: Cooldown %p + Cariche residue, x = +51)
 │
-├── 05 - Trinket 1 (Icona Slot 13: Fila centrata sotto la Mana Bar)
-├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar)
-├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar)
-│
-├── 07 - Mana Bar (Progress Bar: % con due cifre decimali, es. 85.24%, e Valori correnti)
+├── 07 - Mana Bar (Progress Bar: SOLO % con due cifre decimali, es. 85.24%)
 ├── 08 - Castbar (Progress Bar: Cast standard, Channeling, Icona e Tempo)
 ├── 09 - GCD (Barra sottile orizzontale tra Castbar e Mana Bar)
 │
-└── 10 - Alerts (Alert Visivo Hot Streak al centro dello schermo con testo ingrandito)
+└── 10 - Alerts (Alert Visivo Hot Streak sopra i proc con testo ingrandito)
 
 ================================================================================
 COME PERSONALIZZARE GLI ELEMENTI IN GIOCO (/wa)
 ================================================================================
 
-Ogni modulo e' completamente autonomo. Cliccando sulla singola aura in /wa puoi:
+Ogni modulo e' completamente autonomo. Cliccando sul gruppo master o sulla singola aura:
 
-- SPOSTARE: Clicca e trascina con il mouse a video o cambia X Offset / Y Offset.
-- RIDIMENSIONARE: Modifica Width (Larghezza) e Height (Altezza).
+- SPOSTARE L'INTERA HUD: Clicca su "Fire Mage HUD" e modifica yOffset (es. -140 o -160)
+  oppure trascina l'ancora direttamente a schermo.
+- RIDIMENSIONARE: Modifica Width (Larghezza) e Height (Altezza) del singolo modulo.
 - FONT E TESTI: Scegli il font desiderato, dimensione caratteri e allineamento.
 - COLORI: Modifica colore barra, colore sfondo e trasparenza (Alpha).
-- NASCONDERE: Puoi disattivare singoli moduli (es. solo Focus o solo GCD)
-  cliccando sull'icona a forma di occhio accanto al nome dell'aura.
-- ELIMINARE TUTTO IN UN COLPO: Clic destro su "Fire Mage HUD" -> Delete.
+- NASCONDERE: Puoi disattivare singoli moduli cliccando sull'icona a forma di occhio.
+- ELIMINARE TUTTO IN UN COLPO: Clic destro su "Fire Mage HUD" -> Delete children and group.
 
 ================================================================================
-DIAGNOSTICA E VERIFICA IN COMBATTIMENTO
+DIAGNOSTICA E VERIFICA IN COMBATTIMENTO E IN RAID
 ================================================================================
 
-1. Molten Armor:
-   - Rimuovi il buff cliccando con il tasto destro sulla sua icona in alto a destra.
-     -> Appare subito l'avviso rosso "OFF!" lampeggiante.
-   - Rilancia Molten Armor -> Passa all'icona a colori con il conto alla rovescia.
-2. Castbar:
-   - Fuori dal cast la barra e' invisibile. Appena lanci Fireball o Frostfire Bolt
-     la barra si accende con icona, nome e tempo.
+1. Focus Magic:
+   - Se non lo hai lanciato su nessuno: vedi l'icona grigia "OFF" a destra.
+   - Appena lo lanci su un alleato in raid o sul tuo target: l'icona "OFF" SCOMPARE subito.
+   - Quando l'alleato fa un critico e ricevi il buff 10s: appare l'icona a colori con %p.
+2. Gemma del Mana:
+   - Mostra l'icona dello Zaffiro con il numero di cariche in basso a destra (3, 2, 1).
+   - Se usi la gemma: parte lo swipe di cooldown circolare e il countdown di 2 minuti.
+   - Se hai 0 cariche o non hai gemme: compare uno "0" rosso.
 3. Mana Bar:
-   - Mostra la percentuale e il valore attuale/massimo aggiornati in tempo reale.
-4. Manichino da allenamento (Dummy):
-   - Living Bomb mostra il countdown dei 12s.
-   - Hot Streak compare e si illumina al doppio critico, scatenando l'Alert a video.
-
-================================================================================
-CONTROLLO DI VERSIONE (GIT & GITHUB)
-================================================================================
-
-Il progetto e' versionato con Git e collegato al repository remoto privato:
-https://github.com/Glacyal/FireMageHUD-335
-
-File inclusi nel tracciamento:
-- Codice sorgente: Config.lua, Core.lua, FireMageHUD.toc, cartella modules/
-- Generatore WA: generate_import_string.py (AceSerializer + LibDeflate WA4)
-- Stringa di importazione: IMPORT_STRING.txt
-- Documentazione: README.txt, README.md, HANDOFF.md, WEAKAURAS_ONLY_SETUP.md
-- Configurazione: .gitignore
-
-Comandi rapidi Git:
-  git status                  -> Verifica file modificati o non tracciati
-  git log --oneline           -> Cronologia delle versioni e modifiche
-  git push                    -> Carica i nuovi commit sul repository GitHub
-================================================================================
+   - Mostra solo la percentuale con precisione al centesimo (es. 100.00% -> 94.15%).
+4. Posizione a Schermo:
+   - Perfettamente centrata nello spazio libero tra Grid (raid frames a sinistra)
+     e Omen3 (threat meter a destra), appena sopra le action bar inferiori.

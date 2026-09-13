@@ -5,10 +5,10 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 > [!IMPORTANT]
 > **TUTTI I MODULI SONO RIGOROSAMENTE RAGGRUPPATI E NATIVI!**  
 > L'intero pacchetto è compilato per l'engine di WeakAuras 4.0.0 (`internalVersion = 52`):
-> - La **Castbar** compare solo quando lanci magie e mostra icona, nome e tempo residuo.
-> - **Molten Armor** mostra subito lo stato attivo (timer) o mancante (allarme rosso lampeggiante).
-> - La **Mana Bar** mostra percentuale e valori numerici aggiornati in tempo reale.
-> - **Hot Streak** si illumina al doppio critico e fa scattare l'Alert centrale a schermo.
+> - **Layout Ottimizzato per Raid**: posizionato nella tasca centrale pulita (`yOffset = -150`) sopra le action bar, lasciando liberi il modello 3D del personaggio, le meccaniche del boss, i raid frames a sinistra e l'Omen threat meter a destra.
+> - **Mana Bar Essenziale**: mostra **esclusivamente** la percentuale con 2 decimali (es. `85.24%`).
+> - **Focus Magic Intelligente**: monitora in tempo reale tutto il Raid (1-40), Party (1-4), Target e Focus. Quando Focus Magic è applicato ad un alleato, l'avviso grigio `OFF` **scompare** completamente. Se il proc da critico (+3% spell crit) si attiva sul Mago, mostra l'icona attiva con conto alla rovescia.
+> - **Gemma del Mana (Mana Gem)**: integrata nella riga utility (`x = +51, y = -48`); monitora il cooldown di 2 minuti (`%p`) e le cariche rimanenti in borsa (`%c`, con `0` rosso se assente o terminata).
 > - Se vuoi spostare o eliminare l'intera suite, basta fare clic destro su **`Fire Mage HUD`** $\rightarrow$ **`Delete children and group`**.
 
 ---
@@ -32,7 +32,7 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 ## Albero dei Moduli in WeakAuras (`/wa`)
 
 ```text
-Fire Mage HUD (Gruppo Master - Contiene TUTTI i componenti)
+Fire Mage HUD (Gruppo Master - yOffset = -150, posizionato sopra le action bar)
 │
 ├── 01 - Procs (Dynamic Group orizzontale - Auto-allineato sopra la Castbar)
 │   ├── Hot Streak (Icona + Timer + Glow Pixel all'attivazione)
@@ -41,21 +41,21 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTI i componenti)
 │   ├── Combustion (Icona intelligente con Cooldown Progress)
 │   └── Molten Fury (Icona attiva solo con Target HP <= 35%)
 │
-├── 02 - Molten Armor (Ala Sinistra HUD - Monitor Permanente)
+├── 02 - Molten Armor (Ala Sinistra HUD - Monitor Permanente x = -155)
 │   ├── Molten Armor - Active (Icona attiva con timer dei minuti residui)
-│   └── Molten Armor - OFF (Icona desaturata grigia con indicazione OFF)
+│   └── Molten Armor - OFF (Icona desaturata grigia con indicazione OFF se assente)
 │
-├── 03 - Target (Aura Text: Nome Target, % HP e Valori salute - Centrato sotto HUD)
+├── 04 - Focus Magic (Ala Destra HUD - Monitor Permanente x = +155)
+│   ├── Focus Magic - Active (Icona attiva con timer del proc crit %p)
+│   └── Focus Magic - OFF (Icona grigia OFF quando non assegnato a nessuno;
+│                          SCOMPARE non appena applicato ad un alleato in raid/party)
 │
-├── 04 - Focus Magic (Ala Destra HUD - Monitor Permanente, simmetrico a Molten Armor)
-│   ├── Focus Magic - Active (Icona attiva con timer del proc crit o durata residua)
-│   └── Focus Magic - OFF (Icona desaturata grigia con indicazione OFF se non applicato)
+├── 05 - Trinket 1 (Icona Slot 13: Fila centrata sotto la Mana Bar, x = -51)
+├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar, x = -17)
+├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar, x = +17)
+├── 06 - Mana Gem (Gemma del Mana: Cooldown %p + Cariche residue, x = +51)
 │
-├── 05 - Trinket 1 (Icona Slot 13: Fila centrata sotto la Mana Bar)
-├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar)
-├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar)
-│
-├── 07 - Mana Bar (Progress Bar: % con due cifre decimali, es. 85.24%, e Valori correnti)
+├── 07 - Mana Bar (Progress Bar: SOLO % con due cifre decimali, es. 85.24%)
 ├── 08 - Castbar (Progress Bar: Cast standard, Channeling, Icona spell e Tempo)
 ├── 09 - GCD (Barra sottile orizzontale tra Castbar e Mana Bar)
 │
@@ -65,27 +65,9 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTI i componenti)
 
 ---
 
-## Verifica Immediata in Gioco
-
-1. **Castbar**: Fuori dal cast la barra è invisibile. Lancia una *Fireball* o canalizza *Evocation*: la barra compare all'istante con icona, nome e conto alla rovescia.
-2. **Molten Armor**: Clicca con il tasto destro sull'icona del buff di Molten Armor in alto a destra dello schermo di WoW per rimuoverla. L'indicatore a sinistra della HUD passa immediatamente allo stato rosso lampeggiante `OFF!`.
-3. **Mana Bar**: Mostra percentuale e valori numerici aggiornati in tempo reale.
-4. **Combattimento su Dummy**: Applica *Living Bomb* per vedere il countdown dei 12 secondi; fai critici fino al proc di *Hot Streak* per vederlo brillare e far scattare l'alert a schermo.
-
----
-
 ## Controllo Versione (Git)
 
 Il progetto è versionato con Git ed è sincronizzato sulla repository remota privata di GitHub:
 - **Repository Remota**: [Glacyal/FireMageHUD-335](https://github.com/Glacyal/FireMageHUD-335)
 - **Branch**: `main`
 - **File tracciati**: codice sorgente (`Core.lua`, `Config.lua`, `FireMageHUD.toc`, `modules/`), script compilatore (`generate_import_string.py`), stringa WeakAura (`IMPORT_STRING.txt`) e manuali (`README.*`, `HANDOFF.md`).
-- **File ignorati**: cache Python (`__pycache__`), artefatti di sistema e directory IDE via [`.gitignore`](file:///d:/0Progetti/FireMageHUD-335/.gitignore).
-
-### Comandi Rapidi per il Push
-Per sincronizzare le future modifiche su GitHub:
-```bash
-git add .
-git commit -m "descrizione della modifica"
-git push
-```
