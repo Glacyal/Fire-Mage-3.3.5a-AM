@@ -22,8 +22,8 @@ local FMHUD_TrinketDB = {
     [47477] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
     [47182] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" }, -- Reign of the Unliving
     [47316] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
-    [40682] = { buff = "Now is the Time!" }, -- Sundial of the Exiled
-    [40255] = { buff = "Curse of the Eye" }, -- The Dying Curse
+    [40682] = { buff = "Now is the time!", altBuff = "Now is the Time!", spellId = 60064, icd = 45, dur = 10 }, -- Sundial of the Exiled
+    [40255] = { buff = "Dying Curse", altBuff = "Curse of the Eye", spellId = 60494, icd = 45, dur = 10 }, -- The Dying Curse
     [47213] = { buff = "Deadly Precision" }, -- Abyssal Rune
     [37660] = { buff = "Forged Ember" }, -- Forge Ember
     [45308] = { buff = "Blessing of the Broodmother" },
@@ -100,9 +100,21 @@ function FireMageHUD_GetTrinketStatus(slot, targetBuffID, targetICD, isOnUse)
     local dbAltBuff = entry and entry.altBuff
 
     for i = 1, 40 do
-        local name, _, icon, count, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if (buffName and name == buffName) or (dbBuff and name == dbBuff) or (dbAltBuff and name == dbAltBuff) then
+        local isMatch = false
+        if entry then
+            if (entry.spellId and spellId == entry.spellId)
+               or (entry.altSpellId and spellId == entry.altSpellId)
+               or (entry.buff and string.lower(name) == string.lower(entry.buff))
+               or (entry.altBuff and string.lower(name) == string.lower(entry.altBuff)) then
+                isMatch = true
+            end
+        elseif buffName and (string.lower(name) == string.lower(buffName)) then
+            isMatch = true
+        end
+
+        if isMatch then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             Trinket_ProcTimers[slot].lastProc = GetTime()
             local txt = string.format("%s\n|cFF00FF00ACTIVE %.1fs|r", itemName, rem)

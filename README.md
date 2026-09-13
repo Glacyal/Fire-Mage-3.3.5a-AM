@@ -4,33 +4,36 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 
 > [!IMPORTANT]
 > **REGOLE CRUCIALI PER L'IMPORTAZIONE IN WEAKAURAS**:
-> In WeakAuras, se importi un gruppo con lo stesso nome senza prima aver cancellato quello vecchio, WeakAuras **fonde (merge)** i moduli invece di sovrascriverli! Questo lasciava le vecchie aure (con le vecchie coordinate o il Target rimosso) visibili in contemporanea.
+> In WeakAuras, se importi un gruppo con lo stesso nome senza prima aver cancellato quello vecchio, WeakAuras **fonde (merge)** i moduli invece di sovrascriverli!
 > **Procedura obbligatoria**: In `/wa`, fai clic destro su **`Fire Mage HUD`** $\rightarrow$ seleziona **`Delete children and group`** $\rightarrow$ solo DOPO incolla la nuova stringa da `IMPORT_STRING.txt`.
 
 ---
 
 ## Novità di Questo Aggiornamento
 
-1. **Proc Trinket & Mantello con Rilevamento Attivo & Pixel Glow**:
-   - I proc passivi dei trinket (DFO *Oggetto Estraneo Dislocato*, Filatterio *Phylactery of the Nameless Lich*, Scaglia *Charred Twilight Scale*, Bagliore *Flare of the Heavens*, Regno dei Morti *Reign of the Dead*, Clessidra, Dying Curse, Runa Abissale, ecc.) e l'incantamento Mantello di Sartoria (*Lightweave Embroidery*) **non mettono in cooldown lo slot di equipaggiamento**, ma applicano un **Buff temporaneo** sul Mago.
-   - I moduli **`05 - Trinket 1`**, **`05 - Trinket 2`** e **`06 - Cloak`** ora integrano un trigger status personalizzato con riconoscimento automatico di tutti i trinket caster di WotLK 3.3.5a.
-   - **All'attivazione del proc**: l'icona si illumina con un **Pixel Glow dorato animato**, mostra l'icona del proc, attiva lo swipe circolare e visualizza il conto alla rovescia in secondi esatti (`14.2s`).
-   - **Quando il proc termina**: il glow si spegne all'istante e l'icona torna pulita mostrando l'oggetto equipaggiato. Se il trinket o il mantello è "On-Use" (es. paracadute ingegneria, trinket attivo), durante il cooldown mostra il countdown dei secondi residui.
+1. **Trinket & Mantello con Tracking Completo dei Proc & ICD (Internal Cooldown)**:
+   - **Proc Attivo**: Quando il trinket (es. *The Dying Curse*, *Sundial of the Exiled*, *DFO*, *Phylactery*, *Charred Twilight Scale*, ecc.) o l'incantamento del Mantello (*Lightweave Embroidery*) si attivano, l'icona si illumina con un **Pixel Glow dorato animato**, swipe circolare e timer in secondi (`9.7s`).
+   - **Fase ICD (Conto alla rovescia prima del prossimo reproc)**: Non appena il proc termina, il glow si spegne e l'icona mostra un conto alla rovescia in bianco (`35`, `34`, ...) che indica esattamente i secondi mancanti prima che l'effetto possa riattivarsi (ICD di 45s).
+   - **Pronto (Ready)**: Allo scadere dell'ICD l'icona torna pulita senza testi, pronta al prossimo proc.
+   - **Riconoscimento Spell ID Nativo 3.3.5a**: Supporto per *The Dying Curse* (Spell ID 60494, buff "Dying Curse"), *Sundial of the Exiled* (Spell ID 60064, buff "Now is the time!"), e tutti i trinket da caster di WotLK.
 
-2. **Geometria a Zero Sovrapposizioni (Zero-Overlap Layout)**:
-   - **Castbar (`08 - Castbar`)**: larghezza 220px, altezza 20px, opzione `icon: False`. Il nome della spell è scritto all'interno a sinistra e il tempo rimanente a destra. Questo elimina definitivamente la collisione laterale con Molten Armor!
-   - **Ali Laterali Pulite**:
-     - **Molten Armor**: `x = -160, y = -7` (ben **33 pixel di spazio libero** dalla Castbar!).
-     - **Focus Magic**: `x = +160, y = -7` (ben **33 pixel di spazio libero** dalla Castbar!).
-   - **Cluster Centrale Verticale**:
-     - **GCD Bar**: `y = -12`, altezza 3px, agganciata sotto la Castbar.
-     - **Mana Bar**: `y = -23`, altezza 14px, testo rigorosamente solo percentuale con 2 decimali (`85.24%`).
-   - **Fila Utility (`Trinket 1`, `Trinket 2`, `Cloak`, `Mana Gem`)**:
-     - Posizionata a `y = -54` (**10 pixel di spazio libero** sotto la Mana Bar).
-     - Icone 28x28 posizionate a `x = -60, -20, +20, +60` (**12 pixel di spazio libero** tra ogni icona).
-   - **Gemma del Mana (`06 - Mana Gem`)**: Cooldown `%p` centrato; cariche residue `%c` ancorate in alto a destra (`INNER_TOPRIGHT`) per non scontrarsi mai.
-   - **Riga Proc (`01 - Procs`)**: posizionata a `y = +44` (17 pixel sopra la Castbar).
-   - **Alert Hot Streak (`10 - Alerts`)**: posizionato a `y = +105` (19 pixel sopra la riga dei proc).
+2. **Molten Armor Intelligente (Soglia 5 Minuti)**:
+   - Mostra il timer di countdown (es. `4:30`) **solo ed esclusivamente se mancano meno di 5 minuti alla scadenza**.
+   - Con durata superiore a 5 minuti, l'icona rimane pulita ed elegante, senza numeri superflui.
+   - Se il buff è assente, l'icona diventa desaturata con avviso rosso **`OFF`**.
+
+3. **Nuovo Modulo Arcane Intellect / Arcane Brilliance**:
+   - Monitora la presenza del buff di intelletto (*Arcane Intellect*, *Arcane Brilliance*, *Dalaran Intellect*, *Dalaran Brilliance*, *Fel Intelligence*).
+   - Posizionato nell'ala sinistra sopra Molten Armor (`x = -160, y = +22`).
+   - Stessa logica anti-clutter: icona pulita se > 5 min, timer giallo se $\le 5$ min, e scritta rossa **`OFF`** se manca.
+
+4. **Tracciamento Debuff Scorch / Improved Scorch**:
+   - Integrato nel gruppo dinamico `01 - Procs` con icona, swipe circolare e secondi residui.
+   - Allerta colorazione rossa quando il debuff scende sotto i 5 secondi, per non perdere mai il +5% critico magico sul boss.
+
+5. **Scala Aumentata del +20% e Posizionamento Perfetto**:
+   - Master scale impostato a **`1.2`** (+20% di grandezza complessiva).
+   - Coordinata verticale impostata a **`yOffset = -190`**, posizionando l'intero HUD subito sopra le barre delle abilità di gioco senza coprire il personaggio o il combattimento.
 
 ---
 
@@ -42,43 +45,43 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 4. In `/wa`, clicca su **Import** in alto a sinistra.
 5. Incolla la stringa con `Ctrl+V` nel riquadro.
 6. Clicca su **Import Group**.
-7. Chiudi WeakAuras (`Esc`). Pronto!
+7. Chiudi WeakAuras (`Esc`). Fatto!
 
 ---
 
-## Albero dei Moduli in WeakAuras (`/wa`)
+## Struttura e Coordinate dell'HUD
 
 ```text
-Fire Mage HUD (Gruppo Master - yOffset = -150, posizionato sopra le action bar)
+Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le barre)
 │
 ├── 01 - Procs (Dynamic Group orizzontale, y = +44 - Auto-allineato sopra la Castbar)
-│   ├── Hot Streak (Icona + Timer + Glow Pixel all'attivazione)
-│   ├── Living Bomb (Icona + Timer debuff sul Target)
-│   ├── Ignite (Icona + Timer debuff sul Target)
-│   ├── Scorch (Icona Scorch/Improved Scorch + Timer %p + Avviso refresh <= 5s)
-│   ├── Combustion (Icona intelligente con Cooldown Progress)
-│   └── Molten Fury (Icona attiva solo con Target HP <= 35%)
+│   ├── Hot Streak (Icona 34x34 + Timer + Glow Pixel dorato)
+│   ├── Living Bomb (Icona 34x34 + Timer debuff sul Target)
+│   ├── Ignite (Icona 34x34 + Timer debuff sul Target)
+│   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer + Avviso <= 5s)
+│   ├── Combustion (Icona 34x34 con Cooldown Progress)
+│   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
-├── 02 - Molten Armor (Ala Sinistra HUD - x = -160, y = -7, 33px di spazio dalla Castbar)
-│   ├── Molten Armor - Active (Icona attiva con timer)
-│   └── Molten Armor - OFF (Icona desaturata grigia con indicazione OFF se assente)
+├── Ala Sinistra (Colonna Utility Personali - x = -160, 34px di spazio dalla Castbar)
+│   ├── 03 - Arcane Intellect (y = +22, size 32x32: Icona pulita > 5m, Timer <= 5m, OFF rosso)
+│   └── 02 - Molten Armor     (y = -16, size 32x32: Icona pulita > 5m, Timer <= 5m, OFF rosso)
 │
-├── 04 - Focus Magic (Ala Destra HUD - x = +160, y = -7, 33px di spazio dalla Castbar)
-│   ├── Focus Magic - Active (Icona attiva con timer del proc crit %p)
-│   └── Focus Magic - OFF (Icona grigia OFF quando non assegnato a nessuno;
-│                          SCOMPARE non appena applicato ad un alleato in raid/party)
+├── Ala Destra (Colonna Supporto Raid - x = +160, 33px di spazio dalla Castbar)
+│   └── 04 - Focus Magic      (y = -7, size 34x34: Timer attivo o OFF grigio se non assegnato)
 │
-├── 05 - Trinket 1 (Fila utility y = -54, x = -60: Glow + Timer sul Proc DFO/CTS/Flare o CD On-Use)
-├── 05 - Trinket 2 (Fila utility y = -54, x = -20: Glow + Timer sul Proc Phylactery/Reign o CD On-Use)
-├── 06 - Cloak (Fila utility y = -54, x = +20: Glow + Timer sul Proc Lightweave Sartoria o Paracadute)
-├── 06 - Mana Gem (Fila utility y = -54, x = +60: Cooldown al centro + Cariche in alto a destra)
+├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar)
+│   ├── 05 - Trinket 1 (x = -60, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
+│   ├── 05 - Trinket 2 (x = -20, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
+│   ├── 06 - Cloak     (x = +20, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
+│   └── 06 - Mana Gem  (x = +60, size 28x28: Cooldown al centro + Cariche in alto a destra)
 │
-├── 07 - Mana Bar (Progress Bar y = -23: SOLO % con due cifre decimali, es. 85.24%)
-├── 08 - Castbar (Progress Bar y = 0: Cast standard, Channeling, Testo spell a sx, Tempo a dx, no icona)
-├── 09 - GCD (Barra sottile y = -12 tra Castbar e Mana Bar)
+├── Cluster Centrale
+│   ├── 08 - Castbar  (y =   0, w = 220, h = 20: Testo spell a sx, tempo a dx, no icona)
+│   ├── 09 - GCD      (y = -12, w = 220, h =  3: Barra bianca sottile)
+│   └── 07 - Mana Bar (y = -23, w = 220, h = 14: Solo % con 2 decimali, es. 85.24%)
 │
-└── 10 - Alerts (Gruppo Alert Visivi ad alto impatto y = +105)
-    └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!" al centro dello schermo)
+└── 10 - Alerts (y = +105, 24px sopra i Proc)
+    └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!")
 ```
 
 ---

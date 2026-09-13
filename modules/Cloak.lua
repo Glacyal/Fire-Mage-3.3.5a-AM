@@ -36,9 +36,9 @@ function FireMageHUD_Cloak_CustomText()
     -- 1. Controllo Buff Proc attivo (Lightweave o specifico)
     local customBuffName = buffID and buffID > 0 and GetSpellInfo(buffID)
     for i = 1, 40 do
-        local name, _, icon, count, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if (customBuffName and name == customBuffName) or FMHUD_CloakBuffs[name] then
+        if (customBuffName and name == customBuffName) or name == "Lightweave" or spellId == 55637 or spellId == 73849 or FMHUD_CloakBuffs[name] then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             Cloak_ProcTimer.lastProc = GetTime()
             return string.format("%s\n|cFF00FF00ACTIVE %.1fs|r", itemName, rem)

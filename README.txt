@@ -19,31 +19,30 @@ ISTRUZIONI DI AGGIORNAMENTO IN GIOCO (MOLTO IMPORTANTE):
 --------------------------------------------------------------------------------
 NOVITA' PRINCIPALI:
 --------------------------------------------------------------------------------
-1. RILEVAMENTO ATTIVO PROC TRINKET & MANTELLO (PIXEL GLOW):
-   - Trinket passivi da caster (DFO, Phylactery, CTS, Flare, Reign, Sundial, Dying Curse, ecc.)
-     e l'incantamento Mantello di Sartoria (Lightweave Embroidery) ora vengono monitorati
-     in tempo reale.
-   - Quando il proc si attiva:
-     * L'icona si accende con un vivace PIXEL GLOW dorato animato attorno al bordo!
-     * Mostra lo swipe circolare e il countdown numerico dei secondi residui (es. 14.2s).
-   - Quando il proc termina:
-     * Il glow si spegne e l'icona torna a mostrare l'oggetto equipaggiato pulito.
-   - Per gli oggetti On-Use (es. paracadute ingegneria, trinket attivi):
-     * Mostra il cooldown rimanente durante il tempo di ricarica.
+1. PROC TRINKET & MANTELLO CON COUNTDOWN ICD (INTERNAL COOLDOWN):
+   - Trinket (Dying Curse, Sundial of the Exiled, DFO, Phylactery, CTS, Flare, Reign, ecc.)
+     e Mantello (Lightweave Embroidery) ora hanno un comportamento completo a 3 fasi:
+     * FASE 1 - PROC ATTIVO: Pixel Glow dorato animato, swipe circolare e secondi residui (es. 9.8s).
+     * FASE 2 - ICD (CONTO ALLA ROVESCIA RIPROC): Appena il proc scade, il glow si spegne e
+       l'icona mostra i secondi rimanenti in bianco (35, 34, ...) prima che il proc possa riattivarsi!
+     * FASE 3 - READY: Al termine dell'ICD l'icona torna pulita senza testi, pronta a riproccare.
+   - Supporto nativo ai buff/spellId 3.3.5a di Dying Curse (60494) e Sundial (60064).
 
-2. GEOMETRIA A ZERO SOVRAPPOSIZIONI (ZERO-OVERLAP LAYOUT):
-   - Castbar (y = 0, largh. 220): Rimossa icona esterna a sinistra ("icon": False).
-     Testo spell all'interno a sinistra, tempo a destra.
-   - Ali laterali pulite:
-     * Molten Armor a x = -160, y = -7 (ben 33 pixel di spazio libero dalla Castbar!).
-     * Focus Magic a x = +160, y = -7 (ben 33 pixel di spazio libero dalla Castbar!).
-   - Mana Bar (y = -23, largh. 220): Mostra esclusivamente la percentuale con 2 decimali (85.24%).
-   - Fila Utility (y = -54):
-     * 10 pixel di spazio libero sotto la barra del mana.
-     * Icone 28x28 a x = -60, -20, +20, +60 (12 pixel di spazio libero tra ogni icona).
-   - Gemma del Mana (x = +60, y = -54): Cooldown centrato, cariche residue in alto a destra.
-   - Riga Proc (y = +44): 17 pixel di spazio libero sopra la castbar.
-     * Include Scorch / Improved Scorch: icona attiva con swipe e secondi residui (%p).
-       Quando mancano <= 5 secondi, l'icona avverte con colore rosso/arancio per il refresh.
-   - Alert Hot Streak (y = +105): 19 pixel di spazio libero sopra i proc.
+2. MOLTEN ARMOR INTELLIGENTE (TIMER SOLO SE SOTTO I 5 MINUTI):
+   - Se Molten Armor ha piu' di 5 minuti residui, l'icona e' pulita senza numeri a schermo.
+   - Se scende a 5 minuti o meno (<= 5m), compare il countdown in giallo (es. 4:52, 3:15).
+   - Se manca del tutto, l'icona diventa grigia desaturata con scritta "OFF" in rosso.
+
+3. NUOVO MODULO ARCANE INTELLECT / ARCANE BRILLIANCE:
+   - Monitora la presenza di Arcane Intellect, Arcane Brilliance, Dalaran Intellect o Fel Intelligence.
+   - Posizionato a sinistra sopra Molten Armor (x = -160, y = +22).
+   - Stessa logica anti-clutter: pulito se > 5m, countdown se <= 5m, avviso rosso "OFF" se manca.
+
+4. SCORCH / IMPROVED SCORCH:
+   - Debuff monitorato nel gruppo procs con secondi residui (%p).
+   - Colora l'icona in rosso quando mancano <= 5s per ricordarti di rinfrescarlo sul boss.
+
+5. SCALA AUMENTATA DEL 20% E POSIZIONAMENTO SOPRA LE BARRE:
+   - Master scale impostato a 1.2 (+20% di dimensione).
+   - Posizionato a y = -190 (subito sopra le barre delle abilita' del giocatore).
 ================================================================================

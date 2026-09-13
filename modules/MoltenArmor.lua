@@ -54,7 +54,7 @@ function FireMageHUD_MoltenArmorActive_Duration()
     return 0, 0, true
 end
 
--- Custom Text Function (%c per stato attivo):
+-- Custom Text Function (%c per stato attivo - solo se sotto i 5 minuti):
 function FireMageHUD_MoltenArmorActive_CustomText()
     local wantedName = GetSpellInfo(43046) or "Molten Armor"
     for i = 1, 40 do
@@ -62,16 +62,15 @@ function FireMageHUD_MoltenArmorActive_CustomText()
         if not name then break end
         if name == wantedName or name == "Molten Armor" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem >= 60 then
+            if rem > 0 and rem <= 300 then
                 local m = math.floor(rem / 60)
                 local s = math.floor(rem % 60)
-                return string.format("MOLTEN ARMOR\n%dm %02ds", m, s)
-            else
-                return string.format("MOLTEN ARMOR\n%.1fs", rem)
+                return string.format("|cFFFFFF00%d:%02d|r", m, s)
             end
+            return "" -- Nessun testo quando il buff dura più di 5 minuti
         end
     end
-    return "MOLTEN ARMOR\nACTIVE"
+    return ""
 end
 
 

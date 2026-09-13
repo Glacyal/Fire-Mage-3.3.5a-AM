@@ -10,6 +10,7 @@ Core.lua
 modules\Mana.lua
 modules\Castbar.lua
 modules\MoltenArmor.lua
+modules\Intellect.lua
 modules\Focus.lua
 modules\ManaGem.lua
 modules\Procs.lua
