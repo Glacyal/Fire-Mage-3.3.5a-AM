@@ -175,9 +175,9 @@ def build_wa_tree():
                 "internalVersion": 52,
                 "grow": "HORIZONTAL",
                 "align": "CENTER",
-                "space": 5,
+                "space": 6,
                 "xOffset": 0,
-                "yOffset": 36,
+                "yOffset": 44,
                 "controlledChildren": [
                     "Hot Streak",
                     "Living Bomb",
@@ -193,8 +193,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Ability_Mage_HotStreak",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -236,8 +236,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Ability_Mage_LivingBomb",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -269,8 +269,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -302,8 +302,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -335,8 +335,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_MoltenBlood",
                 "auto": True,
                 "color": [1, 0.4, 0, 1],
@@ -362,7 +362,7 @@ def build_wa_tree():
             },
 
             # =================================================================
-            # 02 - MOLTEN ARMOR (Group)
+            # 02 - MOLTEN ARMOR (Wing: Left side of central bars)
             # =================================================================
             {
                 "id": "02 - Molten Armor",
@@ -370,8 +370,8 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -155,
-                "yOffset": 0,
+                "xOffset": -160,
+                "yOffset": -7,
                 "controlledChildren": [
                     "Molten Armor - Active",
                     "Molten Armor - OFF"
@@ -384,8 +384,8 @@ def build_wa_tree():
                 "parent": "02 - Molten Armor",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -416,8 +416,8 @@ def build_wa_tree():
                 "parent": "02 - Molten Armor",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "desaturate": True,
@@ -443,7 +443,7 @@ def build_wa_tree():
             },
 
             # =================================================================
-            # 04 - FOCUS MAGIC (Icon Group - Focus Magic Monitor)
+            # 04 - FOCUS MAGIC (Wing: Right side of central bars)
             # =================================================================
             {
                 "id": "04 - Focus Magic",
@@ -451,8 +451,8 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": 155,
-                "yOffset": 0,
+                "xOffset": 160,
+                "yOffset": -7,
                 "controlledChildren": [
                     "Focus Magic - Active",
                     "Focus Magic - OFF"
@@ -465,8 +465,8 @@ def build_wa_tree():
                 "parent": "04 - Focus Magic",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -490,15 +490,15 @@ def build_wa_tree():
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
-            # Focus Magic OFF (Gray Icon when not applied - scans player, target, focus, raid, party)
+            # Focus Magic OFF (Gray Icon when not applied to anyone)
             {
                 "id": "Focus Magic - OFF",
                 "uid": "FMHUD_FOCUS_OFF",
                 "parent": "04 - Focus Magic",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 36,
-                "height": 36,
+                "width": 34,
+                "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
                 "desaturate": True,
                 "color": [0.6, 0.6, 0.6, 0.8],
@@ -680,28 +680,219 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -51,
-                "yOffset": -48,
-                "width": 26,
-                "height": 26,
+                "xOffset": -60,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "customTextUpdate": "update",
+                "customText": """function()
+    _G.FMHUD_TrinketDB = _G.FMHUD_TrinketDB or {
+        [50348] = { buff = "Celestial Infusion" },
+        [50345] = { buff = "Celestial Infusion" },
+        [50360] = { buff = "Siphon of Aethas" },
+        [50365] = { buff = "Siphon of Aethas", altBuff = "Aethas' Siphon" },
+        [54572] = { buff = "Shared Twilight" },
+        [54588] = { buff = "Shared Twilight" },
+        [45518] = { buff = "Elusive Power" },
+        [47271] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47477] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47182] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47316] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [40682] = { buff = "Now is the Time!" },
+        [40255] = { buff = "Curse of the Eye" },
+        [47213] = { buff = "Deadly Precision" },
+        [37660] = { buff = "Forged Ember" },
+        [45308] = { buff = "Blessing of the Broodmother" },
+        [40432] = { buff = "Dragon Soul" },
+        [37264] = { buff = "Sudden Velocity" },
+        [44253] = { buff = "Greatness" },
+        [44255] = { buff = "Greatness" },
+        [42987] = { buff = "Greatness" },
+        [44254] = { buff = "Greatness" },
+        [50340] = { buff = "Gathering Tracker" },
+        [50353] = { buff = "Gathering Tracker" },
+        [45466] = { buff = "Velocity" },
+        [48724] = { buff = "Chilled Heart" },
+        [48722] = { buff = "Volatile Power" },
+        [50259] = { buff = "Deadly Precision" },
+        [37873] = { buff = "Soul Power" },
+        [50339] = { buff = "Pure Energy" },
+        [50346] = { buff = "Pure Energy" },
+        [47215] = { buff = "Revitalized" },
+        [45490] = { buff = "Pandora's Plea" },
+        [40685] = { buff = "Living Flame" },
+        [50357] = { buff = "Maghia's Misguided Quill" },
+    }
+    _G.FMHUD_CasterProcs = _G.FMHUD_CasterProcs or {
+        ["Celestial Infusion"] = true,
+        ["Siphon of Aethas"] = true,
+        ["Aethas' Siphon"] = true,
+        ["Shared Twilight"] = true,
+        ["Twilight Flame"] = true,
+        ["Elusive Power"] = true,
+        ["Motes of Flame"] = true,
+        ["Pillar of Flame"] = true,
+        ["Now is the Time!"] = true,
+        ["Curse of the Eye"] = true,
+        ["Deadly Precision"] = true,
+        ["Forged Ember"] = true,
+        ["Blessing of the Broodmother"] = true,
+        ["Dragon Soul"] = true,
+        ["Sudden Velocity"] = true,
+        ["Greatness"] = true,
+        ["Gathering Tracker"] = true,
+        ["Velocity"] = true,
+        ["Chilled Heart"] = true,
+        ["Volatile Power"] = true,
+        ["Soul Power"] = true,
+        ["Pure Energy"] = true,
+        ["Revitalized"] = true,
+        ["Pandora's Plea"] = true,
+        ["Living Flame"] = true,
+        ["Maghia's Misguided Quill"] = true,
+        ["Peerless Destruction"] = true,
+    }
+
+    local itemID = GetInventoryItemID("player", 13)
+    local hasProc = false
+    local rem = 0
+    if itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    hasProc = true
+                    rem = expirationTime - GetTime()
+                    break
+                end
+            end
+        end
+    end
+
+    if not hasProc then
+        local otherID = GetInventoryItemID("player", 14)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    hasProc = true
+                    rem = expirationTime - GetTime()
+                    break
+                end
+            end
+        end
+    end
+
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if hasProc then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {1, 0.85, 0.1, 1}, 8, 0.25, 10, 2)
+        end
+        return string.format("|cFFFFFF00%.1f|r", rem)
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        local start, duration = GetInventoryItemCooldown("player", 13)
+        if start and duration and start > 0 and duration > 1.5 then
+            local remCD = (start + duration) - GetTime()
+            if remCD > 0 then
+                return string.format("%.0f", remCD)
+            end
+        end
+        return ""
+    end
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "item",
-                            "event": "Cooldown Progress (Equipment Slot)",
-                            "itemSlot": 13,
-                            "use_itemSlot": True,
-                            "genericShowOn": "showAlways",
-                            "use_genericShowOn": True,
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": """function()
+    local itemID = GetInventoryItemID("player", 13)
+    if _G.FMHUD_TrinketDB and itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    return duration, expirationTime
+                end
+            end
+        end
+    end
+    if _G.FMHUD_CasterProcs then
+        local otherID = GetInventoryItemID("player", 14)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    return duration, expirationTime
+                end
+            end
+        end
+    end
+    local start, duration = GetInventoryItemCooldown("player", 13)
+    if start and duration and start > 0 and duration > 1.5 then
+        return duration, start + duration
+    end
+    return 0, 0
+end""",
+                            "customIcon": """function()
+    local itemID = GetInventoryItemID("player", 13)
+    if _G.FMHUD_TrinketDB and itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, icon, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    return icon
+                end
+            end
+        end
+    end
+    if _G.FMHUD_CasterProcs then
+        local otherID = GetInventoryItemID("player", 14)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, icon, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    return icon
+                end
+            end
+        end
+    end
+    return GetInventoryItemTexture("player", 13) or "Interface\\\\Icons\\\\INV_Misc_QuestionMark"
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 
@@ -714,28 +905,219 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -17,
-                "yOffset": -48,
-                "width": 26,
-                "height": 26,
+                "xOffset": -20,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "customTextUpdate": "update",
+                "customText": """function()
+    _G.FMHUD_TrinketDB = _G.FMHUD_TrinketDB or {
+        [50348] = { buff = "Celestial Infusion" },
+        [50345] = { buff = "Celestial Infusion" },
+        [50360] = { buff = "Siphon of Aethas" },
+        [50365] = { buff = "Siphon of Aethas", altBuff = "Aethas' Siphon" },
+        [54572] = { buff = "Shared Twilight" },
+        [54588] = { buff = "Shared Twilight" },
+        [45518] = { buff = "Elusive Power" },
+        [47271] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47477] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47182] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [47316] = { buff = "Motes of Flame", altBuff = "Pillar of Flame" },
+        [40682] = { buff = "Now is the Time!" },
+        [40255] = { buff = "Curse of the Eye" },
+        [47213] = { buff = "Deadly Precision" },
+        [37660] = { buff = "Forged Ember" },
+        [45308] = { buff = "Blessing of the Broodmother" },
+        [40432] = { buff = "Dragon Soul" },
+        [37264] = { buff = "Sudden Velocity" },
+        [44253] = { buff = "Greatness" },
+        [44255] = { buff = "Greatness" },
+        [42987] = { buff = "Greatness" },
+        [44254] = { buff = "Greatness" },
+        [50340] = { buff = "Gathering Tracker" },
+        [50353] = { buff = "Gathering Tracker" },
+        [45466] = { buff = "Velocity" },
+        [48724] = { buff = "Chilled Heart" },
+        [48722] = { buff = "Volatile Power" },
+        [50259] = { buff = "Deadly Precision" },
+        [37873] = { buff = "Soul Power" },
+        [50339] = { buff = "Pure Energy" },
+        [50346] = { buff = "Pure Energy" },
+        [47215] = { buff = "Revitalized" },
+        [45490] = { buff = "Pandora's Plea" },
+        [40685] = { buff = "Living Flame" },
+        [50357] = { buff = "Maghia's Misguided Quill" },
+    }
+    _G.FMHUD_CasterProcs = _G.FMHUD_CasterProcs or {
+        ["Celestial Infusion"] = true,
+        ["Siphon of Aethas"] = true,
+        ["Aethas' Siphon"] = true,
+        ["Shared Twilight"] = true,
+        ["Twilight Flame"] = true,
+        ["Elusive Power"] = true,
+        ["Motes of Flame"] = true,
+        ["Pillar of Flame"] = true,
+        ["Now is the Time!"] = true,
+        ["Curse of the Eye"] = true,
+        ["Deadly Precision"] = true,
+        ["Forged Ember"] = true,
+        ["Blessing of the Broodmother"] = true,
+        ["Dragon Soul"] = true,
+        ["Sudden Velocity"] = true,
+        ["Greatness"] = true,
+        ["Gathering Tracker"] = true,
+        ["Velocity"] = true,
+        ["Chilled Heart"] = true,
+        ["Volatile Power"] = true,
+        ["Soul Power"] = true,
+        ["Pure Energy"] = true,
+        ["Revitalized"] = true,
+        ["Pandora's Plea"] = true,
+        ["Living Flame"] = true,
+        ["Maghia's Misguided Quill"] = true,
+        ["Peerless Destruction"] = true,
+    }
+
+    local itemID = GetInventoryItemID("player", 14)
+    local hasProc = false
+    local rem = 0
+    if itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    hasProc = true
+                    rem = expirationTime - GetTime()
+                    break
+                end
+            end
+        end
+    end
+
+    if not hasProc then
+        local otherID = GetInventoryItemID("player", 13)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    hasProc = true
+                    rem = expirationTime - GetTime()
+                    break
+                end
+            end
+        end
+    end
+
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if hasProc then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {1, 0.85, 0.1, 1}, 8, 0.25, 10, 2)
+        end
+        return string.format("|cFFFFFF00%.1f|r", rem)
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        local start, duration = GetInventoryItemCooldown("player", 14)
+        if start and duration and start > 0 and duration > 1.5 then
+            local remCD = (start + duration) - GetTime()
+            if remCD > 0 then
+                return string.format("%.0f", remCD)
+            end
+        end
+        return ""
+    end
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "item",
-                            "event": "Cooldown Progress (Equipment Slot)",
-                            "itemSlot": 14,
-                            "use_itemSlot": True,
-                            "genericShowOn": "showAlways",
-                            "use_genericShowOn": True,
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": """function()
+    local itemID = GetInventoryItemID("player", 14)
+    if _G.FMHUD_TrinketDB and itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    return duration, expirationTime
+                end
+            end
+        end
+    end
+    if _G.FMHUD_CasterProcs then
+        local otherID = GetInventoryItemID("player", 13)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    return duration, expirationTime
+                end
+            end
+        end
+    end
+    local start, duration = GetInventoryItemCooldown("player", 14)
+    if start and duration and start > 0 and duration > 1.5 then
+        return duration, start + duration
+    end
+    return 0, 0
+end""",
+                            "customIcon": """function()
+    local itemID = GetInventoryItemID("player", 14)
+    if _G.FMHUD_TrinketDB and itemID and _G.FMHUD_TrinketDB[itemID] then
+        local entry = _G.FMHUD_TrinketDB[itemID]
+        for i = 1, 40 do
+            local name, _, icon, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if name == entry.buff or (entry.altBuff and name == entry.altBuff) then
+                if expirationTime and expirationTime > GetTime() then
+                    return icon
+                end
+            end
+        end
+    end
+    if _G.FMHUD_CasterProcs then
+        local otherID = GetInventoryItemID("player", 13)
+        local otherEntry = otherID and _G.FMHUD_TrinketDB and _G.FMHUD_TrinketDB[otherID]
+        for i = 1, 40 do
+            local name, _, icon, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
+                if expirationTime and expirationTime > GetTime() then
+                    return icon
+                end
+            end
+        end
+    end
+    return GetInventoryItemTexture("player", 14) or "Interface\\\\Icons\\\\INV_Misc_QuestionMark"
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 
@@ -748,28 +1130,111 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 17,
-                "yOffset": -48,
-                "width": 26,
-                "height": 26,
+                "xOffset": 20,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "customTextUpdate": "update",
+                "customText": """function()
+    _G.FMHUD_CloakBuffs = _G.FMHUD_CloakBuffs or {
+        ["Lightweave"] = true,
+        ["Darkglow"] = true,
+        ["Swordguard"] = true,
+        ["Parachute"] = true,
+        ["Flexweave"] = true,
+        ["Springy Arachnoweave"] = true,
+    }
+
+    local hasProc = false
+    local rem = 0
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if _G.FMHUD_CloakBuffs[name] then
+            if expirationTime and expirationTime > GetTime() then
+                hasProc = true
+                rem = expirationTime - GetTime()
+                break
+            end
+        end
+    end
+
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if hasProc then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {1, 0.85, 0.1, 1}, 8, 0.25, 10, 2)
+        end
+        return string.format("|cFFFFFF00%.1f|r", rem)
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        local start, duration = GetInventoryItemCooldown("player", 15)
+        if start and duration and start > 0 and duration > 1.5 then
+            local remCD = (start + duration) - GetTime()
+            if remCD > 0 then
+                return string.format("%.0f", remCD)
+            end
+        end
+        return ""
+    end
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "item",
-                            "event": "Cooldown Progress (Equipment Slot)",
-                            "itemSlot": 15,
-                            "use_itemSlot": True,
-                            "genericShowOn": "showAlways",
-                            "use_genericShowOn": True,
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": """function()
+    if _G.FMHUD_CloakBuffs then
+        for i = 1, 40 do
+            local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CloakBuffs[name] then
+                if expirationTime and expirationTime > GetTime() then
+                    return duration, expirationTime
+                end
+            end
+        end
+    end
+    local start, duration = GetInventoryItemCooldown("player", 15)
+    if start and duration and start > 0 and duration > 1.5 then
+        return duration, start + duration
+    end
+    return 0, 0
+end""",
+                            "customIcon": """function()
+    if _G.FMHUD_CloakBuffs then
+        for i = 1, 40 do
+            local name, _, icon, _, _, _, expirationTime = UnitBuff("player", i)
+            if not name then break end
+            if _G.FMHUD_CloakBuffs[name] then
+                if expirationTime and expirationTime > GetTime() then
+                    return icon
+                end
+            end
+        end
+    end
+    return GetInventoryItemTexture("player", 15) or "Interface\\\\Icons\\\\INV_Misc_Cape_19"
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 
@@ -782,10 +1247,10 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 51,
-                "yOffset": -48,
-                "width": 26,
-                "height": 26,
+                "xOffset": 60,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
                 "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
                 "cooldownSwipe": True,
                 "customTextUpdate": "update",
@@ -815,15 +1280,15 @@ end""",
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
+                    make_subtext("%p", justify="CENTER", anchor_point="CENTER", font_size=10),
                     make_subtext(
                         "%c",
                         justify="RIGHT",
-                        anchor_point="INNER_BOTTOMRIGHT",
+                        anchor_point="INNER_TOPRIGHT",
                         font_size=9,
                         extra_props={
                             "anchorXOffset": -1,
-                            "anchorYOffset": 1,
+                            "anchorYOffset": -1,
                         }
                     ),
                 ],
@@ -838,10 +1303,10 @@ end""",
                 "parent": "Fire Mage HUD",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 240,
+                "width": 220,
                 "height": 14,
                 "xOffset": 0,
-                "yOffset": -26,
+                "yOffset": -23,
                 "barColor": [0.09, 0.55, 1.0, 1.0],
                 "backgroundColor": [0.1, 0.1, 0.1, 0.8],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
@@ -886,15 +1351,14 @@ end""",
                 "parent": "Fire Mage HUD",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 240,
-                "height": 22,
+                "width": 220,
+                "height": 20,
                 "xOffset": 0,
                 "yOffset": 0,
                 "barColor": [1.0, 0.55, 0.0, 1.0],
                 "backgroundColor": [0.15, 0.15, 0.15, 0.8],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
-                "icon": True,
-                "icon_side": "LEFT",
+                "icon": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -910,8 +1374,8 @@ end""",
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
-                    make_subtext("%p", justify="RIGHT", anchor_point="INNER_RIGHT", font_size=11),
-                    make_subtext("%n", justify="LEFT", anchor_point="INNER_LEFT", font_size=11),
+                    make_subtext("%p", justify="RIGHT", anchor_point="INNER_RIGHT", font_size=11, extra_props={"anchorXOffset": -6}),
+                    make_subtext("%n", justify="LEFT", anchor_point="INNER_LEFT", font_size=11, extra_props={"anchorXOffset": 6}),
                 ],
             },
 
@@ -924,10 +1388,10 @@ end""",
                 "parent": "Fire Mage HUD",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 240,
-                "height": 4,
+                "width": 220,
+                "height": 3,
                 "xOffset": 0,
-                "yOffset": -13,
+                "yOffset": -12,
                 "barColor": [1.0, 1.0, 1.0, 0.8],
                 "backgroundColor": [0.0, 0.0, 0.0, 0.0],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
@@ -961,7 +1425,7 @@ end""",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": 0,
-                "yOffset": 85,
+                "yOffset": 105,
                 "controlledChildren": [
                     "Alert - Hot Streak"
                 ],
@@ -988,7 +1452,7 @@ end""",
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
-                    make_subtext("|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r", justify="CENTER", anchor_point="CENTER", font_size=22)
+                    make_subtext("|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r", justify="CENTER", anchor_point="CENTER", font_size=20)
                 ],
             }
         ]
