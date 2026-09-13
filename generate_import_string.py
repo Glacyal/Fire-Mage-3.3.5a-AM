@@ -172,12 +172,13 @@ def build_wa_tree():
                 "internalVersion": 52,
                 "grow": "HORIZONTAL",
                 "align": "CENTER",
-                "space": 6,
+                "space": 5,
                 "xOffset": 0,
-                "yOffset": 45,
+                "yOffset": 36,
                 "controlledChildren": [
                     "Hot Streak",
                     "Living Bomb",
+                    "Living Bomb (Focus)",
                     "Ignite",
                     "Combustion",
                     "Molten Fury"
@@ -190,8 +191,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 42,
-                "height": 42,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Ability_Mage_HotStreak",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -214,7 +215,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=14),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                     {
                         "type": "subglow",
                         "glow": True,
@@ -233,8 +234,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 42,
-                "height": 42,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Ability_Mage_LivingBomb",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -256,7 +257,40 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=14),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                ],
+            },
+            # Living Bomb (Focus Debuff)
+            {
+                "id": "Living Bomb (Focus)",
+                "uid": "FMHUD_LIVINGBOMB_FOCUS",
+                "parent": "01 - Procs",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 36,
+                "height": 36,
+                "displayIcon": "Interface\\Icons\\Ability_Mage_LivingBomb",
+                "auto": True,
+                "color": [1, 0.75, 0.75, 1],
+                "cooldownSwipe": True,
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "aura2",
+                            "unit": "focus",
+                            "auranames": ["Living Bomb"],
+                            "useName": True,
+                            "debuffType": "HARMFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": True,
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%p\\n|cFFFFFF00[F]|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
                 ],
             },
             # Ignite (Target Debuff)
@@ -266,8 +300,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 42,
-                "height": 42,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -289,7 +323,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=14),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
             # Combustion (Cooldown & Active)
@@ -299,8 +333,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 42,
-                "height": 42,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -322,7 +356,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=12),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
             # Molten Fury (Target <= 35% HP)
@@ -332,8 +366,8 @@ def build_wa_tree():
                 "parent": "01 - Procs",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 42,
-                "height": 42,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_MoltenBlood",
                 "auto": True,
                 "color": [1, 0.4, 0, 1],
@@ -354,7 +388,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("35%", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=13),
+                    make_subtext("35%", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
 
@@ -367,7 +401,7 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -190,
+                "xOffset": -155,
                 "yOffset": 0,
                 "controlledChildren": [
                     "Molten Armor - Active",
@@ -381,8 +415,8 @@ def build_wa_tree():
                 "parent": "02 - Molten Armor",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 38,
-                "height": 38,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
@@ -406,19 +440,19 @@ def build_wa_tree():
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
-            # Molten Armor OFF (Permanent Warning when missing)
+            # Molten Armor OFF (Warning when missing)
             {
                 "id": "Molten Armor - OFF",
                 "uid": "FMHUD_MA_OFF",
                 "parent": "02 - Molten Armor",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "width": 38,
-                "height": 38,
+                "width": 36,
+                "height": 36,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "desaturate": True,
-                "color": [1, 0.2, 0.2, 1],
+                "color": [0.6, 0.6, 0.6, 0.8],
                 "triggers": {
                     1: {
                         "trigger": {
@@ -435,17 +469,12 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("|cFFFF2222OFF!|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=12),
-                    {
-                        "type": "subglow",
-                        "glow": True,
-                        "glowType": "buttonOverlay",
-                    }
+                    make_subtext("|cFFFF4444OFF|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
 
             # =================================================================
-            # 03 - TARGET STATUS
+            # 03 - TARGET STATUS (Centered under HUD)
             # =================================================================
             {
                 "id": "03 - Target",
@@ -453,8 +482,8 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "text",
                 "internalVersion": 52,
-                "xOffset": 190,
-                "yOffset": 20,
+                "xOffset": 0,
+                "yOffset": -70,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -468,40 +497,93 @@ def build_wa_tree():
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
-                    make_subtext("%1.target%\\n%1.percenthealth%% (%1.health/%1.totalhealth)", justify="LEFT", anchor_point="CENTER", font_size=12)
+                    make_subtext("%1.target%  -  %1.percenthealth%% (%1.health / %1.totalhealth)", justify="CENTER", anchor_point="CENTER", font_size=11)
                 ],
             },
 
             # =================================================================
-            # 04 - FOCUS STATUS
+            # 04 - FOCUS STATUS (Icon Group - Focus Magic Monitor)
             # =================================================================
             {
                 "id": "04 - Focus",
-                "uid": "FMHUD_FOCUS",
+                "uid": "FMHUD_FOCUS_GRP",
                 "parent": "Fire Mage HUD",
-                "regionType": "text",
+                "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": 190,
-                "yOffset": -15,
+                "xOffset": 155,
+                "yOffset": 0,
+                "controlledChildren": [
+                    "Focus - Active",
+                    "Focus - OFF"
+                ],
+            },
+            # Focus Active (Remaining Time / Proc)
+            {
+                "id": "Focus - Active",
+                "uid": "FMHUD_FOCUS_ACTIVE",
+                "parent": "04 - Focus",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 36,
+                "height": 36,
+                "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
+                "auto": True,
+                "color": [1, 1, 1, 1],
+                "cooldownSwipe": True,
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "unit",
-                            "event": "Unit Characteristics",
-                            "unit": "focus",
-                            "use_unit": True,
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": ["Focus Magic"],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnActive",
                         },
                         "untrigger": {}
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
-                    make_subtext("FOCUS: %1.focus%\\n%1.percenthealth%% (%1.health/%1.totalhealth)", justify="LEFT", anchor_point="CENTER", font_size=11)
+                    { "type": "subbackground" },
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                ],
+            },
+            # Focus OFF (Gray Icon when not applied)
+            {
+                "id": "Focus - OFF",
+                "uid": "FMHUD_FOCUS_OFF",
+                "parent": "04 - Focus",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 36,
+                "height": 36,
+                "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
+                "auto": True,
+                "desaturate": True,
+                "color": [0.6, 0.6, 0.6, 0.8],
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": ["Focus Magic"],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnMissing",
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("|cFF888888OFF|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
 
             # =================================================================
-            # 05 - TRINKET 1 (Slot 13)
+            # 05 - TRINKET 1 (Slot 13 - Centered row under Mana Bar)
             # =================================================================
             {
                 "id": "05 - Trinket 1",
@@ -509,10 +591,10 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -140,
-                "yOffset": -45,
-                "width": 32,
-                "height": 32,
+                "xOffset": -32,
+                "yOffset": -48,
+                "width": 26,
+                "height": 26,
                 "cooldownSwipe": True,
                 "triggers": {
                     1: {
@@ -530,12 +612,12 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
                 ],
             },
 
             # =================================================================
-            # 05 - TRINKET 2 (Slot 14)
+            # 05 - TRINKET 2 (Slot 14 - Centered row under Mana Bar)
             # =================================================================
             {
                 "id": "05 - Trinket 2",
@@ -543,10 +625,10 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -100,
-                "yOffset": -45,
-                "width": 32,
-                "height": 32,
+                "xOffset": 0,
+                "yOffset": -48,
+                "width": 26,
+                "height": 26,
                 "cooldownSwipe": True,
                 "triggers": {
                     1: {
@@ -564,12 +646,12 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
                 ],
             },
 
             # =================================================================
-            # 06 - CLOAK (Slot 15)
+            # 06 - CLOAK (Slot 15 - Centered row under Mana Bar)
             # =================================================================
             {
                 "id": "06 - Cloak",
@@ -577,10 +659,10 @@ def build_wa_tree():
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -60,
-                "yOffset": -45,
-                "width": 32,
-                "height": 32,
+                "xOffset": 32,
+                "yOffset": -48,
+                "width": 26,
+                "height": 26,
                 "cooldownSwipe": True,
                 "triggers": {
                     1: {
@@ -598,7 +680,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=9),
                 ],
             },
 
@@ -612,9 +694,9 @@ def build_wa_tree():
                 "regionType": "aurabar",
                 "internalVersion": 52,
                 "width": 240,
-                "height": 16,
+                "height": 14,
                 "xOffset": 0,
-                "yOffset": -28,
+                "yOffset": -26,
                 "barColor": [0.09, 0.55, 1.0, 1.0],
                 "backgroundColor": [0.1, 0.1, 0.1, 0.8],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
@@ -635,7 +717,7 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
-                    make_subtext("%1.percentpower%%  |  %1.power / %1.totalpower", justify="CENTER", anchor_point="CENTER", font_size=11),
+                    make_subtext("%1.percentpower%%  |  %1.power / %1.totalpower", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 
@@ -649,7 +731,7 @@ def build_wa_tree():
                 "regionType": "aurabar",
                 "internalVersion": 52,
                 "width": 240,
-                "height": 24,
+                "height": 22,
                 "xOffset": 0,
                 "yOffset": 0,
                 "barColor": [1.0, 0.55, 0.0, 1.0],
@@ -672,8 +754,8 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
-                    make_subtext("%p", justify="RIGHT", anchor_point="INNER_RIGHT", font_size=12),
-                    make_subtext("%n", justify="LEFT", anchor_point="INNER_LEFT", font_size=12),
+                    make_subtext("%p", justify="RIGHT", anchor_point="INNER_RIGHT", font_size=11),
+                    make_subtext("%n", justify="LEFT", anchor_point="INNER_LEFT", font_size=11),
                 ],
             },
 
@@ -689,7 +771,7 @@ def build_wa_tree():
                 "width": 240,
                 "height": 4,
                 "xOffset": 0,
-                "yOffset": -14,
+                "yOffset": -13,
                 "barColor": [1.0, 1.0, 1.0, 0.8],
                 "backgroundColor": [0.0, 0.0, 0.0, 0.0],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
@@ -723,7 +805,7 @@ def build_wa_tree():
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": 0,
-                "yOffset": 100,
+                "yOffset": 85,
                 "controlledChildren": [
                     "Alert - Hot Streak"
                 ],
@@ -750,7 +832,7 @@ def build_wa_tree():
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
-                    make_subtext("|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r", justify="CENTER", anchor_point="CENTER", font_size=26)
+                    make_subtext("|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r", justify="CENTER", anchor_point="CENTER", font_size=22)
                 ],
             }
         ]

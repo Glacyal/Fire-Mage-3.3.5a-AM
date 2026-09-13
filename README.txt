@@ -43,24 +43,28 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTO il pacchetto)
 ├── 01 - Procs (Dynamic Group orizzontale - Auto-allineato sopra la Castbar)
 │   ├── Hot Streak (Icona + Timer + Glow all'attivazione)
 │   ├── Living Bomb (Icona + Timer debuff sul Target)
+│   ├── Living Bomb (Focus) (Icona con tag [F] - Appare solo se presente sul Focus)
 │   ├── Ignite (Icona + Timer debuff sul Target)
 │   ├── Combustion (Icona intelligente con Cooldown Progress)
 │   └── Molten Fury (Icona attiva solo con Target HP <= 35%)
 │
-├── 02 - Molten Armor (Gruppo dedicato - Monitor Permanente)
+├── 02 - Molten Armor (Ala Sinistra HUD - Monitor Permanente)
 │   ├── Molten Armor - Active (Icona attiva con timer dei minuti residui)
-│   └── Molten Armor - OFF (Icona desaturata + Bordo rosso + WARNING lampeggiante)
+│   └── Molten Armor - OFF (Icona desaturata grigia con testo OFF)
 │
-├── 03 - Target (Aura Text: Nome, % HP e Valori salute formattati)
-├── 04 - Focus (Aura Text: Nome, % HP e Valori salute formattati)
+├── 03 - Target (Aura Text: Nome Target, % HP e Valori salute - Centrato sotto HUD)
 │
-├── 05 - Trinket 1 (Icona Slot 13: Cooldown Progress automatico)
-├── 05 - Trinket 2 (Icona Slot 14: Cooldown Progress automatico)
-├── 06 - Cloak (Icona Slot 15: Cooldown Progress automatico)
+├── 04 - Focus (Ala Destra HUD - Monitor Focus Magic, simmetrico a Molten Armor)
+│   ├── Focus - Active (Icona attiva con timer del proc crit o durata residua)
+│   └── Focus - OFF (Icona desaturata grigia con testo OFF quando non applicato)
 │
-├── 07 - Mana Bar (Progress Bar: % e Valori correnti formattati)
+├── 05 - Trinket 1 (Icona Slot 13: Fila centrata sotto la Mana Bar)
+├── 05 - Trinket 2 (Icona Slot 14: Fila centrata sotto la Mana Bar)
+├── 06 - Cloak (Icona Slot 15: Fila centrata sotto la Mana Bar)
+│
+├── 07 - Mana Bar (Progress Bar: % e Valori correnti sotto il GCD)
 ├── 08 - Castbar (Progress Bar: Cast standard, Channeling, Icona e Tempo)
-├── 09 - GCD (Barra sottile orizzontale: Monitor Global Cooldown)
+├── 09 - GCD (Barra sottile orizzontale tra Castbar e Mana Bar)
 │
 └── 10 - Alerts (Alert Visivo Hot Streak al centro dello schermo con testo ingrandito)
 

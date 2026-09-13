@@ -39,29 +39,33 @@ Dall'ispezione di `WTF\Account\...\SavedVariables\WeakAuras.lua` è emerso che:
 
 ```text
 Fire Mage HUD (root: group, internalVersion: 52)
-├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 6px, yOffset: +45)
+├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 5px, yOffset: +36)
 │   ├── Hot Streak (icon: aura2 buff "Hot Streak", matchesShowOn: "showOnActive", subglow pixel)
 │   ├── Living Bomb (icon: aura2 debuff "Living Bomb", matchesShowOn: "showOnActive", ownOnly: true)
+│   ├── Living Bomb (Focus) (icon: aura2 debuff "Living Bomb" on focus, matchesShowOn: "showOnActive", ownOnly: true)
 │   ├── Ignite (icon: aura2 debuff "Ignite", matchesShowOn: "showOnActive", ownOnly: true)
 │   ├── Combustion (icon: spell Cooldown Progress 11129, genericShowOn: "showAlways")
 │   └── Molten Fury (icon: unit Health target <= 35%, subtext "35%")
 │
-├── 02 - Molten Armor (group: permanent monitor, xOffset: -190)
+├── 02 - Molten Armor (group: ala sinistra HUD, xOffset: -155, yOffset: 0)
 │   ├── Molten Armor - Active (icon: aura2 buff "Molten Armor", matchesShowOn: "showOnActive")
-│   └── Molten Armor - OFF (icon: aura2 buff "Molten Armor", matchesShowOn: "showOnMissing", desaturate: true, subglow)
+│   └── Molten Armor - OFF (icon: aura2 buff "Molten Armor", matchesShowOn: "showOnMissing", desaturate: true)
 │
-├── 03 - Target (text: unit characteristics target, subtext name + hp% + values)
-├── 04 - Focus (text: unit characteristics focus, subtext name + hp% + values)
+├── 03 - Target (text: unit characteristics target, centrato a yOffset: -70)
 │
-├── 05 - Trinket 1 (icon: item Cooldown Progress slot 13)
-├── 05 - Trinket 2 (icon: item Cooldown Progress slot 14)
-├── 06 - Cloak (icon: item Cooldown Progress slot 15)
+├── 04 - Focus (group: ala destra HUD, xOffset: +155, yOffset: 0, Focus Magic Monitor)
+│   ├── Focus - Active (icon: aura2 buff "Focus Magic", matchesShowOn: "showOnActive", cooldown timer %p)
+│   └── Focus - OFF (icon: aura2 buff "Focus Magic", matchesShowOn: "showOnMissing", desaturate: true)
 │
-├── 07 - Mana Bar (aurabar: unit Power powertype 0 player, subtext %1.percentpower%)
-├── 08 - Castbar (aurabar: unit Cast player, icon left, subtext right %p, subtext left %n)
-├── 09 - GCD (aurabar: spell Cooldown Progress 61304, genericShowOn: "showOnCooldown")
+├── 05 - Trinket 1 (icon: item Cooldown Progress slot 13, xOffset: -32, yOffset: -48)
+├── 05 - Trinket 2 (icon: item Cooldown Progress slot 14, xOffset: 0, yOffset: -48)
+├── 06 - Cloak (icon: item Cooldown Progress slot 15, xOffset: +32, yOffset: -48)
 │
-└── 10 - Alerts (group: yOffset: +100)
+├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -26, width: 240, height: 14)
+├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 240, height: 22)
+├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -13, width: 240, height: 4)
+│
+└── 10 - Alerts (group: yOffset: +85)
     └── Alert - Hot Streak (text: aura2 buff "Hot Streak", large text expressway outline)
 ```
 
