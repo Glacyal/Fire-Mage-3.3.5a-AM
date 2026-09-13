@@ -96,10 +96,12 @@ DIAGNOSTICA E VERIFICA IN COMBATTIMENTO
    - Hot Streak compare e si illumina al doppio critico, scatenando l'Alert a video.
 
 ================================================================================
-CONTROLLO DI VERSIONE (GIT REPOSITORY)
+CONTROLLO DI VERSIONE (GIT & GITHUB)
 ================================================================================
 
-La cartella del progetto e' configurata come repository Git locale (branch: main).
+Il progetto e' versionato con Git e collegato al repository remoto privato:
+https://github.com/Glacyal/FireMageHUD-335
+
 File inclusi nel tracciamento:
 - Codice sorgente: Config.lua, Core.lua, FireMageHUD.toc, cartella modules/
 - Generatore WA: generate_import_string.py (AceSerializer + LibDeflate WA4)
@@ -107,9 +109,8 @@ File inclusi nel tracciamento:
 - Documentazione: README.txt, README.md, HANDOFF.md, WEAKAURAS_ONLY_SETUP.md
 - Configurazione: .gitignore
 
-Comandi utili Git:
+Comandi rapidi Git:
   git status                  -> Verifica file modificati o non tracciati
   git log --oneline           -> Cronologia delle versioni e modifiche
-  git remote add origin <URL> -> Collega a una repository remota (es. GitHub)
-  git push -u origin main     -> Carica il progetto online sul server remoto
+  git push                    -> Carica i nuovi commit sul repository GitHub
 ================================================================================

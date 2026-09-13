@@ -18,7 +18,7 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 | **Sistema di Rendering Testi** | `subRegions` WA4 native (`subbackground`, `subforeground`, `subtext` con font Expressway outline). Evita il fallback ai nomi delle aure. |
 | **Formato Stringa WA** | `!WA:1!` (LibDeflate Little-Endian 6-bit + AceSerializer-3.0 Protocol Rev 1, versione 2000 per sub-gruppi nidificati) |
 | **Struttura Interna** | **Tutti i 10 moduli sono rigorosamente raggruppati** sotto `Fire Mage HUD`. Eliminabile o spostabile in blocco con un solo clic. |
-| **Controllo Versione** | Repository Git locale inizializzata su branch `main` (`.gitignore` attivo). |
+| **Controllo Versione** | Repository Git collegata a GitHub privato: [`Glacyal/FireMageHUD-335`](https://github.com/Glacyal/FireMageHUD-335) (branch `main`). |
 
 ---
 
@@ -76,13 +76,15 @@ Lo script legge i parametri e genera istantaneamente `IMPORT_STRING.txt`.
 
 ---
 
-## Gestione Repository Git
+## Gestione Repository Git & GitHub
 
-Il progetto è gestito localmente con Git:
+Il progetto è gestito con Git e sincronizzato su GitHub:
+- **Repository Remota**: [`https://github.com/Glacyal/FireMageHUD-335`](https://github.com/Glacyal/FireMageHUD-335) (privata)
 - **Branch principale**: `main`
 - **Configurazione ignore**: `.gitignore` esclude `__pycache__`, file temporanei e directory di sistema.
 - **Workflow modifiche**:
   1. Modifica moduli o parametri in `generate_import_string.py`.
   2. Esecuzione `python generate_import_string.py`.
   3. Verifica sincronizzazione di `README.txt`, `README.md` e `HANDOFF.md`.
-  4. `git add .` e commit strutturato `git commit -m "..."`.
+  4. `git add .` e commit `git commit -m "..."`.
+  5. Sincronizzazione con `git push`.

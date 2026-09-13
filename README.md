@@ -73,14 +73,16 @@ Fire Mage HUD (Gruppo Master - Contiene TUTTI i componenti)
 
 ## Controllo Versione (Git)
 
-Il progetto è versionato con Git (`branch: main`):
+Il progetto è versionato con Git ed è sincronizzato sulla repository remota privata di GitHub:
+- **Repository Remota**: [Glacyal/FireMageHUD-335](https://github.com/Glacyal/FireMageHUD-335)
+- **Branch**: `main`
 - **File tracciati**: codice sorgente (`Core.lua`, `Config.lua`, `FireMageHUD.toc`, `modules/`), script compilatore (`generate_import_string.py`), stringa WeakAura (`IMPORT_STRING.txt`) e manuali (`README.*`, `HANDOFF.md`).
 - **File ignorati**: cache Python (`__pycache__`), artefatti di sistema e directory IDE via [`.gitignore`](file:///d:/0Progetti/FireMageHUD-335/.gitignore).
 
-### Collegamento a una repository remota (GitHub / GitLab)
-Se desideri salvare il progetto su GitHub:
+### Comandi Rapidi per il Push
+Per sincronizzare le future modifiche su GitHub:
 ```bash
-git remote add origin https://github.com/<TUO_UTENTE>/<TUO_REPO>.git
-git branch -M main
-git push -u origin main
+git add .
+git commit -m "descrizione della modifica"
+git push
 ```
