@@ -55,6 +55,7 @@ Fire Mage HUD (Gruppo Master - yOffset = -150, posizionato sopra le action bar)
 │   ├── Hot Streak (Icona + Timer + Glow Pixel all'attivazione)
 │   ├── Living Bomb (Icona + Timer debuff sul Target)
 │   ├── Ignite (Icona + Timer debuff sul Target)
+│   ├── Scorch (Icona Scorch/Improved Scorch + Timer %p + Avviso refresh <= 5s)
 │   ├── Combustion (Icona intelligente con Cooldown Progress)
 │   └── Molten Fury (Icona attiva solo con Target HP <= 35%)
 │

@@ -182,6 +182,7 @@ def build_wa_tree():
                     "Hot Streak",
                     "Living Bomb",
                     "Ignite",
+                    "Scorch",
                     "Combustion",
                     "Molten Fury"
                 ],
@@ -290,6 +291,68 @@ def build_wa_tree():
                     },
                     "activeTriggerMode": -10,
                 },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                ],
+            },
+            # Scorch / Improved Scorch (Target Debuff)
+            {
+                "id": "Scorch",
+                "uid": "FMHUD_SCORCH",
+                "parent": "01 - Procs",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 34,
+                "height": 34,
+                "displayIcon": "Interface\\Icons\\Spell_Fire_SoulBurn",
+                "auto": True,
+                "color": [1, 1, 1, 1],
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "aura2",
+                            "unit": "target",
+                            "auranames": [
+                                "Improved Scorch",
+                                "Scorch",
+                                "22959",
+                                "Shadow and Flame"
+                            ],
+                            "auraspellids": [
+                                22959,
+                                12873,
+                                12872,
+                                11095,
+                                17800
+                            ],
+                            "useName": True,
+                            "debuffType": "HARMFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": False,
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "conditions": [
+                    {
+                        "check": {
+                            "trigger": 1,
+                            "variable": "remaining",
+                            "op": "<=",
+                            "value": "5"
+                        },
+                        "changes": [
+                            {
+                                "property": "color",
+                                "value": [1, 0.25, 0.25, 1]
+                            }
+                        ]
+                    }
+                ],
                 "subRegions": [
                     { "type": "subbackground" },
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),

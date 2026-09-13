@@ -68,6 +68,54 @@ end
 -- Display Text: %p (durata rimanente) | %s (stacks se esposti)
 
 -- =========================================================================
+-- 3b. SCORCH / IMPROVED SCORCH (Debuff Target - +5% Spell Crit)
+-- =========================================================================
+-- Monitora il debuff di Scorch applicato al target (Improved Scorch ID 22959,
+-- Scorch o Shadow and Flame). Mostra durata residua in secondi.
+-- Eventi: UNIT_AURA PLAYER_TARGET_CHANGED PLAYER_ENTERING_WORLD
+
+function FireMageHUD_Scorch_Trigger(event, unit)
+    if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
+        return false
+    end
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or spellId == 22959 then
+            return true
+        end
+    end
+    return false
+end
+
+function FireMageHUD_Scorch_Duration()
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or spellId == 22959 then
+            return duration or 30, expirationTime or 0
+        end
+    end
+    return 0, 0
+end
+
+function FireMageHUD_Scorch_CustomText()
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or spellId == 22959 then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem <= 5.0 then
+                return string.format("SCORCH\n|cFFFF2222%.1fs REFRESH!|r", rem)
+            else
+                return string.format("SCORCH\n|cFF00FF00ACTIVE %.1fs|r", rem)
+            end
+        end
+    end
+    return ""
+end
+
+-- =========================================================================
 -- 4. COMBUSTION (Cooldown & Active Buff)
 -- =========================================================================
 -- Gestione completa a 3 stati (READY, ACTIVE, COOLDOWN):

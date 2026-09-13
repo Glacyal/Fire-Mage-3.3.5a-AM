@@ -43,5 +43,7 @@ NOVITA' PRINCIPALI:
      * Icone 28x28 a x = -60, -20, +20, +60 (12 pixel di spazio libero tra ogni icona).
    - Gemma del Mana (x = +60, y = -54): Cooldown centrato, cariche residue in alto a destra.
    - Riga Proc (y = +44): 17 pixel di spazio libero sopra la castbar.
+     * Include Scorch / Improved Scorch: icona attiva con swipe e secondi residui (%p).
+       Quando mancano <= 5 secondi, l'icona avverte con colore rosso/arancio per il refresh.
    - Alert Hot Streak (y = +105): 19 pixel di spazio libero sopra i proc.
 ================================================================================

@@ -67,6 +67,14 @@ FireMageHUD_Config = {
             Duration = 4.0,
         },
 
+        -- Scorch / Improved Scorch (Debuff +5% Spell Crit)
+        Scorch = {
+            DebuffID = 22959,
+            Name = "Improved Scorch",
+            AltName = "Scorch",
+            Duration = 30.0,
+        },
+
         -- Combustion (Talento Fire: Cooldown 2 min)
         Combustion = {
             SpellID = 11129,
