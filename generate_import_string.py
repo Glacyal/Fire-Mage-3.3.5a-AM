@@ -508,28 +508,68 @@ def build_wa_tree():
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD",
-                            "custom": """function()
+                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD",
+                            "custom": """function(event, ...)
+    FMHUD_State = FMHUD_State or {}
+    local now = GetTime()
+
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unit, spell = ...
+        if unit == "player" and spell == "Focus Magic" then
+            FMHUD_State.FMTarget = UnitName("target") or "Ally"
+            FMHUD_State.FMExpires = now + 1800
+        end
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
+        if sourceGUID == UnitGUID("player") and (spellName == "Focus Magic" or spellId == 54646) then
+            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
+                FMHUD_State.FMTarget = destName or "Ally"
+                FMHUD_State.FMExpires = now + 1800
+            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
+                FMHUD_State.FMExpires = 0
+                FMHUD_State.FMTarget = nil
+            end
+        elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
+            FMHUD_State.FMExpires = 0
+            FMHUD_State.FMTarget = nil
+        end
+    end
+
+    if FMHUD_State.FMExpires and FMHUD_State.FMExpires > now then
+        return false
+    end
+
     local b = "Focus Magic"
     for i = 1, 40 do
         local n = UnitBuff("player", i)
         if not n then break end
         if n == b then return false end
     end
+
     if UnitExists("target") and UnitIsFriend("player", "target") then
         for i = 1, 40 do
             local n, _, _, _, _, _, _, c = UnitBuff("target", i)
             if not n then break end
-            if n == b and (c == "player" or not c) then return false end
+            if n == b and (c == "player" or not c) then
+                FMHUD_State.FMExpires = now + 1800
+                FMHUD_State.FMTarget = UnitName("target")
+                return false
+            end
         end
     end
+
     if UnitExists("focus") and UnitIsFriend("player", "focus") then
         for i = 1, 40 do
             local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
             if not n then break end
-            if n == b and (c == "player" or not c) then return false end
+            if n == b and (c == "player" or not c) then
+                FMHUD_State.FMExpires = now + 1800
+                FMHUD_State.FMTarget = UnitName("focus")
+                return false
+            end
         end
     end
+
     local nr = GetNumRaidMembers()
     if nr and nr > 0 then
         for r = 1, nr do
@@ -537,7 +577,11 @@ def build_wa_tree():
             for i = 1, 40 do
                 local n, _, _, _, _, _, _, c = UnitBuff(u, i)
                 if not n then break end
-                if n == b and (c == "player" or not c) then return false end
+                if n == b and (c == "player" or not c) then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMTarget = UnitName(u)
+                    return false
+                end
             end
         end
     else
@@ -548,22 +592,33 @@ def build_wa_tree():
                 for i = 1, 40 do
                     local n, _, _, _, _, _, _, c = UnitBuff(u, i)
                     if not n then break end
-                    if n == b and (c == "player" or not c) then return false end
+                    if n == b and (c == "player" or not c) then
+                        FMHUD_State.FMExpires = now + 1800
+                        FMHUD_State.FMTarget = UnitName(u)
+                        return false
+                    end
                 end
             end
         end
     end
+
     return true
 end""",
                         },
                         "untrigger": {
-                            "custom": """function()
+                            "custom": """function(event, ...)
+    local now = GetTime()
+    if FMHUD_State and FMHUD_State.FMExpires and FMHUD_State.FMExpires > now then
+        return true
+    end
+
     local b = "Focus Magic"
     for i = 1, 40 do
         local n = UnitBuff("player", i)
         if not n then break end
         if n == b then return true end
     end
+
     if UnitExists("target") and UnitIsFriend("player", "target") then
         for i = 1, 40 do
             local n, _, _, _, _, _, _, c = UnitBuff("target", i)
@@ -571,6 +626,7 @@ end""",
             if n == b and (c == "player" or not c) then return true end
         end
     end
+
     if UnitExists("focus") and UnitIsFriend("player", "focus") then
         for i = 1, 40 do
             local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
@@ -578,6 +634,7 @@ end""",
             if n == b and (c == "player" or not c) then return true end
         end
     end
+
     local nr = GetNumRaidMembers()
     if nr and nr > 0 then
         for r = 1, nr do
@@ -601,6 +658,7 @@ end""",
             end
         end
     end
+
     return false
 end"""
                         }

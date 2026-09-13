@@ -36,3 +36,4 @@ function FireMageHUD_ManaGem_GetCooldown()
     end
     return startTime or 0, duration or 0, enable or 1
 end
+

@@ -34,10 +34,11 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 ### 2. Focus Magic Monitor (`04 - Focus Magic`)
 - In WoW 3.3.5a, lanciare Focus Magic su un alleato posiziona il buff di 30 min sull'alleato (`caster == "player"`), mentre il Mago riceve il buff di 10s solo quando l'alleato esegue un critico.
 - **Focus Magic - Active**: Trigger nativo `aura2` su `unit = "player"`. Quando il Mago ottiene il buff/proc di 10s, compare l'icona attiva con lo swipe di ricarica e il countdown `%p`.
-- **Focus Magic - OFF**: Custom Status Trigger registrato su eventi `UNIT_AURA, PLAYER_TARGET_CHANGED, PLAYER_FOCUS_CHANGED, RAID_ROSTER_UPDATE, PARTY_MEMBERS_CHANGED, PLAYER_ENTERING_WORLD`.
-  - Scansiona: `player`, `target`, `focus`, `raid1..40`, `party1..4` cercando l'aura `"Focus Magic"` con `caster == "player"`.
-  - Se il buff è presente su qualsiasi alleato o sul giocatore: l'untrigger si attiva e l'avviso grigio "OFF" **scompare completamente**.
-  - Se il buff non è applicato a nessuno: il trigger si attiva e mostra l'icona grigia sobria `"OFF"`.
+- **Focus Magic - OFF**: Custom Status Trigger registrato su eventi `COMBAT_LOG_EVENT_UNFILTERED, UNIT_SPELLCAST_SUCCEEDED, UNIT_AURA, PLAYER_TARGET_CHANGED, PLAYER_FOCUS_CHANGED, RAID_ROSTER_UPDATE, PARTY_MEMBERS_CHANGED, PLAYER_ENTERING_WORLD`.
+  - Traccia in tempo reale l'applicazione tramite Combat Log (`SPELL_AURA_APPLIED`, `SPELL_CAST_SUCCESS`) e `UNIT_SPELLCAST_SUCCEEDED`, memorizzando target ed expiration (1800s).
+  - Scansiona attivamente: `player`, `target`, `focus`, `raid1..40`, `party1..4` cercando l'aura `"Focus Magic"` con `caster == "player"`.
+  - Se il buff è stato applicato a qualcuno (in raid, party o target): l'untrigger si attiva e l'avviso grigio "OFF" **scompare completamente** e resta nascosto per tutti i 30 minuti anche se deselezioni il bersaglio.
+  - Se il buff non è stato messo a nessuno (o il bersaglio muore/scade): il trigger si attiva e mostra l'icona grigia sobria `"OFF"`.
 
 ### 3. Gemma del Mana (`06 - Mana Gem`)
 - Item: `33312` (Mana Sapphire - Livello 80) e `22044` (Mana Emerald).

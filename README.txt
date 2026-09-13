@@ -90,9 +90,9 @@ DIAGNOSTICA E VERIFICA IN COMBATTIMENTO E IN RAID
 ================================================================================
 
 1. Focus Magic:
-   - Se non lo hai lanciato su nessuno: vedi l'icona grigia "OFF" a destra.
-   - Appena lo lanci su un alleato in raid o sul tuo target: l'icona "OFF" SCOMPARE subito.
-   - Quando l'alleato fa un critico e ricevi il buff 10s: appare l'icona a colori con %p.
+   - "OFF" compare ESCLUSIVAMENTE se non lo hai messo a NESSUNO.
+   - Non appena lo metti a qualcuno (in raid, party, sul target o in duello): l'avviso "OFF" SCOMPARE all'istante e resta nascosto per tutti i 30 minuti, anche se deselezioni il bersaglio (tracciamento automatico via Combat Log e Spellcast).
+   - Quando l'alleato fa un critico e ricevi il buff 10s (+3% crit): appare l'icona a colori con %p (come Molten Armor).
 2. Gemma del Mana:
    - Mostra l'icona dello Zaffiro con il numero di cariche in basso a destra (3, 2, 1).
    - Se usi la gemma: parte lo swipe di cooldown circolare e il countdown di 2 minuti.

@@ -7,7 +7,7 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 > L'intero pacchetto è compilato per l'engine di WeakAuras 4.0.0 (`internalVersion = 52`):
 > - **Layout Ottimizzato per Raid**: posizionato nella tasca centrale pulita (`yOffset = -150`) sopra le action bar, lasciando liberi il modello 3D del personaggio, le meccaniche del boss, i raid frames a sinistra e l'Omen threat meter a destra.
 > - **Mana Bar Essenziale**: mostra **esclusivamente** la percentuale con 2 decimali (es. `85.24%`).
-> - **Focus Magic Intelligente**: monitora in tempo reale tutto il Raid (1-40), Party (1-4), Target e Focus. Quando Focus Magic è applicato ad un alleato, l'avviso grigio `OFF` **scompare** completamente. Se il proc da critico (+3% spell crit) si attiva sul Mago, mostra l'icona attiva con conto alla rovescia.
+> - **Focus Magic Intelligente**: monitora in tempo reale tramite Combat Log (`CLEU`), Spellcast e scansione roster. L'avviso grigio `OFF` compare **esclusivamente se non è stato messo a nessuno**. Quando Focus Magic è applicato ad un alleato (in raid, party o target), `OFF` **scompare** all'istante e resta nascosto per tutti i 30 minuti anche se deselezioni il bersaglio. Se il proc da critico (+3% spell crit) si attiva sul Mago, mostra l'icona attiva con conto alla rovescia.
 > - **Gemma del Mana (Mana Gem)**: integrata nella riga utility (`x = +51, y = -48`); monitora il cooldown di 2 minuti (`%p`) e le cariche rimanenti in borsa (`%c`, con `0` rosso se assente o terminata).
 > - Se vuoi spostare o eliminare l'intera suite, basta fare clic destro su **`Fire Mage HUD`** $\rightarrow$ **`Delete children and group`**.
 

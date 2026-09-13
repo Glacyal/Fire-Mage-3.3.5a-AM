@@ -10,8 +10,8 @@ Core.lua
 modules\Mana.lua
 modules\Castbar.lua
 modules\MoltenArmor.lua
-modules\Target.lua
 modules\Focus.lua
+modules\ManaGem.lua
 modules\Procs.lua
 modules\Trinkets.lua
 modules\Cloak.lua
