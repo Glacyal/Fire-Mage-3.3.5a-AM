@@ -56,3 +56,4 @@ end
 function FireMageHUD_IntellectOFF_Untrigger(event, unit)
     return FireMageHUD_IntellectActive_Trigger(event, unit)
 end
+
