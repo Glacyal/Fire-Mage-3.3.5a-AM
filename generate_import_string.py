@@ -146,7 +146,7 @@ def build_wa_tree():
                 "01 - Procs",
                 "02 - Molten Armor",
                 "03 - Target",
-                "04 - Focus",
+                "04 - Focus Magic",
                 "05 - Trinket 1",
                 "05 - Trinket 2",
                 "06 - Cloak",
@@ -178,7 +178,6 @@ def build_wa_tree():
                 "controlledChildren": [
                     "Hot Streak",
                     "Living Bomb",
-                    "Living Bomb (Focus)",
                     "Ignite",
                     "Combustion",
                     "Molten Fury"
@@ -258,39 +257,6 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
-                ],
-            },
-            # Living Bomb (Focus Debuff)
-            {
-                "id": "Living Bomb (Focus)",
-                "uid": "FMHUD_LIVINGBOMB_FOCUS",
-                "parent": "01 - Procs",
-                "regionType": "icon",
-                "internalVersion": 52,
-                "width": 36,
-                "height": 36,
-                "displayIcon": "Interface\\Icons\\Ability_Mage_LivingBomb",
-                "auto": True,
-                "color": [1, 0.75, 0.75, 1],
-                "cooldownSwipe": True,
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "aura2",
-                            "unit": "focus",
-                            "auranames": ["Living Bomb"],
-                            "useName": True,
-                            "debuffType": "HARMFUL",
-                            "matchesShowOn": "showOnActive",
-                            "ownOnly": True,
-                        },
-                        "untrigger": {}
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    make_subtext("%p\\n|cFFFFFF00[F]|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
                 ],
             },
             # Ignite (Target Debuff)
@@ -502,10 +468,10 @@ def build_wa_tree():
             },
 
             # =================================================================
-            # 04 - FOCUS STATUS (Icon Group - Focus Magic Monitor)
+            # 04 - FOCUS MAGIC (Icon Group - Focus Magic Monitor)
             # =================================================================
             {
-                "id": "04 - Focus",
+                "id": "04 - Focus Magic",
                 "uid": "FMHUD_FOCUS_GRP",
                 "parent": "Fire Mage HUD",
                 "regionType": "group",
@@ -513,15 +479,15 @@ def build_wa_tree():
                 "xOffset": 155,
                 "yOffset": 0,
                 "controlledChildren": [
-                    "Focus - Active",
-                    "Focus - OFF"
+                    "Focus Magic - Active",
+                    "Focus Magic - OFF"
                 ],
             },
-            # Focus Active (Remaining Time / Proc)
+            # Focus Magic Active (Remaining Time / Proc)
             {
-                "id": "Focus - Active",
+                "id": "Focus Magic - Active",
                 "uid": "FMHUD_FOCUS_ACTIVE",
-                "parent": "04 - Focus",
+                "parent": "04 - Focus Magic",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "width": 36,
@@ -549,11 +515,11 @@ def build_wa_tree():
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
-            # Focus OFF (Gray Icon when not applied)
+            # Focus Magic OFF (Gray Icon when not applied)
             {
-                "id": "Focus - OFF",
+                "id": "Focus Magic - OFF",
                 "uid": "FMHUD_FOCUS_OFF",
-                "parent": "04 - Focus",
+                "parent": "04 - Focus Magic",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "width": 36,
