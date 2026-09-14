@@ -1107,7 +1107,7 @@ end"""
                 "internalVersion": 52,
                 "width": 32,
                 "height": 32,
-                "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
+                "displayIcon": "Interface\\Icons\\Ability_Mage_MoltenArmor",
                 "auto": True,
                 "color": [1, 1, 1, 1],
                 "cooldown": True,
@@ -1164,6 +1164,9 @@ end""",
     end
     return 0, 0
 end""",
+                            "customIcon": """function()
+    return "Interface\\\\Icons\\\\Ability_Mage_MoltenArmor"
+end""",
                         },
                         "untrigger": {
                             "custom": """function(event, ...)
@@ -1198,7 +1201,7 @@ end"""
                 "internalVersion": 52,
                 "width": 32,
                 "height": 32,
-                "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
+                "displayIcon": "Interface\\Icons\\Ability_Mage_MoltenArmor",
                 "auto": True,
                 "desaturate": True,
                 "color": [0.6, 0.6, 0.6, 0.8],
