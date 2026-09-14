@@ -46,44 +46,50 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 - Testo 1: `%p` per il countdown del cooldown (2 min).
 - Testo 2: `%c` in basso a destra per le cariche residue in borsa (`GetItemCount(33312, nil, true)`). Se le cariche sono 0 o la gemma manca, compare uno `"0"` rosso di avvertimento.
 
-### 4. Layout Orizzontale Utility (Sotto la Mana Bar a `y = -48`)
-- 4 icone da 26x26 perfettamente simmetriche centrate a `x = 0`:
-  - `05 - Trinket 1`: `x = -51` (Slot 13)
-  - `05 - Trinket 2`: `x = -17` (Slot 14)
-  - `06 - Cloak`: `x = +17` (Slot 15)
-  - `06 - Mana Gem`: `x = +51` (Item 33312)
+### 4. Layout Orizzontale Utility (Sotto la Mana Bar a `y = -54`)
+- 5 icone da 28x28 perfettamente simmetriche centrate sotto la Mana Bar:
+  - `05 - Trinket 1`: `x = -72` (Slot 13, supporto 40+ trinket WotLK, On-Use e ICD passivi, Pixel Glow su proc)
+  - `05 - Trinket 2`: `x = -36` (Slot 14, 100% simmetrico a Trinket 1 con database identico e fallback)
+  - `06 - Cloak`: `x = 0` (Slot 15, Lightweave/Darkglow/Swordguard con countdown ICD e swipe)
+  - `06 - Combustion`: `x = +36` (A sinistra della Gemma, Pixel Glow e conteggio stack `xN` quando attiva, swipe su CD)
+  - `06 - Mana Gem`: `x = +72` (Item 33312 / 22044 con cariche e swipe)
 
 ---
 
 ## Architettura Completa dei Moduli
 
 ```text
-Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -150)
-├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 5px, yOffset: +36)
+Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scale: 1.2)
+├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 6px, yOffset: +44)
 │   ├── Hot Streak (icon: aura2 buff "Hot Streak", matchesShowOn: "showOnActive", subglow pixel)
 │   ├── Living Bomb (icon: aura2 debuff "Living Bomb", matchesShowOn: "showOnActive", ownOnly: true)
 │   ├── Ignite (icon: aura2 debuff "Ignite", matchesShowOn: "showOnActive", ownOnly: true)
-│   ├── Combustion (icon: spell Cooldown Progress 11129, genericShowOn: "showAlways")
+│   ├── Scorch (icon: aura2 debuff "Improved Scorch" / "Scorch" su target, timer %p, alert rosso <=5s)
 │   └── Molten Fury (icon: unit Health target <= 35%, subtext "35%")
 │
-├── 02 - Molten Armor (group: ala sinistra HUD, xOffset: -155, yOffset: 0)
-│   ├── Molten Armor - Active (icon: aura2 buff "Molten Armor", matchesShowOn: "showOnActive")
-│   └── Molten Armor - OFF (icon: aura2 buff "Molten Armor", matchesShowOn: "showOnMissing", desaturate: true)
+├── 02 - Molten Armor (group: ala sinistra HUD, xOffset: -160, yOffset: -14)
+│   ├── Molten Armor - Active (icon: compare SOLO se <= 5 min con timer m:ss / ss, nascosto se > 5m)
+│   └── Molten Armor - OFF (icon: aura2 buff missing, icona desaturata con avviso rosso "OFF")
 │
-├── 04 - Focus Magic (group: ala destra HUD, xOffset: +155, yOffset: 0)
-│   ├── Focus Magic - Active (icon: aura2 buff "Focus Magic", matchesShowOn: "showOnActive", timer %p)
+├── 03 - Arcane Intellect (group: ala sinistra HUD, xOffset: -160, yOffset: +22)
+│   ├── Arcane Intellect - Active (icon: compare SOLO se <= 5 min con timer m:ss / ss, nascosto se > 5m)
+│   └── Arcane Intellect - OFF (icon: aura2 buff missing, icona desaturata con avviso rosso "OFF")
+│
+├── 04 - Focus Magic (group: ala destra HUD, xOffset: +160, yOffset: -7)
+│   ├── Focus Magic - Active (icon: compare SOLO se <= 5 min con countdown scadenza se applicato)
 │   └── Focus Magic - OFF (custom status trigger: scansione raid/party/target/focus, sparisce se applicato)
 │
-├── 05 - Trinket 1 (icon: item Cooldown Progress slot 13, xOffset: -51, yOffset: -48)
-├── 05 - Trinket 2 (icon: item Cooldown Progress slot 14, xOffset: -17, yOffset: -48)
-├── 06 - Cloak (icon: item Cooldown Progress slot 15, xOffset: +17, yOffset: -48)
-├── 06 - Mana Gem (icon: item Cooldown Progress 33312 + cariche %c, xOffset: +51, yOffset: -48)
+├── 05 - Trinket 1 (icon: Slot 13, On-Use CD + ICD passivi, swipe Blizzlike, golden glow, xOffset: -72, yOffset: -54)
+├── 05 - Trinket 2 (icon: Slot 14, 100% simmetrico a Trinket 1, xOffset: -36, yOffset: -54)
+├── 06 - Cloak (icon: Slot 15 ricamo mantello con ICD, xOffset: 0, yOffset: -54)
+├── 06 - Combustion (icon: a sinistra della Gemma, stack quando attiva, swipe CD, xOffset: +36, yOffset: -54)
+├── 06 - Mana Gem (icon: cariche + swipe CD, xOffset: +72, yOffset: -54)
 │
-├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -26, width: 240, height: 14, solo % a 2 decimali)
-├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 240, height: 22)
-├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -13, width: 240, height: 4)
+├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -23, width: 220, height: 14, solo % a 2 decimali)
+├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 220, height: 20)
+├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -12, width: 220, height: 3)
 │
-└── 10 - Alerts (group: yOffset: +85)
+└── 10 - Alerts (group: yOffset: +105)
     └── Alert - Hot Streak (text: aura2 buff "Hot Streak", large text expressway outline)
 ```
 
