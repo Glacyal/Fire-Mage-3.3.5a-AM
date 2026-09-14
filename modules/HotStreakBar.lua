@@ -1,16 +1,15 @@
 -- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo: Barra Hot Streak (2 Segmenti)
+--- Fire Mage HUD 3.3.5a — Modulo: Barra Hot Streak (264x7px)
 --- =========================================================================
 --- Gestisce il monitoraggio in tempo reale del talento Hot Streak (Lancio Istantaneo)
 --- posizionata immediatamente sotto la Barra del Mana (264x7px):
---- - Barretta 1 (Sinistra): si accende al 1° colpo critico diretto e RESTA PERSISTENTE
----   nel tempo. I danni periodici (DoT come Ignite o Living Bomb tick) non la azzerano.
----   Si azzera solo su colpo diretto non-critico o all'uscita dal combattimento.
---- - Barretta 2 (Destra): si accende al 2° colpo critico consecutivo (proc Hot Streak
----   Buff 48108). Mostra il conto alla rovescia dei 10 secondi del buff a scorrere.
+--- - 1° Critico non-periodico: illumina esattamente metà barretta (50%, 130px ambra vivo)
+---   e RESTA PERSISTENTE nel tempo. I DoT (Ignite, tick Living Bomb) non azzerano la serie.
+---   Si azzera solo su colpo diretto non-critico, uscita dal combat o morte.
+--- - 2° Critico consecutivo (Proc Hot Streak): i due segmenti diventano un'UNICA BARRA
+---   al 100% (264px) con Pixel Glow, che mostra il TIMING con il conto alla rovescia di 10s!
 --- - Lancio di Pyroblast (o scadenza buff): consuma immediatamente l'effetto
----   e azzera istantaneamente entrambe le barrette a 0.
---- - Zero testo: barra puramente visiva senza percentuali o etichette.
+---   e azzera istantaneamente la barra a 0.
 --- =========================================================================
 
 FireMageHUD_HotStreak = FireMageHUD_HotStreak or {
@@ -18,6 +17,7 @@ FireMageHUD_HotStreak = FireMageHUD_HotStreak or {
     hasBuff = false,
     duration = 10,
     expirationTime = 0,
+    lastEventKey = nil,
 }
 
 local HS = FireMageHUD_HotStreak
@@ -36,27 +36,22 @@ local QUALIFYING_SPELLS = {
     [10206] = true, [10207] = true, [27073] = true, [27074] = true, [42858] = true, [42859] = true,
     -- Frostfire Bolt (Rank 1 e 2)
     [44614] = true, [47610] = true,
-    -- Living Bomb Esplosione Finale (Rank 1, 2 e 3)
-    [44461] = true, [55361] = true, [55362] = true,
-}
-
-local QUALIFYING_NAMES = {
-    ["Fireball"] = true,
-    ["Palla di Fuoco"] = true,
-    ["Fire Blast"] = true,
-    ["Deflagrazione di Fuoco"] = true,
-    ["Scorch"] = true,
-    ["Bruciatura"] = true,
-    ["Frostfire Bolt"] = true,
-    ["Dardo di Fuocogelo"] = true,
+    -- Living Bomb (Rank 1, 2 e 3)
+    [44461] = true, [55361] = true, [55362] = true, [44457] = true, [55359] = true, [55360] = true,
 }
 
 local function IsQualifyingSpell(spellId, spellName)
     if spellId and QUALIFYING_SPELLS[spellId] then
         return true
     end
-    if spellName and QUALIFYING_NAMES[spellName] then
-        return true
+    if spellName then
+        if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
+           string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
+           string.find(spellName, "Scorch") or string.find(spellName, "Bruciatura") or
+           string.find(spellName, "Frostfire") or string.find(spellName, "Fuocogelo") or
+           string.find(spellName, "Living Bomb") or string.find(spellName, "Bomba Vivente") then
+            return true
+        end
     end
     return false
 end
@@ -67,12 +62,12 @@ local function SyncHotStreakBuff()
     for i = 1, 40 do
         local name, _, _, _, _, dur, expTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" then
+        if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" or string.find(name, "Hot Streak") then
             found = true
             HS.hasBuff = true
             HS.streak = 2
             HS.duration = (dur and dur > 0) and dur or 10
-            HS.expirationTime = expTime or (GetTime() + HS.duration)
+            HS.expirationTime = (expTime and expTime > 0) and expTime or (GetTime() + HS.duration)
             break
         end
     end
@@ -81,6 +76,12 @@ local function SyncHotStreakBuff()
         HS.hasBuff = false
         HS.streak = 0
         HS.expirationTime = 0
+    end
+end
+
+local function NotifyWA()
+    if WeakAuras and WeakAuras.ScanEvents then
+        WeakAuras.ScanEvents("FMHUD_HS_UPDATE")
     end
 end
 
@@ -93,19 +94,25 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
         HS.hasBuff = false
         HS.expirationTime = 0
         SyncHotStreakBuff()
+        NotifyWA()
     elseif event == "PLAYER_DEAD" or event == "PLAYER_UNGHOST" then
         HS.streak = 0
         HS.hasBuff = false
         HS.expirationTime = 0
+        NotifyWA()
     elseif event == "PLAYER_REGEN_ENABLED" then
-        -- All'uscita dal combattimento, azzera solo se non si ha il buff Hot Streak attivo
-        if not HS.hasBuff then
+        if not HS.hasBuff and HS.streak > 0 then
             HS.streak = 0
+            NotifyWA()
         end
     elseif event == "UNIT_AURA" then
         local unit = ...
         if unit == "player" then
+            local oldBuff = HS.hasBuff
             SyncHotStreakBuff()
+            if oldBuff ~= HS.hasBuff then
+                NotifyWA()
+            end
         end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spellName, _, _, spellId = ...
@@ -113,38 +120,69 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
             -- Se viene lanciata Pyroblast, il buff Hot Streak viene consumato all'istante
             if spellId == 11366 or spellId == 12505 or spellId == 12522 or spellId == 12523 or
                spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
-               spellId == 42890 or spellId == 42891 or spellName == "Pyroblast" or spellName == "Pirocombustione" then
+               spellId == 42890 or spellId == 42891 or (spellName and (string.find(spellName, "Pyro") or string.find(spellName, "Piro"))) then
                 HS.hasBuff = false
                 HS.streak = 0
                 HS.expirationTime = 0
+                NotifyWA()
             end
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local subEvent = select(2, ...)
-        local sourceGUID = select(4, ...)
+        if subEvent == "SPELL_DAMAGE" then
+            local sourceGUID = select(4, ...)
+            local sourceName = select(5, ...)
+            local sourceFlags = select(6, ...)
 
-        -- Solo colpi eseguiti dal giocatore
-        if sourceGUID == UnitGUID("player") and subEvent == "SPELL_DAMAGE" then
-            -- RIGOROSO: Solo SPELL_DAMAGE diretto! SPELL_PERIODIC_DAMAGE (DoT) viene ignorato!
-            local spellId = select(10, ...)
-            local spellName = select(11, ...)
-            if IsQualifyingSpell(spellId, spellName) then
-                local critical = select(19, ...)
-                local isCrit = (critical and critical ~= 0 and critical ~= false)
-                if isCrit then
-                    if not HS.hasBuff then
-                        if HS.streak == 0 then
-                            -- 1° Critico: persiste nel tempo, illumina metà barretta
-                            HS.streak = 1
+            local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
+            if not isPlayer and sourceFlags and bit and bit.band then
+                if bit.band(sourceFlags, 0x00000001) > 0 then
+                    isPlayer = true
+                end
+            end
+
+            -- Solo colpi eseguiti dal giocatore
+            if isPlayer then
+                local spellId = select(10, ...)
+                local spellName = select(11, ...)
+                if not IsQualifyingSpell(spellId, spellName) then
+                    spellId = select(9, ...)
+                    spellName = select(10, ...)
+                end
+
+                if IsQualifyingSpell(spellId, spellName) then
+                    local timestamp = select(1, ...)
+                    local destGUID = select(7, ...) or select(8, ...) or ""
+                    local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
+
+                    if HS.lastEventKey ~= eventKey then
+                        HS.lastEventKey = eventKey
+
+                        local c18, c19, c20 = select(18, ...)
+                        local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)
+
+                        if isCrit then
+                            if not HS.hasBuff then
+                                if HS.streak == 0 then
+                                    -- 1° Critico: illumina metà barretta a 50%
+                                    HS.streak = 1
+                                    NotifyWA()
+                                else
+                                    -- 2° Critico: entra in Hot Streak
+                                    HS.streak = 2
+                                    HS.hasBuff = true
+                                    HS.duration = 10.0
+                                    HS.expirationTime = GetTime() + 10.0
+                                    NotifyWA()
+                                end
+                            end
                         else
-                            -- 2° Critico: entra in Hot Streak
-                            HS.streak = 2
+                            -- Colpo non-critico: azzera la serie se non c'e' gia' Hot Streak attivo
+                            if not HS.hasBuff and HS.streak > 0 then
+                                HS.streak = 0
+                                NotifyWA()
+                            end
                         end
-                    end
-                else
-                    -- Colpo non-critico: azzera la serie se non c'e' gia' Hot Streak attivo
-                    if not HS.hasBuff then
-                        HS.streak = 0
                     end
                 end
             end
@@ -152,21 +190,35 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
     end
 end
 
---- Restituisce lo stato corrente della Barretta 1 (Sinistra, 1° Critico).
----@return boolean isVisible True se attiva (piena al 100% e persistente)
+-- Frame nativo WoW registrato per l'addon
+local hsFrame = CreateFrame("Frame", "FireMageHUD_HotStreak_Frame")
+hsFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+hsFrame:RegisterEvent("PLAYER_DEAD")
+hsFrame:RegisterEvent("PLAYER_UNGHOST")
+hsFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+hsFrame:RegisterEvent("UNIT_AURA")
+hsFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+hsFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+hsFrame:SetScript("OnEvent", function(self, event, ...)
+    FireMageHUD_HotStreak_OnEvent(event, ...)
+end)
+
+--- Restituisce lo stato corrente della Barretta 1 (Sinistra, 1° Critico - 50%).
+--- Visibile SOLO sul 1° critico, sparisce al proc della barra unica.
+---@return boolean isVisible True se attiva al 50%
 ---@return number current Valore corrente (1)
 ---@return number max Valore massimo (1)
 function FireMageHUD_HotStreak_Segment1()
     SyncHotStreakBuff()
-    local isVisible = (HS.streak >= 1 or HS.hasBuff)
+    local isVisible = (HS.streak == 1 and not HS.hasBuff)
     return isVisible, 1, 1
 end
 
---- Restituisce lo stato corrente della Barretta 2 (Destra, Proc Hot Streak 10s).
+--- Restituisce lo stato corrente della Barra Unificata di Proc (264px intera, 10s Timing).
 ---@return boolean isVisible True se Hot Streak proc e' attivo
 ---@return number remaining Secondi rimanenti prima della scadenza
 ---@return number duration Durata totale del buff (10.0s)
-function FireMageHUD_HotStreak_Segment2()
+function FireMageHUD_HotStreak_ProcBar()
     SyncHotStreakBuff()
     if HS.hasBuff and HS.expirationTime and HS.expirationTime > GetTime() then
         local rem = math.max(0, HS.expirationTime - GetTime())
@@ -174,4 +226,7 @@ function FireMageHUD_HotStreak_Segment2()
     end
     return false, 0, 10.0
 end
+
+-- Alias di retrocompatibilita'
+FireMageHUD_HotStreak_Segment2 = FireMageHUD_HotStreak_ProcBar
 

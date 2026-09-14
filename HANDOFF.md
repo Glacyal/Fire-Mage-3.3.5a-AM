@@ -34,11 +34,11 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 
 ### 2. Barra Hot Streak (`10 - Hot Streak Bar`) — NUOVA
 - **Posizionamento**: Collocata a filo sotto la Mana Bar a `yOffset = -25` (spessore 7px, larghezza 264px, metà spessore della barra mana).
-- **Due Barrette Interne (Segmenti da 130x5px)**:
-  - **Barretta 1 (Sinistra, 1° Critico)**: Si accende al primo colpo critico diretto non-periodico (*Fireball, Fire Blast, Scorch, Living Bomb esplosione, Frostfire Bolt*) e **resta persistente nel tempo**. I danni periodici DoT (*Ignite, Living Bomb tick*) non intaccano la serie. Si azzera solo su colpo diretto non-critico o all'uscita dal combattimento.
-  - **Barretta 2 (Destra, Hot Streak Proc)**: Si accende al secondo critico consecutivo all'attivazione del buff Hot Streak (Spell ID 48108). Mostra il conto alla rovescia di 10 secondi del buff con effetto pixel glow.
-  - **Consumo con Pyroblast**: Al lancio di Pyroblast istantaneo (o scadenza del buff), entrambe le barrette si azzerano immediatamente a 0.
-  - **Zero Testo**: Design minimale e pulito, nessun testo o percentuale sulla barra.
+- **Comportamento Visivo Dinamico (Unificazione al Proc)**:
+  - **1° Critico Diretto (Sinistra, 50% Larghezza)**: Si illumina la metà barretta sinistra (130x5px, arancio fuoco) al primo colpo critico diretto non-periodico (*Fireball, Fire Blast, Scorch, Living Bomb impatto/esplosione, Frostfire Bolt*) e **resta persistente nel tempo**. I danni periodici DoT (*Ignite, Living Bomb tick*) non intaccano la serie. Si azzera solo su colpo diretto non-critico di questi incantesimi o all'uscita dal combattimento.
+  - **Hot Streak Proc (Barra Unica a Piena Larghezza 264px)**: Al secondo critico consecutivo (o all'ottenimento del buff Hot Streak 48108), i due segmenti **diventano un'unica barra continua da 264x5px** con Pixel Glow dorato/arancio e timing con conto alla rovescia swipe di 10 secondi!
+  - **Consumo con Pyroblast**: Al lancio di Pyroblast (o scadenza dei 10 secondi), la barra si azzera istantaneamente tornando alla sola cornice scura di fondo.
+  - **Zero Testo**: Design minimale e pulito, nessun testo o percentuale sulla barra (gestito separatamente dagli alert).
 
 ### 3. Focus Magic Monitor (`04 - Focus Magic`)
 - In WoW 3.3.5a, lanciare Focus Magic su un alleato posiziona il buff di 30 min sull'alleato (`caster == "player"`), mentre il Mago riceve il buff di 10s solo quando l'alleato esegue un critico.
@@ -102,10 +102,10 @@ Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scal
 ├── 06 - Mirror Image (icon: copie 30s con glow, swipe CD, xOffset: +110, yOffset: -54)
 │
 ├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -15, width: 264, height: 14, % con 2 decimali, rossa <= 20%)
-├── 10 - Hot Streak Bar (group: yOffset: -25, width: 264, height: 7, 2 segmenti da 130x5px)
+├── 10 - Hot Streak Bar (group: yOffset: -25, width: 264, height: 7, 50% 1° critico -> barra unica 264px al proc)
 │   ├── Hot Streak Bar - Background (texture: cornice 264x7px)
-│   ├── Hot Streak Bar - Segment 1 (aurabar: 1° critico persistente, 130x5px, xOffset: -66)
-│   └── Hot Streak Bar - Segment 2 (aurabar: proc Hot Streak countdown 10s con glow, 130x5px, xOffset: +66)
+│   ├── Hot Streak Bar - Segment 1 (texture: 1° critico persistente, 130x5px, 50% sx, xOffset: -66)
+│   └── Hot Streak Bar - Proc (aurabar: proc Hot Streak barra unica 264x5px, countdown 10s con Pixel Glow)
 ├── 08 - Castbar (aurabar: unit Cast player con icona a sinistra, yOffset: +8, width: 264, height: 20)
 ├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -4, width: 264, height: 3)
 │

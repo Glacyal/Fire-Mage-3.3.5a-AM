@@ -121,9 +121,9 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 │   ├── 08 - Castbar         (y =  +8, w = 264, h = 20: Testo spell a sx, tempo a dx, icona a sx)
 │   ├── 09 - GCD             (y =  -4, w = 264, h =  3: Barra bianca sottile)
 │   ├── 07 - Mana Bar        (y = -15, w = 264, h = 14: Solo % con 2 decimali, es. 85.24%)
-│   └── 10 - Hot Streak Bar  (y = -25, w = 264, h =  7: Barretta dual-segment pulita, no testo)
-│       ├── Segmento 1 (sx: 130x5px, 1° critico non-periodico persistente nel tempo)
-│       └── Segmento 2 (dx: 130x5px, Hot Streak proc countdown 10s con glow, reset istantaneo su Pyroblast)
+│   └── 10 - Hot Streak Bar  (y = -25, w = 264, h =  7: Barretta dinamica pulita, no testo)
+│       ├── Segmento 1 (sx: 130x5px, 50% 1° critico non-periodico persistente nel tempo)
+│       └── Proc Bar   (barra unica: 264x5px, Hot Streak proc countdown 10s con Pixel Glow, reset su Pyroblast)
 │
 ├── Fila Utility Inferiore (y = -54, margine di 11.5px sotto la Hot Streak Bar - 6 icone 28x28)
 │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)

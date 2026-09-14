@@ -1616,17 +1616,45 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     }
     local hs = _G.FMHUD_HS
 
+    local QUALIFYING_SPELLS = {
+        [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
+        [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
+        [2948]=true,[8444]=true,[8445]=true,[8446]=true,[10205]=true,[10206]=true,[10207]=true,[27073]=true,[27074]=true,[42858]=true,[42859]=true, -- Scorch
+        [44614]=true,[47610]=true, -- Frostfire Bolt
+        [44461]=true,[55361]=true,[55362]=true,[44457]=true,[55359]=true,[55360]=true, -- Living Bomb
+    }
+
+    local function isQualifying(spellId, spellName)
+        if spellId and QUALIFYING_SPELLS[spellId] then return true end
+        if spellName then
+            if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
+               string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
+               string.find(spellName, "Scorch") or string.find(spellName, "Bruciatura") or
+               string.find(spellName, "Frostfire") or string.find(spellName, "Fuocogelo") or
+               string.find(spellName, "Living Bomb") or string.find(spellName, "Bomba Vivente") then
+                return true
+            end
+        end
+        return false
+    end
+
+    local function notifyWA()
+        if WeakAuras and WeakAuras.ScanEvents then
+            WeakAuras.ScanEvents("FMHUD_HS_UPDATE")
+        end
+    end
+
     local function syncBuff()
         local found = false
         for i = 1, 40 do
             local name, _, _, _, _, dur, expTime, _, _, _, spellId = UnitBuff("player", i)
             if not name then break end
-            if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" then
+            if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" or string.find(name, "Hot Streak") then
                 found = true
                 hs.hasBuff = true
                 hs.streak = 2
                 hs.duration = (dur and dur > 0) and dur or 10
-                hs.expirationTime = expTime or (GetTime() + hs.duration)
+                hs.expirationTime = (expTime and expTime > 0) and expTime or (GetTime() + hs.duration)
                 break
             end
         end
@@ -1637,103 +1665,128 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         end
     end
 
-    if event == "PLAYER_ENTERING_WORLD" then
-        hs.streak = 0
-        hs.hasBuff = false
-        hs.expirationTime = 0
-        syncBuff()
-    elseif event == "PLAYER_DEAD" or event == "PLAYER_UNGHOST" then
-        hs.streak = 0
-        hs.hasBuff = false
-        hs.expirationTime = 0
-    elseif event == "PLAYER_REGEN_ENABLED" then
-        if not hs.hasBuff then
+    local function handleEvent(ev, ...)
+        if ev == "PLAYER_ENTERING_WORLD" then
             hs.streak = 0
-        end
-    elseif event == "UNIT_AURA" then
-        local unit = ...
-        if unit == "player" then
+            hs.hasBuff = false
+            hs.expirationTime = 0
             syncBuff()
-        end
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, spellName, _, _, spellId = ...
-        if unit == "player" then
-            if spellId == 11366 or spellId == 12505 or spellId == 12522 or spellId == 12523 or
-               spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
-               spellId == 42890 or spellId == 42891 or spellName == "Pyroblast" or spellName == "Pirocombustione" then
-                hs.hasBuff = false
+            notifyWA()
+        elseif ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
+            hs.streak = 0
+            hs.hasBuff = false
+            hs.expirationTime = 0
+            notifyWA()
+        elseif ev == "PLAYER_REGEN_ENABLED" then
+            if not hs.hasBuff and hs.streak > 0 then
                 hs.streak = 0
-                hs.expirationTime = 0
+                notifyWA()
             end
-        end
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local timestamp = select(1, ...)
-        local subEvent = select(2, ...)
-        local sourceGUID = select(4, ...)
-
-        if sourceGUID == UnitGUID("player") and subEvent == "SPELL_DAMAGE" then
-            local destGUID = select(7, ...)
-            local spellId = select(10, ...)
-            local spellName = select(11, ...)
-            local critical = select(19, ...)
-
-            local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
-            if hs.lastEventKey ~= eventKey then
-                hs.lastEventKey = eventKey
-
-                -- Solo SPELL_DAMAGE diretto (non periodico). I DoT (SPELL_PERIODIC_DAMAGE) non azzerano!
-                local isEligible = false
-                if spellId then
-                    if spellId == 133 or spellId == 143 or spellId == 145 or spellId == 3140 or spellId == 8400 or
-                       spellId == 8401 or spellId == 8402 or spellId == 10148 or spellId == 10149 or spellId == 10150 or
-                       spellId == 10151 or spellId == 25306 or spellId == 27070 or spellId == 38692 or spellId == 42832 or
-                       spellId == 42833 or -- Fireball
-                       spellId == 2136 or spellId == 2137 or spellId == 2138 or spellId == 8412 or spellId == 8413 or
-                       spellId == 10197 or spellId == 10199 or spellId == 27078 or spellId == 27079 or spellId == 42872 or
-                       spellId == 42873 or -- Fire Blast
-                       spellId == 2948 or spellId == 8444 or spellId == 8445 or spellId == 8446 or spellId == 10205 or
-                       spellId == 10206 or spellId == 10207 or spellId == 27073 or spellId == 27074 or spellId == 42858 or
-                       spellId == 42859 or -- Scorch
-                       spellId == 44614 or spellId == 47610 or -- Frostfire Bolt
-                       spellId == 44461 or spellId == 55361 or spellId == 55362 then -- Living Bomb Explosion
-                        isEligible = true
-                    end
+        elseif ev == "UNIT_AURA" then
+            local unit = ...
+            if unit == "player" then
+                local oldBuff = hs.hasBuff
+                syncBuff()
+                if oldBuff ~= hs.hasBuff then
+                    notifyWA()
                 end
-                if not isEligible and spellName then
-                    if spellName == "Fireball" or spellName == "Palla di Fuoco" or
-                       spellName == "Fire Blast" or spellName == "Deflagrazione di Fuoco" or
-                       spellName == "Scorch" or spellName == "Bruciatura" or
-                       spellName == "Frostfire Bolt" or spellName == "Dardo di Fuocogelo" then
-                        isEligible = true
+            end
+        elseif ev == "UNIT_SPELLCAST_SUCCEEDED" then
+            local unit, spellName, _, _, spellId = ...
+            if unit == "player" then
+                if spellId == 11366 or spellId == 12505 or spellId == 12522 or spellId == 12523 or
+                   spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
+                   spellId == 42890 or spellId == 42891 or (spellName and (string.find(spellName, "Pyro") or string.find(spellName, "Piro"))) then
+                    hs.hasBuff = false
+                    hs.streak = 0
+                    hs.expirationTime = 0
+                    notifyWA()
+                end
+            end
+        elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
+            local subEvent = select(2, ...)
+            if subEvent == "SPELL_DAMAGE" then
+                local sourceGUID = select(4, ...)
+                local sourceName = select(5, ...)
+                local sourceFlags = select(6, ...)
+
+                local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
+                if not isPlayer and sourceFlags and bit and bit.band then
+                    if bit.band(sourceFlags, 0x00000001) > 0 then
+                        isPlayer = true
                     end
                 end
 
-                if isEligible then
-                    local isCrit = (critical and critical ~= 0 and critical ~= false)
-                    if isCrit then
-                        if not hs.hasBuff then
-                            if hs.streak == 0 then
-                                hs.streak = 1 -- 1° critico persistente: illumina metà barretta!
+                if isPlayer then
+                    local spellId = select(10, ...)
+                    local spellName = select(11, ...)
+                    if not isQualifying(spellId, spellName) then
+                        spellId = select(9, ...)
+                        spellName = select(10, ...)
+                    end
+
+                    if isQualifying(spellId, spellName) then
+                        local timestamp = select(1, ...)
+                        local destGUID = select(7, ...) or select(8, ...) or ""
+                        local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
+
+                        if hs.lastEventKey ~= eventKey then
+                            hs.lastEventKey = eventKey
+
+                            local c18, c19, c20 = select(18, ...)
+                            local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)
+
+                            if isCrit then
+                                if not hs.hasBuff then
+                                    if hs.streak == 0 then
+                                        hs.streak = 1
+                                        notifyWA()
+                                    else
+                                        hs.streak = 2
+                                        hs.hasBuff = true
+                                        hs.duration = 10.0
+                                        hs.expirationTime = GetTime() + 10.0
+                                        notifyWA()
+                                    end
+                                end
                             else
-                                hs.streak = 2
+                                if not hs.hasBuff and hs.streak > 0 then
+                                    hs.streak = 0
+                                    notifyWA()
+                                end
                             end
-                        end
-                    else
-                        -- Colpo non-critico diretto: azzera la serie se non c'e' gia' Hot Streak attivo
-                        if not hs.hasBuff then
-                            hs.streak = 0
                         end
                     end
                 end
             end
         end
     end
-    syncBuff()
+
+    if not _G.FMHUD_HSFrame then
+        local f = CreateFrame("Frame", "FMHUD_HSFrame")
+        _G.FMHUD_HSFrame = f
+        f:RegisterEvent("PLAYER_ENTERING_WORLD")
+        f:RegisterEvent("PLAYER_DEAD")
+        f:RegisterEvent("PLAYER_UNGHOST")
+        f:RegisterEvent("PLAYER_REGEN_ENABLED")
+        f:RegisterEvent("UNIT_AURA")
+        f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        f:SetScript("OnEvent", function(self, ev, ...)
+            handleEvent(ev, ...)
+        end)
+    end
+
+    if event then
+        handleEvent(event, ...)
+    end
     return hs
 end"""
 
 def make_hotstreak_bg_trigger() -> str:
     return """function(event, ...)
+    _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
+    _G.FMHUD_InitHotStreak(event, ...)
     return not UnitIsDeadOrGhost("player")
 end"""
 
@@ -1744,16 +1797,16 @@ end"""
 
 def make_hotstreak_seg1_trigger() -> str:
     return """function(event, ...)
-    _G.FMHUD_UpdateHotStreakState = _G.FMHUD_UpdateHotStreakState or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    local hs = _G.FMHUD_UpdateHotStreakState(event, ...)
-    return (hs.streak >= 1 or hs.hasBuff)
+    _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
+    _G.FMHUD_InitHotStreak(event, ...)
+    local hs = _G.FMHUD_HS
+    return (hs and hs.streak == 1 and not hs.hasBuff)
 end"""
 
 def make_hotstreak_seg1_untrigger() -> str:
     return """function(event, ...)
-    _G.FMHUD_UpdateHotStreakState = _G.FMHUD_UpdateHotStreakState or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    local hs = _G.FMHUD_UpdateHotStreakState(event, ...)
-    return not (hs.streak >= 1 or hs.hasBuff)
+    local hs = _G.FMHUD_HS
+    return not (hs and hs.streak == 1 and not hs.hasBuff)
 end"""
 
 import copy
@@ -3039,7 +3092,7 @@ end"""
                 "controlledChildren": [
                     "Hot Streak Bar - Background",
                     "Hot Streak Bar - Segment 1",
-                    "Hot Streak Bar - Segment 2",
+                    "Hot Streak Bar - Proc",
                 ],
             },
             # Hot Streak Bar - Background Frame (264x7px)
@@ -3063,7 +3116,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "PLAYER_ENTERING_WORLD,PLAYER_ALIVE",
+                            "events": "PLAYER_ENTERING_WORLD,PLAYER_ALIVE,PLAYER_DEAD",
                             "custom": make_hotstreak_bg_trigger(),
                         },
                         "untrigger": {
@@ -3073,7 +3126,7 @@ end"""
                     "activeTriggerMode": -10,
                 },
             },
-            # Hot Streak Bar - Segment 1 (Left Half: 1° Crit, Metà Barretta Illuminata, Persistente)
+            # Hot Streak Bar - Segment 1 (Left Half: 1° Crit, Metà Barretta 130x5px a -66, Illuminata a 50%, Persistente)
             {
                 "id": "Hot Streak Bar - Segment 1",
                 "uid": "FMHUD_HSBAR_SEG1",
@@ -3094,7 +3147,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_ENTERING_WORLD,PLAYER_DEAD",
+                            "events": "FMHUD_HS_UPDATE,PLAYER_ENTERING_WORLD,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_DEAD,PLAYER_ALIVE",
                             "custom": make_hotstreak_seg1_trigger(),
                         },
                         "untrigger": {
@@ -3104,16 +3157,16 @@ end"""
                     "activeTriggerMode": -10,
                 },
             },
-            # Hot Streak Bar - Segment 2 (Right Half: Proc Hot Streak 10s Countdown, Pixel Glow)
+            # Hot Streak Bar - Proc (Barra Unificata 264x5px: Hot Streak 10s Countdown Swipe, Pixel Glow)
             {
-                "id": "Hot Streak Bar - Segment 2",
+                "id": "Hot Streak Bar - Proc",
                 "uid": "FMHUD_HSBAR_SEG2",
                 "parent": "10 - Hot Streak Bar",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 130,
+                "width": 264,
                 "height": 5,
-                "xOffset": 66,
+                "xOffset": 0,
                 "yOffset": 0,
                 "barColor": [1.0, 0.35, 0.0, 1.0],
                 "backgroundColor": [0.1, 0.1, 0.1, 0.8],
