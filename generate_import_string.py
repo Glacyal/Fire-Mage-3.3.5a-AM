@@ -752,7 +752,9 @@ def build_wa_tree():
             ],
             "load": {
                 "use_class": True,
-                "class": { "single": "MAGE", "multi": { "MAGE": True } }
+                "class": { "single": "MAGE", "multi": { "MAGE": True } },
+                "use_spellknown": True,
+                "spellknown": 11129,
             }
         },
         "c": [
@@ -772,6 +774,7 @@ def build_wa_tree():
                 "yOffset": 44,
                 "controlledChildren": [
                     "Hot Streak",
+                    "Clearcasting",
                     "Living Bomb",
                     "Ignite",
                     "Scorch",
@@ -801,6 +804,57 @@ def build_wa_tree():
                             "type": "aura2",
                             "unit": "player",
                             "auranames": ["Hot Streak"],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": True,
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    {
+                        "type": "subglow",
+                        "glow": True,
+                        "glowType": "Pixel",
+                        "glowLines": 8,
+                        "glowFrequency": 0.25,
+                        "glowLength": 10,
+                        "glowThickness": 2,
+                    }
+                ],
+            },
+            # Clearcasting / Arcane Concentration (Active on proc)
+            {
+                "id": "Clearcasting",
+                "uid": "FMHUD_CLEARCASTING",
+                "parent": "01 - Procs",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 34,
+                "height": 34,
+                "displayIcon": "Interface\\Icons\\Spell_Shadow_ManaBurn",
+                "auto": True,
+                "color": [1, 1, 1, 1],
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": [
+                                "Clearcasting",
+                                "Arcane Concentration",
+                                "Lancio limpido",
+                                "12536"
+                            ],
                             "useName": True,
                             "debuffType": "HELPFUL",
                             "matchesShowOn": "showOnActive",
@@ -908,59 +962,91 @@ def build_wa_tree():
                 "width": 34,
                 "height": 34,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SoulBurn",
-                "auto": True,
                 "color": [1, 1, 1, 1],
                 "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    if not UnitExists("target") then return "" end
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if spellId == 22959 or spellId == 12873 or spellId == 12872 or spellId == 17800 or name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or string.find(name, "Scorch") or string.find(name, "Bruciatura") then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 5 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.0fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "aura2",
-                            "unit": "target",
-                            "auranames": [
-                                "Improved Scorch",
-                                "Scorch",
-                                "22959",
-                                "Shadow and Flame"
-                            ],
-                            "auraspellids": [
-                                22959,
-                                12873,
-                                12872,
-                                11095,
-                                17800
-                            ],
-                            "useName": True,
-                            "debuffType": "HARMFUL",
-                            "matchesShowOn": "showOnActive",
-                            "ownOnly": False,
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_ENTERING_WORLD",
+                            "custom": """function(event, ...)
+    if not UnitExists("target") then return false end
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if spellId == 22959 or spellId == 12873 or spellId == 12872 or spellId == 17800 or name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or string.find(name, "Scorch") or string.find(name, "Bruciatura") then
+            return true
+        end
+    end
+    return false
+end""",
+                            "customDuration": """function()
+    if not UnitExists("target") then return 0, 0 end
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if spellId == 22959 or spellId == 12873 or spellId == 12872 or spellId == 17800 or name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or string.find(name, "Scorch") or string.find(name, "Bruciatura") then
+            return duration or 30, expirationTime or (GetTime() + 30)
+        end
+    end
+    return 0, 0
+end""",
+                            "customIcon": """function()
+    if not UnitExists("target") then return "Interface\\\\Icons\\\\Spell_Fire_SoulBurn" end
+    for i = 1, 40 do
+        local name, _, icon, _, _, _, _, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if spellId == 22959 or spellId == 12873 or spellId == 12872 or spellId == 17800 or name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or string.find(name, "Scorch") or string.find(name, "Bruciatura") then
+            return icon or "Interface\\\\Icons\\\\Spell_Fire_SoulBurn"
+        end
+    end
+    return "Interface\\\\Icons\\\\Spell_Fire_SoulBurn"
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    if not UnitExists("target") then return true end
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if spellId == 22959 or spellId == 12873 or spellId == 12872 or spellId == 17800 or name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or string.find(name, "Scorch") or string.find(name, "Bruciatura") then
+            return false
+        end
+    end
+    return true
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
-                "conditions": [
-                    {
-                        "check": {
-                            "trigger": 1,
-                            "variable": "remaining",
-                            "op": "<=",
-                            "value": "5"
-                        },
-                        "changes": [
-                            {
-                                "property": "color",
-                                "value": [1, 0.25, 0.25, 1]
-                            }
-                        ]
-                    }
-                ],
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
             # Molten Fury (Target <= 35% HP)
@@ -1796,6 +1882,15 @@ end""",
                 "parent": "10 - Alerts",
                 "regionType": "text",
                 "internalVersion": 52,
+                "displayText": "|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r",
+                "fontSize": 20,
+                "outline": "OUTLINE",
+                "justify": "CENTER",
+                "color": [1, 1, 1, 1],
+                "selfPoint": "CENTER",
+                "anchorPoint": "CENTER",
+                "xOffset": 0,
+                "yOffset": 0,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -1810,9 +1905,6 @@ end""",
                     },
                     "activeTriggerMode": -10,
                 },
-                "subRegions": [
-                    make_subtext("|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r", justify="CENTER", anchor_point="CENTER", font_size=20)
-                ],
             }
         ]
     }

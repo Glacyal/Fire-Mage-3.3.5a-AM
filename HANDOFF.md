@@ -62,9 +62,10 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scale: 1.2)
 ├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 6px, yOffset: +44)
 │   ├── Hot Streak (icon: aura2 buff "Hot Streak", matchesShowOn: "showOnActive", subglow pixel)
+│   ├── Clearcasting (icon: aura2 buff "Clearcasting" / "Arcane Concentration" 12536, subglow pixel, timer %p)
 │   ├── Living Bomb (icon: aura2 debuff "Living Bomb", matchesShowOn: "showOnActive", ownOnly: true)
 │   ├── Ignite (icon: aura2 debuff "Ignite", matchesShowOn: "showOnActive", ownOnly: true)
-│   ├── Scorch (icon: aura2 debuff "Improved Scorch" / "Scorch" su target, timer %p, alert rosso <=5s)
+│   ├── Scorch (icon: custom status trigger debuff su target, countdown esatto, alert rosso <=5s)
 │   └── Molten Fury (icon: unit Health target <= 35%, subtext "35%")
 │
 ├── 02 - Molten Armor (group: ala sinistra HUD, xOffset: -160, yOffset: -14)
