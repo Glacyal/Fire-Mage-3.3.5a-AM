@@ -30,20 +30,23 @@ PANORAMICA DELLE FUNZIONALITA' E DEL LAYOUT:
    - Lancio di Pyroblast (o fine 10s): consuma l'effetto e azzera subito la barra.
    - Zero Testo: design puramente visivo, pulito e minimale.
 
-2. GESTIONE DINAMICA TIER 8 (Bonus 2 Pezzi - Praxis +350 SP):
-   - Auto-Rilevamento Intelligente: controlla continuamente i 10 pezzi T8 Kirin Tor
-     (Elmo, Spalle, Torso, Guanti, Gambe 10m/25m).
-   - Se indossi Solo T7 o Solo T10 (o < 2 pezzi T8):
-     L'icona T8 e' nascosta e la fila utility mantiene esattamente la configurazione
-     a 6 icone da 28x28 spaziate di 44px (x = -110, -66, -22, +22, +66, +110).
-   - Se indossi >= 2 pezzi T8:
-     L'icona T8 compare al centro perfetto (x = 0, y = -54 tra Mantello e Gemma).
-     Gli altri moduli si restringono dinamicamente a 38px di spaziatura
-     (x = -114, -76, -38, 0, +38, +76, +114), totale 256px centrato sotto la barra!
-   - Meccanica Proc & ICD:
-     Durante il proc Praxis (+350 SP per 15s): Pixel Glow dorato e countdown giallo.
-     Durante l'ICD (45s totale = 15s buff + 30s ricarica): swipe a orologio e timer CD.
-     Pronto: icona pulita in attesa del prossimo riproc.
+2. GESTIONE DINAMICA TIER 8 & TIER 10 (Praxis +350 SP & Frostforged Sage / Haste 12%):
+   - Auto-Rilevamento Intelligente Multi-Stadio: controlla continuamente i pezzi
+     T8 Kirin Tor (10m/25m) e T10 Bloodmage (251/264/277), con fallback su tooltip e buff.
+   - Le 4 Modalita' Dinamiche:
+     * Scenario A: Entrambi T8 (>= 2P) e T10 (>= 2P) equipaggiati contemporaneamente.
+       Tutti gli 8 moduli compattati a 26x26 px con passo ~33px (totale 256px).
+       T8 a sinistra della Gemma (-16), Gemma (+16), T10 a destra della Gemma (+49).
+     * Scenario B: Solo T8 (>= 2P), no T10 (< 2P).
+       Icone a 28px con passo 38px (totale 256px). T10 nascosto, T8 al centro a x = 0.
+     * Scenario C: Solo T10 (>= 2P), no T8 (< 2P).
+       Icone a 28px con passo 38px (totale 256px). T8 nascosto, Gemma al centro a x = 0,
+       T10 a destra della Gemma a x = +38.
+     * Scenario D: Ne' T8 ne' T10 (< 2P entrambi).
+       Icone a 28px con passo 44px (totale 248px). Configurazione simmetrica classica a 6 icone.
+   - Meccanica Proc & Glow:
+     * T8 Praxis (64868): Pixel Glow dorato per 15s, poi ricarica ICD 30s a orologio.
+     * T10 Frostforged/Limit (70753/72416): Pixel Glow ciano/ghiaccio per 5s/10s.
 
 3. BUFF A LUNGA DURATA NASCOSTI SE > 5 MINUTI (Molten Armor, Intellect, Focus Magic):
    - Invisibili > 5 min: per la massima pulizia dello schermo durante i boss fight.
@@ -83,10 +86,14 @@ PANORAMICA DELLE FUNZIONALITA' E DEL LAYOUT:
    - Hot Streak Bar (y = -25): 264x7px a scomparsa dinamica.
 
 8. FILA UTILITY INFERIORE DINAMICA (y = -54):
-   - Modalità 6 Icone (< 2 Pezzi T8):
-     Trinket 1 (-110) | Trinket 2 (-66) | Mantello (-22) | Gemma (+22) | Combustione (+66) | Copie (+110)
-   - Modalità 7 Icone (>= 2 Pezzi T8):
+   - Scenario A [8 Icone Compattate a 26px] (T8 >= 2P e T10 >= 2P):
+     Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | T8 Praxis (-16) | Gemma (+16) | T10 Frostforged (+49) | Combustione (+82) | Copie (+115)
+   - Scenario B [7 Icone a 28px] (Solo T8 >= 2P, no T10):
      Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | Tier 8 (0) | Gemma (+38) | Combustione (+76) | Copie (+114)
+   - Scenario C [7 Icone a 28px] (Solo T10 >= 2P, no T8):
+     Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | Gemma (0) | Tier 10 (+38) | Combustione (+76) | Copie (+114)
+   - Scenario D [6 Icone Standard a 28px] (Ne' T8 ne' T10):
+     Trinket 1 (-110) | Trinket 2 (-66) | Mantello (-22) | Gemma (+22) | Combustione (+66) | Copie (+110)
 
 9. PROCS & DEBUFF CON TIMER ROSSI IN SCADENZA (y = +52):
    - Timer in rosso vivo negli ultimi secondi: Scorch <= 5s, Hot Streak <= 3s,

@@ -19,6 +19,7 @@ modules\Procs.lua
 modules\Trinkets.lua
 modules\Cloak.lua
 modules\Tier8.lua
+modules\Tier10.lua
 modules\GCD.lua
 modules\Alerts.lua
 modules\Stats.lua

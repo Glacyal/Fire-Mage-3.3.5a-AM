@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Mage 3.3.5a AM — Anteprima Dinamica Fila Utility (T8 / T10)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body {
+            background: #0f1115;
+            color: #e0e6ed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #ff7700;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(255, 119, 0, 0.4);
+            font-size: 24px;
+        }
+        p.subtitle {
+            color: #8899a6;
+            margin-bottom: 30px;
+            font-size: 14px;
+            text-align: center;
+            max-width: 650px;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            background: #1c2128;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background: #28303a;
+            border-color: #ff7700;
+            color: #fff;
+        }
+        button.active {
+            background: #ff7700;
+            border-color: #ff9933;
+            color: #000;
+            box-shadow: 0 0 12px rgba(255, 119, 0, 0.5);
+        }
+        .hud-canvas {
+            position: relative;
+            width: 360px;
+            height: 240px;
+            background: radial-gradient(circle at 50% 40%, #1a1e27 0%, #0d0f13 100%);
+            border: 1px solid #2d333b;
+            border-radius: 12px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 35px;
+        }
+        .hud-canvas::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            bottom: 20px;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+        /* Top Central 264px Bar */
+        .bar-container {
+            position: relative;
+            width: 264px;
+            height: 16px;
+            background: #11141a;
+            border: 1px solid #444;
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .bar-fill {
+            height: 100%;
+            width: 65%;
+            background: linear-gradient(90deg, #ff4500, #ff8c00);
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.6);
+        }
+        .bar-label {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+        /* Utility Row Container */
+        .row-container {
+            position: relative;
+            width: 264px;
+            height: 40px;
+            margin-top: 54px;
+        }
+        /* Icon styling */
+        .icon {
+            position: absolute;
+            top: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            border: 1px solid #3a3f47;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+            transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            user-select: none;
+        }
+        .icon span {
+            font-size: 9px;
+            font-weight: 800;
+            text-shadow: 0 0 3px #000, 1px 1px 1px #000;
+            margin-bottom: 1px;
+        }
+        .icon.hidden {
+            opacity: 0;
+            transform: scale(0.4);
+            pointer-events: none;
+        }
+        /* Individual Icons */
+        .icon-t1 { background-image: url('https://wow.zamimg.com/images/wow/icons/large/inv_jewelry_trinketpvp_02.jpg'); }
+        .icon-t2 { background-image: url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_organ_04.jpg'); }
+        .icon-cloak { background-image: url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_cape_18.jpg'); }
+        .icon-t8 {
+            background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_arcane_studentofmagic.jpg');
+            border-color: #ffd700;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        }
+        .icon-t8 span { color: #ffd700; }
+        .icon-gem { background-image: url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg'); }
+        .icon-gem span { color: #00e5ff; }
+        .icon-t10 {
+            background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_frost_frostward.jpg');
+            border-color: #00d9ff;
+            box-shadow: 0 0 8px rgba(0, 217, 255, 0.45);
+        }
+        .icon-t10 span { color: #00d9ff; }
+        .icon-comb { background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_fire_sealoffire.jpg'); }
+        .icon-comb span { color: #ff5500; }
+        .icon-mirror { background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_magic_lesserinvisibilty.jpg'); }
+        .icon-mirror span { color: #bb86fc; }
+
+        /* Status Description */
+        .desc-box {
+            margin-top: 30px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 16px 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .desc-box h3 {
+            color: #ff9933;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 6px;
+        }
+        .badge-t8 { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid #ffd700; }
+        .badge-t10 { background: rgba(0, 217, 255, 0.15); color: #00d9ff; border: 1px solid #00d9ff; }
+        .badge-compact { background: rgba(187, 134, 252, 0.15); color: #bb86fc; border: 1px solid #bb86fc; }
+    </style>
+</head>
+<body>
+
+    <h1>Fire Mage 3.3.5a AM — Fila Utility Dinamica</h1>
+    <p class="subtitle">Dimostrazione del riposizionamento e compattamento dinamico con rilevamento automatico in tempo reale delle configurazioni <strong>Tier 8 (Praxis)</strong> e <strong>Tier 10 (Frostforged Sage)</strong>.</p>
+
+    <div class="controls">
+        <button id="btn-8" class="active" onclick="setLayout('8')">Scenario A: T8 (2P) + T10 (2P) [8 Icone]</button>
+        <button id="btn-7-t8" onclick="setLayout('7-t8')">Scenario B: Solo T8 (2P) [7 Icone]</button>
+        <button id="btn-7-t10" onclick="setLayout('7-t10')">Scenario C: Solo T10 (2P) [7 Icone]</button>
+        <button id="btn-6" onclick="setLayout('6')">Scenario D: Né T8 né T10 [6 Icone Standard]</button>
+    </div>
+
+    <div class="hud-canvas">
+        <div class="bar-container">
+            <div class="bar-fill"></div>
+            <div class="bar-label">
+                <span>Mana Bar (264px)</span>
+                <span>14,850 / 22,800</span>
+            </div>
+        </div>
+
+        <div class="row-container" id="row">
+            <div id="t1" class="icon icon-t1"><span>RDY</span></div>
+            <div id="t2" class="icon icon-t2"><span>RDY</span></div>
+            <div id="cloak" class="icon icon-cloak"><span>RDY</span></div>
+            <div id="t8" class="icon icon-t8"><span>15s</span></div>
+            <div id="gem" class="icon icon-gem"><span>3x</span></div>
+            <div id="t10" class="icon icon-t10"><span>5s</span></div>
+            <div id="comb" class="icon icon-comb"><span>RDY</span></div>
+            <div id="mirror" class="icon icon-mirror"><span>RDY</span></div>
+        </div>
+    </div>
+
+    <div class="desc-box" id="desc">
+        <h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
+        <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
+        <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio occupato:</strong> 256px (4px di margine per lato).<br>
+        <strong>Ordine:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>
+    </div>
+
+    <script>
+        const row = document.getElementById('row');
+        const t1 = document.getElementById('t1');
+        const t2 = document.getElementById('t2');
+        const cloak = document.getElementById('cloak');
+        const t8 = document.getElementById('t8');
+        const gem = document.getElementById('gem');
+        const t10 = document.getElementById('t10');
+        const comb = document.getElementById('comb');
+        const mirror = document.getElementById('mirror');
+        const desc = document.getElementById('desc');
+
+        const buttons = {
+            '8': document.getElementById('btn-8'),
+            '7-t8': document.getElementById('btn-7-t8'),
+            '7-t10': document.getElementById('btn-7-t10'),
+            '6': document.getElementById('btn-6')
+        };
+
+        function setIcon(el, x, size, visible) {
+            if (!visible) {
+                el.classList.add('hidden');
+                return;
+            }
+            el.classList.remove('hidden');
+            el.style.width = size + 'px';
+            el.style.height = size + 'px';
+            // Coordinate x is relative to center (132px of row)
+            const left = 132 + x - (size / 2);
+            el.style.left = left + 'px';
+        }
+
+        function setLayout(mode) {
+            Object.values(buttons).forEach(b => b.classList.remove('active'));
+            buttons[mode].classList.add('active');
+
+            if (mode === '8') {
+                // 8 icons: size 26px
+                setIcon(t1, -115, 26, true);
+                setIcon(t2, -82, 26, true);
+                setIcon(cloak, -49, 26, true);
+                setIcon(t8, -16, 26, true);
+                setIcon(gem, 16, 26, true);
+                setIcon(t10, 49, 26, true);
+                setIcon(comb, 82, 26, true);
+                setIcon(mirror, 115, 26, true);
+
+                desc.innerHTML = `<h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
+                <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
+                <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio totale:</strong> 256px.<br>
+                <strong>Disposizione:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>`;
+            } else if (mode === '7-t8') {
+                // 7 icons (T8 only): size 28px
+                setIcon(t1, -114, 28, true);
+                setIcon(t2, -76, 28, true);
+                setIcon(cloak, -38, 28, true);
+                setIcon(t8, 0, 28, true);
+                setIcon(gem, 38, 28, true);
+                setIcon(t10, 0, 28, false); // Hidden
+                setIcon(comb, 76, 28, true);
+                setIcon(mirror, 114, 28, true);
+
+                desc.innerHTML = `<h3><span class="badge badge-t8">7 ICONE T8</span> Scenario B: Solo Tier 8 (2P) equipaggiato</h3>
+                <p>Nessun pezzo T10 rilevato. Il buff T10 è nascosto, mentre il Tier 8 siede al centro tra Mantello e Gemma:<br>
+                <strong>Dimensione:</strong> 28x28 px | <strong>Passo:</strong> 38px | <strong>Spazio totale:</strong> 256px.<br>
+                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong style="color:#ffd700;">T8 Praxis (0)</strong> | Gemma (+38) | Combustion (+76) | Mirror Image (+114).</p>`;
+            } else if (mode === '7-t10') {
+                // 7 icons (T10 only): size 28px
+                setIcon(t1, -114, 28, true);
+                setIcon(t2, -76, 28, true);
+                setIcon(cloak, -38, 28, true);
+                setIcon(t8, 0, 28, false); // Hidden
+                setIcon(gem, 0, 28, true);
+                setIcon(t10, 38, 28, true);
+                setIcon(comb, 76, 28, true);
+                setIcon(mirror, 114, 28, true);
+
+                desc.innerHTML = `<h3><span class="badge badge-t10">7 ICONE T10</span> Scenario C: Solo Tier 10 (2P) equipaggiato</h3>
+                <p>Nessun pezzo T8 rilevato. Il buff T8 non viene visualizzato. La Gemma di Mana è centrata a x = 0 e il T10 si trova immediatamente a destra a x = +38:<br>
+                <strong>Dimensione:</strong> 28x28 px | <strong>Passo:</strong> 38px | <strong>Spazio totale:</strong> 256px.<br>
+                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong>Gemma Mana (0)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+38)</strong> | Combustion (+76) | Mirror Image (+114).</p>`;
+            } else if (mode === '6') {
+                // 6 icons (standard): size 28px
+                setIcon(t1, -110, 28, true);
+                setIcon(t2, -66, 28, true);
+                setIcon(cloak, -22, 28, true);
+                setIcon(t8, 0, 28, false); // Hidden
+                setIcon(gem, 22, 28, true);
+                setIcon(t10, 0, 28, false); // Hidden
+                setIcon(comb, 66, 28, true);
+                setIcon(mirror, 110, 28, true);
+
+                desc.innerHTML = `<h3><span class="badge" style="background:#30363d; color:#c9d1d9;">6 ICONE STANDARD</span> Scenario D: Né Tier 8 né Tier 10</h3>
+                <p>Configurazione standard simmetrica per Tier 7 o equipaggiamento misto non-set. Entrambi i bonus T8 e T10 sono nascosti:<br>
+                <strong>Dimensione:</strong> 28x28 px | <strong>Passo:</strong> 44px | <strong>Spazio totale:</strong> 248px.<br>
+                <strong>Disposizione:</strong> Trinket 1 (-110) | Trinket 2 (-66) | Mantello (-22) | Gemma (+22) | Combustion (+66) | Mirror Image (+110).</p>`;
+            }
+        }
+
+        // Initialize with 8-icon mode
+        setLayout('8');
+    </script>
+</body>
+</html>

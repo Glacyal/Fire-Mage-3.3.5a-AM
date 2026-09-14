@@ -30,9 +30,11 @@ L'interfaccia è progettata secondo i principi di **massima ergonomia e pulizia 
    - Se assenti o scaduti, mostrano l'icona desaturata con avviso rosso **`OFF`**.
 2. **Cluster Centrale Unificato (Larghezza 264px)**:
    - Castbar, GCD, Mana Bar e Hot Streak Bar condividono la medesima larghezza di 264px, perfettamente impilate l'una sull'altra.
-3. **Fila Utility Dinamica Adattiva (6 vs 7 Icone)**:
-   - Se si usano solo T7 o solo T10 (o $< 2$ pezzi T8), la riga è predisposta a 6 moduli simmetrici spaziati a 44px.
-   - Con $\ge 2$ pezzi T8, viene inserito il modulo T8 al centro e gli altri si restringono dinamicamente a 38px, mantenendo la simmetria assoluta.
+3. **Fila Utility Dinamica Adattiva (4 Scenari da 6 a 8 Icone)**:
+   - **Scenario A (8 Icone Compattate a 26px)**: Se il mago equipaggia contemporaneamente $\ge 2$ pezzi T8 E $\ge 2$ pezzi T10, tutti gli 8 moduli rientrano compattandosi a 26x26px con passo ~33px (totale 256px). T8 si trova a sinistra della Gemma (-16) e T10 si trova a destra della Gemma (+49).
+   - **Scenario B (7 Icone a 28px - Solo T8)**: Se equipaggia solo T8 ($\ge 2$ pezzi), T10 è nascosto e T8 siede al centro tra Mantello e Gemma a `x = 0`.
+   - **Scenario C (7 Icone a 28px - Solo T10)**: Se equipaggia solo T10 ($\ge 2$ pezzi), T8 è nascosto, la Gemma è centrata a `x = 0` e T10 si trova a destra della Gemma a `x = +38`.
+   - **Scenario D (6 Icone Standard a 28px - Né T8 né T10)**: Se non indossa T8 né T10 (es. solo T7 o gear misto), entrambi i moduli sono nascosti e la riga adotta la spaziatura simmetrica classica da 44px.
 4. **Timer Intelligenti con Allerta Rossa di Scadenza**:
    - I procs e debuff dinamici (*Scorch $\le$ 5s, Hot Streak $\le$ 3s, Living Bomb $\le$ 3s prima dell'esplosione, Ignite $\le$ 1.5s*) commutano automaticamente il testo in rosso vivo a 1 decimale (`|cFFFF4444%.1fs|r`), avvertendo tempestivamente del momento ottimale per il refresh senza clippare i tick.
 
@@ -72,19 +74,21 @@ Lancio di Pyroblast (o scadenza 10s):
 
 ---
 
-### 3.2 Modulo Tier 8 2-Piece Bonus (`06 - Tier 8` — Praxis)
+### 3.2 Moduli Tier 8 (`06 - Tier 8` — Praxis) & Tier 10 (`06 - Tier 10` — Frostforged Sage / Limit)
 
-Posizionato a `x = 0, y = -54` al centro della riga utility:
-- **Auto-Rilevamento Intelligente**:
-  - Scansiona i 10 pezzi T8 Kirin Tor (10m: 45367, 45369, 45365, 45366, 45368; 25m: 45357, 45359, 45355, 45356, 45358).
-- **Adattamento Dinamico del Layout**:
-  - Funzione condivisa `_G.FMHUD_SetUtilityPos(env, x6, x7)` che aggiorna i punti delle icone utility senza ricaricare la UI.
-  - Con $< 2$ pezzi T8: `06 - Tier 8` è nascosto, le altre 6 icone si posizionano su `[-110, -66, -22, +22, +66, +110]` (spaziatura 44px).
-  - Con $\ge 2$ pezzi T8: `06 - Tier 8` appare a `x = 0`, le altre 6 icone si stringono su `[-114, -76, -38, +38, +76, +114]` (spaziatura 38px).
-- **Tracciamento Proc & ICD**:
-  - **Buff Attivo**: Praxis (Spell ID 64868, +350 SP per 15s) con **Pixel Glow** e timer decimale giallo `|cFFFFFF00%.1fs|r`.
-  - **Internal Cooldown (ICD)**: 45 secondi complessivi (15s buff + 30s ricarica a orologio con timer residuo `%.0f`).
-  - **Stato Pronto**: Icona desaturata o pulita pronta al prossimo proc.
+Monitorano i bonus set 2P Tier 8 e Tier 10 nella fila utility a `y = -54`:
+- **Auto-Rilevamento Intelligente Multi-Stadio**:
+  - Scansiona i 10 pezzi T8 Kirin Tor (10m: 45365-45369, 25m: 45355-45359).
+  - Scansiona i 15 pezzi T10 Bloodmage (251: 50275-50279, 264: 51280-51284, 277: 51300-51304).
+  - Scansione tooltip e verifica buff attivo.
+- **Adattamento Dinamico del Layout (`_G.FMHUD_UpdateUtilityRowPositions`)**:
+  - T8 + T10 contemporaneamente: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`).
+  - Solo T8: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T8 tra Mantello e Gemma.
+  - Solo T10: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), Gemma al centro e T10 a destra della Gemma.
+  - Né T8 né T10: 6 icone a 28px (`[-110, -66, -22, +22, +66, +110]`), entrambi nascosti.
+- **Tracciamento Proc & Glow**:
+  - **T8 Praxis (64868)**: +350 SP per 15s con Pixel Glow dorato e timer `|cFFFFFF00%.1fs|r`, poi ricarica ICD 30s.
+  - **T10 Frostforged/Limit (70753/72416)**: +12% Haste per 5s o +285 SP per 10s con Pixel Glow ciano/ghiaccio `|cFFFFFF00%.1fs|r`.
 
 ---
 
@@ -160,22 +164,35 @@ Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190
 │       └── Hot Streak Bar - Proc       (aurabar: 264x5px intera, countdown 10s con Pixel Glow)
 │
 ├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
-│   ├── MODALITÀ 6 ICONE (< 2 pezzi T8 equipaggiati - Spaziatura 44px):
-│   │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│   │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
-│   └── MODALITÀ 7 ICONE RISTRETTE (>= 2 pezzi T8 equipaggiati - Spaziatura 38px):
-│       ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD)
-│       ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD)
-│       ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD)
-│       ├── 06 - Tier 8       (x =    0: Praxis +350 SP 15s con Glow + Swipe ICD 30s)
-│       ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│       ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
-│       └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
+│   ├── SCENARIO A: 8 ICONE COMPATTATE (Entrambi T8 >= 2P e T10 >= 2P - 26x26px, passo ~33px):
+│   │   ├── 05 - Trinket 1    (x = -115: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
+│   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│   │   ├── 06 - Tier 10      (x =  +49: Frostforged Sage / Haste 12% con Glow ciano)
+│   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
+│   │
+│   ├── SCENARIO B: 7 ICONE T8 (Solo T8 >= 2P, T10 < 2P - 28x28px, passo 38px, T10 nascosto):
+│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
+│   │   ├── 06 - Tier 8       (x =    0: Centrato tra Mantello e Gemma di Mana)
+│   │   └── 06 - Mana Gem     (x =  +38) | 06 - Combustion (x = +76) | 06 - Mirror Image (x = +114)
+│   │
+│   ├── SCENARIO C: 7 ICONE T10 (Solo T10 >= 2P, T8 < 2P - 28x28px, passo 38px, T8 nascosto):
+│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
+│   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
+│   │   ├── 06 - Tier 10      (x =  +38: A destra della Gemma di Mana)
+│   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
+│   │
+│   └── SCENARIO D: 6 ICONE STANDARD (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):
+│       ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│       ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
+│       └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
 │
 └── 10 - Alerts (y = +105, sopra i Proc)
     └── Alert - Hot Streak (text: alert "HOT STREAK! / PYROBLAST READY!" font expressway)
@@ -191,10 +208,10 @@ Per compilare la stringa WeakAuras ed eseguire tutti i test di validazione sinta
 # 1. Rigenera la stringa compressa WA4 (!WA:1!) in IMPORT_STRING.txt
 python generate_import_string.py
 
-# 2. Esegui la suite di test sulla logica e sul simulatore Hot Streak
-python scratch/test_hotstreak_logic.py
+# 2. Esegui la suite di test completa sul layout T8/T10 e sui blocchi Lua
+python scratch/test_t8_t10_full.py
 
-# 3. Esegui il validatore di sintassi Lua per tutti i moduli
+# 3. Esegui il validatore di sintassi Lua per tutti i moduli addon
 python scratch/test_lua.py
 ```
 

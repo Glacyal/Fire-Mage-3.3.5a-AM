@@ -611,29 +611,221 @@ SHARED_T8_INIT_LUA = """function()
         return "READY", 0, 0, icon, true
     end
 
+    _G.FMHUD_T10_SetIDs = {
+        -- 251 Normal (Bloodmage's Regalia)
+        [50278] = true, -- Head
+        [50279] = true, -- Shoulders
+        [50275] = true, -- Chest
+        [50277] = true, -- Legs
+        [50276] = true, -- Hands
+        -- 264 Sanctified (Sanctified Bloodmage's Regalia)
+        [51283] = true, -- Head
+        [51284] = true, -- Shoulders
+        [51280] = true, -- Chest
+        [51282] = true, -- Legs
+        [51281] = true, -- Hands
+        -- 277 Heroic Sanctified (Sanctified Bloodmage's Regalia)
+        [51303] = true, -- Head
+        [51304] = true, -- Shoulders
+        [51300] = true, -- Chest
+        [51302] = true, -- Legs
+        [51301] = true, -- Hands
+    }
+
+    _G.FMHUD_T10_State = _G.FMHUD_T10_State or { lastStart = 0, lastEnd = 0, isProc = false, isRingProc = false }
+
+    _G.FMHUD_CheckT10Equipped = function()
+        local now = GetTime()
+        if _G.FMHUD_T10_EquipCache and (now - _G.FMHUD_T10_EquipCache.time < 0.3) then
+            return _G.FMHUD_T10_EquipCache.isEquipped
+        end
+
+        -- Check 1: Active buff on player (70753 "Pushing the Limit" / 72416 "Frostforged Sage" / etc.)
+        for i = 1, 40 do
+            local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+            if not name then break end
+            if spellId == 70753 or spellId == 72416 or name == "Frostforged Sage" or name == "Saggio della Forgia del Gelo" or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and name:find("T10 2P")) then
+                _G.FMHUD_T10_LastSeen = now
+                _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+                return true
+            end
+        end
+
+        -- Check 2: Known Item IDs
+        local count = 0
+        local slots = { 1, 3, 5, 7, 10 }
+        for _, s in ipairs(slots) do
+            local id = GetInventoryItemID("player", s)
+            if id and _G.FMHUD_T10_SetIDs[id] then
+                count = count + 1
+            end
+        end
+        if count >= 2 then
+            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        -- Check 3: Tooltip scan on equipped armor
+        local ttCount = 0
+        local tt = _G.FMHUD_ScanTT
+        if not tt then
+            tt = CreateFrame("GameTooltip", "FMHUD_ScanTT", nil, "GameTooltipTemplate")
+            tt:SetOwner(WorldFrame, "ANCHOR_NONE")
+            _G.FMHUD_ScanTT = tt
+        end
+        for _, s in ipairs(slots) do
+            local id = GetInventoryItemID("player", s)
+            if id then
+                tt:ClearLines()
+                tt:SetInventoryItem("player", s)
+                for j = 1, tt:NumLines() do
+                    local line = _G["FMHUD_ScanTTTextLeft"..j]
+                    local text = line and line:GetText()
+                    if text then
+                        local lt = text:lower()
+                        if lt:find("bloodmage") or lt:find("mago del sangue") or lt:find("pushing the limit") or lt:find("oltre il limite") or lt:find("frostforged") then
+                            ttCount = ttCount + 1
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        if ttCount >= 2 then
+            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        -- Check 4: Recent buff within 60s
+        if _G.FMHUD_T10_LastSeen and (now - _G.FMHUD_T10_LastSeen < 60) then
+            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        _G.FMHUD_T10_EquipCache = { time = now, isEquipped = false }
+        return false
+    end
+
+    _G.FMHUD_CheckT10 = function()
+        local isEquipped = _G.FMHUD_CheckT10Equipped()
+        local now = GetTime()
+        local state = _G.FMHUD_T10_State
+        local defIcon = GetSpellTexture(70753) or "Interface\\\\Icons\\\\Spell_Frost_FrostWard"
+        local icon = defIcon
+
+        -- 1. Controllo buff attivo T10 2P (SpellID 70753 / 72416)
+        local foundBuff = false
+        local remBuff = 0
+        local durBuff = 5
+        local isRingProc = false
+        for i = 1, 40 do
+            local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+            if not name then break end
+            if spellId == 70753 or spellId == 72416 or name == "Frostforged Sage" or name == "Saggio della Forgia del Gelo" or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and name:find("T10 2P")) then
+                foundBuff = true
+                if spellId == 72416 or name == "Frostforged Sage" or name == "Saggio della Forgia del Gelo" then
+                    isRingProc = true
+                end
+                durBuff = (duration and duration > 0) and duration or (isRingProc and 10 or 5)
+                remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
+                if bIcon then icon = bIcon end
+                _G.FMHUD_T10_LastSeen = now
+                break
+            end
+        end
+
+        if foundBuff then
+            if not state.isProc or (now - state.lastStart > durBuff + 1) then
+                state.lastStart = now - (durBuff - remBuff)
+                state.isProc = true
+                state.isRingProc = isRingProc
+            end
+            return "ACTIVE", remBuff, durBuff, icon, true
+        end
+
+        if state.isProc then
+            state.isProc = false
+        end
+
+        if not isEquipped then
+            return "NONE", 0, 0, defIcon, false
+        end
+
+        -- 2. ICD per proc anello se applicabile (60s)
+        if state.isRingProc and state.lastStart > 0 then
+            local elapsed = now - state.lastStart
+            if elapsed < 60 then
+                local remICD = 60 - elapsed
+                return "ICD", remICD, 60, icon, true
+            end
+        end
+
+        -- 3. Pronto
+        return "READY", 0, 0, icon, true
+    end
+
     _G.FMHUD_UpdateUtilityRowPositions = function()
         if not WeakAuras or not WeakAuras.regions then return end
         local group = WeakAuras.regions["Fire Mage 3.3.5a AM"] and WeakAuras.regions["Fire Mage 3.3.5a AM"].region
         if not group then return end
 
-        local is7 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
+        local hasT8 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
+        local hasT10 = _G.FMHUD_CheckT10Equipped and _G.FMHUD_CheckT10Equipped()
 
-        local layout = is7 and {
-            ["05 - Trinket 1"]    = -114,
-            ["05 - Trinket 2"]    = -76,
-            ["06 - Cloak"]        = -38,
-            ["06 - Tier 8"]       = 0,
-            ["06 - Mana Gem"]     = 38,
-            ["06 - Combustion"]   = 76,
-            ["06 - Mirror Image"] = 114,
-        } or {
-            ["05 - Trinket 1"]    = -110,
-            ["05 - Trinket 2"]    = -66,
-            ["06 - Cloak"]        = -22,
-            ["06 - Mana Gem"]     = 22,
-            ["06 - Combustion"]   = 66,
-            ["06 - Mirror Image"] = 110,
-        }
+        local layout, targetW
+        if hasT8 and hasT10 then
+            -- Scenario A: 8 Componenti (T8 + T10 contemporaneamente)
+            -- Compattazione riga a 26px, passo 33px, larghezza totale 256px sotto la barra centrale da 264px
+            targetW = 26
+            layout = {
+                ["05 - Trinket 1"]    = -115,
+                ["05 - Trinket 2"]    = -82,
+                ["06 - Cloak"]        = -49,
+                ["06 - Tier 8"]       = -16,
+                ["06 - Mana Gem"]     = 16,
+                ["06 - Tier 10"]      = 49,
+                ["06 - Combustion"]   = 82,
+                ["06 - Mirror Image"] = 115,
+            }
+        elseif hasT8 then
+            -- Scenario B: 7 Componenti (Solo T8)
+            -- Larghezza 28px, passo 38px, T8 tra Mantello e Gemma a x = 0
+            targetW = 28
+            layout = {
+                ["05 - Trinket 1"]    = -114,
+                ["05 - Trinket 2"]    = -76,
+                ["06 - Cloak"]        = -38,
+                ["06 - Tier 8"]       = 0,
+                ["06 - Mana Gem"]     = 38,
+                ["06 - Combustion"]   = 76,
+                ["06 - Mirror Image"] = 114,
+            }
+        elseif hasT10 then
+            -- Scenario C: 7 Componenti (Solo T10)
+            -- Larghezza 28px, passo 38px, Gemma al centro a x = 0 e T10 a destra a x = +38
+            targetW = 28
+            layout = {
+                ["05 - Trinket 1"]    = -114,
+                ["05 - Trinket 2"]    = -76,
+                ["06 - Cloak"]        = -38,
+                ["06 - Mana Gem"]     = 0,
+                ["06 - Tier 10"]      = 38,
+                ["06 - Combustion"]   = 76,
+                ["06 - Mirror Image"] = 114,
+            }
+        else
+            -- Scenario D: 6 Componenti (Ne' T8 ne' T10, standard 6 icone simmetriche)
+            -- Larghezza 28px, passo 44px
+            targetW = 28
+            layout = {
+                ["05 - Trinket 1"]    = -110,
+                ["05 - Trinket 2"]    = -66,
+                ["06 - Cloak"]        = -22,
+                ["06 - Mana Gem"]     = 22,
+                ["06 - Combustion"]   = 66,
+                ["06 - Mirror Image"] = 110,
+            }
+        end
 
         for id, targetX in pairs(layout) do
             local regObj = WeakAuras.regions[id]
@@ -643,6 +835,10 @@ SHARED_T8_INIT_LUA = """function()
                 if not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-54)) > 0.5) then
                     r:ClearAllPoints()
                     r:SetPoint("CENTER", group, "CENTER", targetX, -54)
+                end
+                if r.GetWidth and math.abs(r:GetWidth() - targetW) > 0.5 then
+                    r:SetWidth(targetW)
+                    r:SetHeight(targetW)
                 end
             end
         end
@@ -665,6 +861,7 @@ SHARED_T8_INIT_LUA = """function()
         f:SetScript("OnEvent", function(self, event, unit)
             if event == "UNIT_AURA" and unit ~= "player" then return end
             _G.FMHUD_T8_EquipCache = nil
+            _G.FMHUD_T10_EquipCache = nil
             _G.FMHUD_UpdateUtilityRowPositions()
         end)
         _G.FMHUD_LayoutFrame = f
@@ -696,12 +893,12 @@ def make_t8_custom_text() -> str:
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
     if state == "ACTIVE" then
         if LCG and aura_env and aura_env.region then
-            LCG.PixelGlow_Start(aura_env.region, {{1, 0.85, 0.1, 1}}, 8, 0.25, 10, 2)
+            LCG.PixelGlow_Start(aura_env.region, {{1, 0.85, 0.1, 1}}, 8, 0.25, 10, 2, 0, 0, false, "FMHUD_T8_GLOW")
         end
         return string.format("|cFFFFFF00%.1fs|r", rem)
     else
         if LCG and aura_env and aura_env.region then
-            LCG.PixelGlow_Stop(aura_env.region)
+            LCG.PixelGlow_Stop(aura_env.region, "FMHUD_T8_GLOW")
         end
         if state == "ICD" and rem > 0.1 then
             if rem >= 60 then
@@ -739,6 +936,65 @@ def make_t8_custom_icon() -> str:
     end
     local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
     return icon or GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
+end"""
+
+def make_t10_custom_text() -> str:
+    """Genera la closure Lua per il testo descrittivo del Tier 10 2P (%c), con pixel glow su proc attivo e timer ICD."""
+    return f"""function()
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {{0.3, 0.8, 1.0, 1}}, 8, 0.25, 10, 2, 0, 0, false, "FMHUD_T10_GLOW")
+        end
+        return string.format("|cFFFFFF00%.1fs|r", rem)
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region, "FMHUD_T10_GLOW")
+        end
+        if state == "ICD" and rem > 0.1 then
+            if rem >= 60 then
+                local m = math.floor(rem / 60)
+                local s = math.floor(rem % 60)
+                return string.format("%d:%02d", m, s)
+            else
+                return string.format("%.0f", rem)
+            end
+        end
+        return ""
+    end
+end"""
+
+def make_t10_custom_duration() -> str:
+    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per il Tier 10 2P."""
+    return f"""function()
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    if (state == "ACTIVE" or state == "ICD") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end"""
+
+def make_t10_custom_icon() -> str:
+    """Genera la closure Lua per l'icona del Tier 10 2P (Pushing the Limit / Frostforged Sage)."""
+    return f"""function()
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    return icon or GetSpellTexture(70753) or "Interface\\\\Icons\\\\Spell_Frost_FrostWard"
 end"""
 
 SHARED_FM_CHECK_LUA = """function(event, ...)
@@ -2910,6 +3166,61 @@ end"""
                             "anchorYOffset": -1,
                         }
                     ),
+                ],
+            },
+
+            # =================================================================
+            # 06 - TIER 10 (Right of Mana Gem - Frostforged Sage / Pushing the Limit)
+            # Active when >= 2 pieces of T10 equipped (12% Haste / +285 SP)
+            # =================================================================
+            {
+                "id": "06 - Tier 10",
+                "uid": "FMHUD_TIER10",
+                "parent": "Fire Mage 3.3.5a AM",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 49,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\Spell_Frost_FrostWard",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_t10_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "update",
+                            "custom": f"""function(event, ...)
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    return isEquipped
+end""",
+                            "customDuration": make_t10_custom_duration(),
+                            "customIcon": make_t10_custom_icon(),
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    if not _G.FMHUD_T8_InitDone then return true end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    return not isEquipped
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 

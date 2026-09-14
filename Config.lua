@@ -263,4 +263,35 @@ FireMageHUD_Config = {
             [45358] = true, -- Guanti
         },
     },
+
+    -- ---------------------------------------------------------------------
+    -- 10. TIER 10 2-PIECE BONUS / FROSTFORGED SAGE
+    -- ---------------------------------------------------------------------
+    Tier10 = {
+        BuffID     = 70753, -- Pushing the Limit (+12% Haste per 5s) / Frostforged Sage
+        AltBuffID  = 72416, -- Frostforged Sage (+285 SP, 10s durata, 60s ICD)
+        Duration   = 5.0,   -- Durata buff base (5s T10 2P, 10s ring)
+        InternalCD = 0,     -- 0s per T10 2P (60s se proc anello ICC)
+        Icon       = "Interface\\Icons\\Spell_Frost_FrostWard",
+        SetPieces  = {
+            -- 251 Normal (Regalia del Mago del Sangue)
+            [50278] = true, -- Elmo
+            [50279] = true, -- Spalle
+            [50275] = true, -- Torso
+            [50277] = true, -- Gambe
+            [50276] = true, -- Guanti
+            -- 264 Santificato (Regalia Santificata del Mago del Sangue)
+            [51283] = true, -- Elmo
+            [51284] = true, -- Spalle
+            [51280] = true, -- Torso
+            [51282] = true, -- Gambe
+            [51281] = true, -- Guanti
+            -- 277 Eroico Santificato (Regalia Santificata del Mago del Sangue)
+            [51303] = true, -- Elmo
+            [51304] = true, -- Spalle
+            [51300] = true, -- Torso
+            [51302] = true, -- Gambe
+            [51301] = true, -- Guanti
+        },
+    },
 }

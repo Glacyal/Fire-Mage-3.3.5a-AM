@@ -34,22 +34,34 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale = 1.2, yOffset = -190)
 │
 ├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
 │   │
-│   ├── Modalità 6 Icone (< 2 Pezzi T8 Equipaggiati - Spaziatura 44px):
-│   │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   │   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│   │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+│   ├── Scenario A: 8 Icone Compattate a 26px (Entrambi T8 >= 2P e T10 >= 2P, passo ~33px):
+│   │   ├── 05 - Trinket 1    (x = -115: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP per 15s con Glow dorato + Swipe ICD)
+│   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
+│   │   ├── 06 - Tier 10      (x =  +49: Frostforged Sage / Haste 12% con Glow ciano)
+│   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
-│   └── Modalità 7 Icone Ristrette (>= 2 Pezzi T8 Equipaggiati - Spaziatura 38px):
-│       ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│       ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│       ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│       ├── 06 - Tier 8       (x =    0: Praxis +350 SP per 15s con Glow dorato + Swipe ICD 30s)
-│       ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│       ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
-│       └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
+│   ├── Scenario B: 7 Icone T8 (Solo T8 >= 2P, no T10 - 28x28px, passo 38px, T10 nascosto):
+│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
+│   │   ├── 06 - Tier 8       (x =    0: Centrato tra Mantello e Gemma di Mana)
+│   │   └── 06 - Mana Gem     (x =  +38) | 06 - Combustion (x = +76) | 06 - Mirror Image (x = +114)
+│   │
+│   ├── Scenario C: 7 Icone T10 (Solo T10 >= 2P, no T8 - 28x28px, passo 38px, T8 nascosto):
+│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
+│   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
+│   │   ├── 06 - Tier 10      (x =  +38: A destra della Gemma di Mana)
+│   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
+│   │
+│   └── Scenario D: 6 Icone Standard (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):
+│       ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
+│       ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
+│       └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
 │
 └── 10 - Alerts (y = +105, sopra i Proc)
     └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!")
