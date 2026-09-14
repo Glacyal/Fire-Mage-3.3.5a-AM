@@ -39,17 +39,20 @@ FireMageHUD_Config = {
     },
 
     -- ---------------------------------------------------------------------
-    -- 1B. BARRA HOT STREAK (Sotto Mana Bar, 2 Segmenti, no testo)
+    -- 1B. BARRA HOT STREAK (Sotto Mana Bar a y = -25, 264x7px, no testo)
+    -- Dinamica: 1° critico illumina metà barra a sx (50%), al 2° critico
+    -- i due segmenti diventano un'unica barra continua da 264px con swipe 10s!
     -- ---------------------------------------------------------------------
     HotStreakBar = {
         Width = 264,
         Height = 7,
-        SegmentWidth = 130,
-        SegmentHeight = 5,
+        HalfWidth = 130,     -- Metà barretta 50% sul 1° critico
+        InnerHeight = 5,
         Colors = {
-            Segment1   = { r = 1.00, g = 0.55, b = 0.00, a = 1.0 }, -- Ambra / Arancione vivo (Persistente)
-            Segment2   = { r = 1.00, g = 0.35, b = 0.00, a = 1.0 }, -- Rosso fuoco (Proc 10s)
-            Background = { r = 0.05, g = 0.05, b = 0.05, a = 0.85 },
+            FirstCrit  = { r = 1.00, g = 0.55, b = 0.00, a = 1.0 }, -- Ambra / Arancio vivo (1° critico persistente)
+            ProcBar    = { r = 1.00, g = 0.35, b = 0.00, a = 1.0 }, -- Rosso fuoco / Arancio acceso (Proc 10s unificato)
+            Glow       = { r = 1.00, g = 0.60, b = 0.00, a = 1.0 }, -- Pixel Glow dorato/arancio durante proc
+            Background = { r = 0.05, g = 0.05, b = 0.05, a = 0.85 }, -- Sfondo scuro cornice
         },
     },
 
@@ -215,20 +218,7 @@ FireMageHUD_Config = {
     },
 
     -- ---------------------------------------------------------------------
-    -- 7. SMART LIVING BOMB TARGET ASSISTANT (Modulo Destro Indipendente)
-    -- ---------------------------------------------------------------------
-    SmartLivingBomb = {
-        Enabled      = true,
-        MedMin       = 40,   -- Soglia minima HP Medi (%) - Fascia 1: Priorità Massima
-        MedMax       = 70,   -- Soglia massima HP Medi (%) - Fascia 1: Priorità Massima
-        HighMax      = 100,  -- Soglia massima HP Alti (%) - Fascia 2: Seconda Scelta
-        LowMin       = 0,    -- Soglia minima HP Bassi (%) - Fascia 3: Terza Scelta
-        MaxEntries   = 5,    -- Numero massimo di bersagli visualizzati nell'elenco
-        OnlyInCombat = false -- Se true, mostra il pannello solo durante il combattimento
-    },
-
-    -- ---------------------------------------------------------------------
-    -- 8. REAL-TIME STATS PANEL (Modulo 12: SP, Crit, Haste, Hit)
+    -- 7. REAL-TIME STATS PANEL (Modulo 12: SP, Crit, Haste, Hit)
     -- ---------------------------------------------------------------------
     Stats = {
         Enabled          = true,
@@ -237,5 +227,14 @@ FireMageHUD_Config = {
         YOffset          = -54,   -- Offset Y relativo al centro dell'HUD
         Width            = 88,
         Height           = 48,
+    },
+
+    -- ---------------------------------------------------------------------
+    -- 8. GEMMA DEL MANA (Mana Gem & Bonus 2 Pezzi T7)
+    -- ---------------------------------------------------------------------
+    ManaGem = {
+        T7BuffID     = 61062, -- Mana Surge (+225 Spell Power per 15s)
+        CooldownItem = 33312, -- Mana Sapphire (2 min CD)
+        ChargesMax   = 3,
     },
 }

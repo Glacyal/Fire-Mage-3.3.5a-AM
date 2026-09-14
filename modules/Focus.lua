@@ -1,7 +1,7 @@
 --- =========================================================================
 --- Fire Mage HUD 3.3.5a — Modulo 04: Focus Magic Monitor
 --- =========================================================================
---- Monitora l'applicazione del buff Focus Magic (x = -182, y = -54):
+--- Monitora l'applicazione del buff Focus Magic (x = -150, y = -14, sopra Stats Panel):
 --- - Durata > 5 minuti: Completamente NASCOSTA per pulizia visiva in combattimento.
 --- - Durata <= 5 minuti: COMPARE automaticamente con countdown e swipe per il rinnovo.
 --- - NON applicato / Scaduto / Bersaglio morto: Icona grigia con avviso rosso "OFF".

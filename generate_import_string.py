@@ -1070,379 +1070,6 @@ def make_managem_custom_icon() -> str:
     return "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
 end"""
 
-SHARED_SMART_LB_CHECK_LUA = """function()
-    _G.FMHUD_SmartLB = _G.FMHUD_SmartLB or {
-        LB_Active  = {},
-        LastUpdate = 0,
-        Slots      = {},
-    }
-
-    if not _G.FMHUD_SmartLB_OnCombatLog then
-        _G.FMHUD_SmartLB_OnCombatLog = function(...)
-            local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-            local lb = _G.FMHUD_SmartLB.LB_Active
-            if not destGUID then return end
-
-            if sourceGUID == UnitGUID("player") then
-                local isLB = (spellName == "Living Bomb" or spellName == "Bomba Vivente" or spellId == 44457 or spellId == 55359 or spellId == 55360)
-                if isLB then
-                    if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" then
-                        lb[destGUID] = { exp = GetTime() + 12.0, name = destName or "Enemy", guid = destGUID }
-                    elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                        lb[destGUID] = nil
-                    end
-                end
-            end
-
-            if subEvent == "UNIT_DIED" or subEvent == "PARTY_KILL" then
-                lb[destGUID] = nil
-            end
-        end
-    end
-
-    if not _G.FMHUD_SmartLB_GetSlotData then
-        _G.FMHUD_SmartLB_GetSlotData = function(slotIndex, customConfig)
-            local now = GetTime()
-            local state = _G.FMHUD_SmartLB
-
-            if (now - (state.LastUpdate or 0)) >= 0.08 or not state.Slots then
-                state.LastUpdate = now
-
-                for guid, data in pairs(state.LB_Active) do
-                    local exp = (type(data) == "table") and data.exp or data
-                    if exp <= now then state.LB_Active[guid] = nil end
-                end
-
-                local cfg = customConfig or {}
-                local globalCfg = _G.FireMageHUD_Config and _G.FireMageHUD_Config.SmartLivingBomb or _G.FMHUD_SmartLB_Config or {}
-                local medMin     = cfg.medMin or globalCfg.MedMin or 40
-                local medMax     = cfg.medMax or globalCfg.MedMax or 70
-                local highMax    = cfg.highMax or globalCfg.HighMax or 100
-                local maxEntries = cfg.maxEntries or globalCfg.MaxEntries or 5
-
-                local seenGUIDs = {}
-                local activeLB = {}
-                local missingLB = {}
-
-                local function inspectUnit(u)
-                    if not UnitExists(u) then return end
-                    if UnitIsDeadOrGhost(u) then return end
-                    if not UnitCanAttack("player", u) or UnitIsFriend("player", u) then return end
-
-                    local guid = UnitGUID(u)
-                    if not guid or seenGUIDs[guid] then return end
-                    seenGUIDs[guid] = true
-
-                    local hp = UnitHealth(u) or 0
-                    local maxHp = UnitHealthMax(u) or 1
-                    if hp <= 0 then return end
-
-                    local pct = (maxHp > 0) and math.floor((hp / maxHp) * 100) or 100
-                    if pct > 100 then pct = 100 end
-                    if pct < 0 then pct = 0 end
-
-                    local name = UnitName(u) or "Enemy"
-                    if name == "" then name = "Enemy" end
-
-                    local hasLB = false
-                    local lbExp = 0
-                    for i = 1, 40 do
-                        local debName, _, _, _, _, _, exp, caster, _, _, debSpellId = UnitDebuff(u, i)
-                        if not debName then break end
-                        if (debName == "Living Bomb" or debName == "Bomba Vivente" or debSpellId == 55360 or debSpellId == 55359 or debSpellId == 44457) and (caster == "player" or not caster) then
-                            hasLB = true
-                            lbExp = (exp and exp > 0) and exp or (now + 12.0)
-                            state.LB_Active[guid] = { exp = lbExp, name = name, guid = guid, unit = u }
-                            break
-                        end
-                    end
-
-                    if not hasLB and state.LB_Active[guid] then
-                        local lbData = state.LB_Active[guid]
-                        local exp = (type(lbData) == "table") and lbData.exp or lbData
-                        if exp > now then
-                            hasLB = true
-                            lbExp = exp
-                        end
-                    end
-
-                    if hasLB then
-                        table.insert(activeLB, { guid = guid, name = name, hpPct = pct, unit = u, hasLB = true, exp = lbExp, tier = 1, isTop = false })
-                    else
-                        table.insert(missingLB, { guid = guid, name = name, hpPct = pct, unit = u, hasLB = false, exp = 0, tier = 1, isTop = false })
-                    end
-                end
-
-                inspectUnit("target")
-                inspectUnit("focus")
-                inspectUnit("mouseover")
-                inspectUnit("targettarget")
-                inspectUnit("focustarget")
-                inspectUnit("boss1")
-                inspectUnit("boss2")
-                inspectUnit("boss3")
-                inspectUnit("boss4")
-
-                local numRaid = GetNumRaidMembers()
-                if numRaid and numRaid > 0 then
-                    local limit = math.min(numRaid, 40)
-                    for r = 1, limit do inspectUnit("raid" .. r .. "target") end
-                else
-                    local numParty = GetNumPartyMembers()
-                    if numParty and numParty > 0 then
-                        for p = 1, numParty do inspectUnit("party" .. p .. "target") end
-                    end
-                end
-
-                for guid, lbData in pairs(state.LB_Active) do
-                    if not seenGUIDs[guid] then
-                        local exp = (type(lbData) == "table") and lbData.exp or lbData
-                        local name = (type(lbData) == "table") and lbData.name or "Enemy"
-                        if exp > now then
-                            seenGUIDs[guid] = true
-                            table.insert(activeLB, { guid = guid, name = name, hpPct = 100, unit = nil, hasLB = true, exp = exp, tier = 1, isTop = false })
-                        end
-                    end
-                end
-
-                table.sort(activeLB, function(a, b) return a.exp < b.exp end)
-
-                local tier1_Med = {}
-                local tier2_High = {}
-                local tier3_Low = {}
-                for _, mob in ipairs(missingLB) do
-                    if mob.hpPct >= medMin and mob.hpPct <= medMax then
-                        mob.tier = 1
-                        table.insert(tier1_Med, mob)
-                    elseif mob.hpPct > medMax and mob.hpPct <= highMax then
-                        mob.tier = 2
-                        table.insert(tier2_High, mob)
-                    else
-                        mob.tier = 3
-                        table.insert(tier3_Low, mob)
-                    end
-                end
-
-                table.sort(tier1_Med, function(a, b) return a.hpPct > b.hpPct end)
-                table.sort(tier2_High, function(a, b) return a.hpPct < b.hpPct end)
-                table.sort(tier3_Low, function(a, b) return a.hpPct > b.hpPct end)
-
-                local sortedMissing = {}
-                for _, m in ipairs(tier1_Med) do table.insert(sortedMissing, m) end
-                for _, m in ipairs(tier2_High) do table.insert(sortedMissing, m) end
-                for _, m in ipairs(tier3_Low) do table.insert(sortedMissing, m) end
-
-                if #sortedMissing > 0 then
-                    sortedMissing[1].isTop = true
-                end
-
-                local slots = {}
-                for _, m in ipairs(activeLB) do
-                    if #slots < maxEntries then table.insert(slots, m) end
-                end
-                for _, m in ipairs(sortedMissing) do
-                    if #slots < maxEntries then table.insert(slots, m) end
-                end
-                state.Slots = slots
-            end
-
-            return state.Slots and state.Slots[slotIndex] or nil
-        end
-    end
-
-    if not _G.FMHUD_SmartLB_HasData then
-        _G.FMHUD_SmartLB_HasData = function(customConfig)
-            if UnitInVehicle and UnitInVehicle("player") then return false end
-            if not _G.FMHUD_SmartLB_GetSlotData then return false end
-            local d = _G.FMHUD_SmartLB_GetSlotData(1, customConfig)
-            return d ~= nil
-        end
-    end
-end"""
-
-def make_smart_lb_bg_trigger() -> str:
-    """Mostra lo sfondo e l'intestazione SOLO quando esistono bersagli validi o bombe attive e il player non e in un veicolo."""
-    return f"""function(event, ...)
-    if UnitInVehicle and UnitInVehicle("player") then return false end
-
-    if not _G.FMHUD_SmartLB_Init then
-        local init = {SHARED_SMART_LB_CHECK_LUA}
-        init()
-        _G.FMHUD_SmartLB_Init = true
-    end
-    if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        if _G.FMHUD_SmartLB_OnCombatLog then
-            _G.FMHUD_SmartLB_OnCombatLog(...)
-        end
-    end
-
-    local cfg = aura_env and aura_env.config or {{}}
-    if cfg.onlyInCombat and not UnitAffectingCombat("player") then
-        return false
-    end
-
-    if _G.FMHUD_SmartLB_HasData then
-        return _G.FMHUD_SmartLB_HasData(cfg)
-    end
-    return false
-end"""
-
-def make_smart_lb_bg_untrigger() -> str:
-    """Nasconde lo sfondo e l'intestazione se non ci sono bersagli o bombe attive o se si entra in un veicolo."""
-    return """function(event, ...)
-    if UnitInVehicle and UnitInVehicle("player") then return true end
-
-    local cfg = aura_env and aura_env.config or {}
-    if cfg.onlyInCombat and not UnitAffectingCombat("player") then
-        return true
-    end
-    if _G.FMHUD_SmartLB_HasData then
-        return not _G.FMHUD_SmartLB_HasData(cfg)
-    end
-    return true
-end"""
-
-def make_smart_lb_trigger(slot_index: int) -> str:
-    """Genera il trigger per il singolo slot aurabar dello Smart Living Bomb Assistant."""
-    return f"""function(event, ...)
-    if UnitInVehicle and UnitInVehicle("player") then return false end
-
-    if not _G.FMHUD_SmartLB_Init then
-        local init = {SHARED_SMART_LB_CHECK_LUA}
-        init()
-        _G.FMHUD_SmartLB_Init = true
-    end
-    if event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        if _G.FMHUD_SmartLB_OnCombatLog then
-            _G.FMHUD_SmartLB_OnCombatLog(...)
-        end
-    end
-
-    local cfg = aura_env and aura_env.config
-    local data = _G.FMHUD_SmartLB_GetSlotData and _G.FMHUD_SmartLB_GetSlotData({slot_index}, cfg)
-
-    if aura_env and aura_env.region and not InCombatLockdown() then
-        if not aura_env.targetBtn then
-            local btn = CreateFrame("Button", "FMHUD_SmartLB_Btn_{slot_index}", aura_env.region, "SecureActionButtonTemplate")
-            btn:SetAllPoints(aura_env.region)
-            btn:RegisterForClicks("AnyUp")
-            btn:EnableMouse(true)
-            aura_env.region:EnableMouse(true)
-            aura_env.targetBtn = btn
-        end
-        if data and data.name then
-            pcall(function()
-                aura_env.targetBtn:SetAttribute("type", "macro")
-                aura_env.targetBtn:SetAttribute("macrotext", "/targetexact " .. data.name)
-                aura_env.targetBtn:Show()
-            end)
-        else
-            pcall(function()
-                aura_env.targetBtn:Hide()
-            end)
-        end
-    end
-
-    if aura_env and aura_env.region and data then
-        local r, g, b = 1.0, 0.45, 0.1
-        if not data.hasLB then
-            if data.tier == 1 then
-                r, g, b = 0.2, 0.85, 0.2
-            elseif data.tier == 2 then
-                r, g, b = 0.2, 0.7, 1.0
-            else
-                r, g, b = 0.85, 0.2, 0.2
-            end
-        end
-        if aura_env.region.Color then
-            aura_env.region:Color(r, g, b, 1.0)
-        elseif aura_env.region.SetColor then
-            aura_env.region:SetColor(r, g, b, 1.0)
-        elseif aura_env.region.bar and aura_env.region.bar.SetStatusBarColor then
-            aura_env.region.bar:SetStatusBarColor(r, g, b, 1.0)
-        end
-    end
-
-    if not data then return false end
-    if cfg and cfg.onlyInCombat and not UnitAffectingCombat("player") then
-        return false
-    end
-    return true
-end"""
-
-def make_smart_lb_untrigger(slot_index: int) -> str:
-    """Genera l'untrigger per nascondere la barra se lo slot e vuoto o il player e in un veicolo."""
-    return f"""function(event, ...)
-    if UnitInVehicle and UnitInVehicle("player") then return true end
-
-    local cfg = aura_env and aura_env.config
-    local data = _G.FMHUD_SmartLB_GetSlotData and _G.FMHUD_SmartLB_GetSlotData({slot_index}, cfg)
-    if not data then return true end
-    if cfg and cfg.onlyInCombat and not UnitAffectingCombat("player") then
-        return true
-    end
-    return false
-end"""
-
-def make_smart_lb_duration(slot_index: int) -> str:
-    """Genera la durata dinamica per la barra (12s countdown per [V], statico % HP per [X])."""
-    return f"""function()
-    local data = _G.FMHUD_SmartLB_GetSlotData and _G.FMHUD_SmartLB_GetSlotData({slot_index})
-    if not data then return 0, 0 end
-    if data.hasLB then
-        local rem = (data.exp or 0) - GetTime()
-        if rem > 0 then
-            return 12.0, data.exp
-        end
-        return 0, 0
-    else
-        return (data.hpPct or 0), 100, true
-    end
-end"""
-
-def make_smart_lb_custom_text(slot_index: int) -> str:
-    """Genera il testo per il lato sinistro della barra (%c): [V]/[X] NomeMob * e aggiorna il fontstring a destra."""
-    return f"""function()
-    local data = _G.FMHUD_SmartLB_GetSlotData and _G.FMHUD_SmartLB_GetSlotData({slot_index})
-    if not data then return "" end
-
-    local status = data.hasLB and "|cFF55FF55[V]|r" or "|cFFFF4444[X]|r"
-    local name = data.name or "Enemy"
-    if #name > 10 then
-        name = string.sub(name, 1, 9) .. ".."
-    end
-    local cur = (data.unit and UnitIsUnit(data.unit, "target")) and " |cFFFFFF00*|r" or ""
-
-    if aura_env and aura_env.region and aura_env.region.subRegions then
-        local rightSub = aura_env.region.subRegions[4]
-        if not rightSub or not rightSub.text then
-            for i = 1, #aura_env.region.subRegions do
-                local sr = aura_env.region.subRegions[i]
-                if sr and sr.text and i ~= 3 then
-                    rightSub = sr
-                    break
-                end
-            end
-        end
-        if rightSub and rightSub.text and rightSub.text.SetText then
-            if data.hasLB then
-                local rem = (data.exp or 0) - GetTime()
-                if rem > 0 then
-                    rightSub.text:SetFormattedText("%.1fs", rem)
-                    rightSub.text:SetTextColor(1, 0.9, 0.2, 1)
-                else
-                    rightSub.text:SetText("0.0s")
-                end
-            else
-                rightSub.text:SetFormattedText("%d%%", data.hpPct or 0)
-                rightSub.text:SetTextColor(0.85, 0.85, 0.85, 1)
-            end
-        end
-    end
-
-    return string.format("%s %s%s", status, name, cur)
-end"""
-
 def make_stats_bg_trigger() -> str:
     return """function(event, ...)
     return true
@@ -1607,6 +1234,9 @@ def make_stats_custom_text() -> str:
 end"""
 
 SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
+    -- Frame nativo invisibile dedicato: in WeakAuras 3.3.5a i custom status trigger
+    -- non ricevono COMBAT_LOG_EVENT_UNFILTERED in modo affidabile. Un frame C++ dedicato
+    -- garantisce la cattura al 100% di tutti i colpi e notifica WA via FMHUD_HS_UPDATE.
     _G.FMHUD_HS = _G.FMHUD_HS or {
         streak = 0,
         hasBuff = false,
@@ -1616,6 +1246,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     }
     local hs = _G.FMHUD_HS
 
+    -- Spells valide: solo colpi diretti non-periodici che concorrono al talento Hot Streak
     local QUALIFYING_SPELLS = {
         [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
         [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
@@ -1710,6 +1341,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                 local sourceName = select(5, ...)
                 local sourceFlags = select(6, ...)
 
+                -- Controllo sorgente: GUID player, nome player, o flag COMBATLOG_OBJECT_AFFILIATION_MINE (0x00000001)
                 local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
                 if not isPlayer and sourceFlags and bit and bit.band then
                     if bit.band(sourceFlags, 0x00000001) > 0 then
@@ -1718,6 +1350,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                 end
 
                 if isPlayer then
+                    -- Multi-offset spell: gestisce server con e senza hideCaster (Arg 9/10 vs 10/11)
                     local spellId = select(10, ...)
                     local spellName = select(11, ...)
                     if not isQualifying(spellId, spellName) then
@@ -1726,6 +1359,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                     end
 
                     if isQualifying(spellId, spellName) then
+                        -- De-duplicazione eventi: evita doppi incrementi su multi-target/stesso frame
                         local timestamp = select(1, ...)
                         local destGUID = select(7, ...) or select(8, ...) or ""
                         local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
@@ -1733,15 +1367,18 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                         if hs.lastEventKey ~= eventKey then
                             hs.lastEventKey = eventKey
 
+                            -- Multi-offset critical: supporta core WotLK che passano true booleano o 1 numerico
                             local c18, c19, c20 = select(18, ...)
                             local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)
 
                             if isCrit then
                                 if not hs.hasBuff then
                                     if hs.streak == 0 then
+                                        -- 1° Crit: illumina metà barretta sx (50%) in modo persistente
                                         hs.streak = 1
                                         notifyWA()
                                     else
+                                        -- 2° Crit: i due segmenti diventano una barra unica da 264px con swipe 10s
                                         hs.streak = 2
                                         hs.hasBuff = true
                                         hs.duration = 10.0

@@ -1,7 +1,7 @@
 --- =========================================================================
 --- Fire Mage HUD 3.3.5a — Modulo 03: Arcane Intellect / Brilliance
 --- =========================================================================
---- Monitora la presenza del buff di Intelletto sul giocatore (x = -182, y = +18):
+--- Monitora la presenza del buff di Intelletto sul giocatore (x = -210, y = -14, sopra Stats Panel):
 --- - Riconosce Arcane Intellect, Arcane Brilliance, Dalaran Brilliance e Fel Intelligence.
 --- - Durata > 5 minuti: Completamente NASCOSTA per massima pulizia visiva.
 --- - Durata <= 5 minuti: COMPARE con conto alla rovescia (m:ss giallo, ss rosso).
