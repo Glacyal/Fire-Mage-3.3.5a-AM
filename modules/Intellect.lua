@@ -19,17 +19,33 @@ local IntellectBuffs = {
 function FireMageHUD_IntellectActive_Trigger(event, unit)
     if unit and unit ~= "player" then return false end
     for i = 1, 40 do
-        local name = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
         if not name then break end
         if IntellectBuffs[name] then
-            return true
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return true
+            end
+            return false
         end
     end
     return false
 end
 
 function FireMageHUD_IntellectActive_Untrigger(event, unit)
-    return not FireMageHUD_IntellectActive_Trigger(event, unit)
+    if unit and unit ~= "player" then return false end
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if IntellectBuffs[name] then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return false
+            end
+            return true
+        end
+    end
+    return true
 end
 
 function FireMageHUD_IntellectActive_CustomText()
@@ -50,10 +66,18 @@ function FireMageHUD_IntellectActive_CustomText()
 end
 
 function FireMageHUD_IntellectOFF_Trigger(event, unit)
-    return not FireMageHUD_IntellectActive_Trigger(event, unit)
+    if unit and unit ~= "player" then return false end
+    for i = 1, 40 do
+        local name = UnitBuff("player", i)
+        if not name then break end
+        if IntellectBuffs[name] then
+            return false -- Buff presente -> OFF è disattivato
+        end
+    end
+    return true -- Buff assente -> Mostra OFF
 end
 
 function FireMageHUD_IntellectOFF_Untrigger(event, unit)
-    return FireMageHUD_IntellectActive_Trigger(event, unit)
+    return not FireMageHUD_IntellectOFF_Trigger(event, unit)
 end
 

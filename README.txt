@@ -19,28 +19,31 @@ ISTRUZIONI DI AGGIORNAMENTO IN GIOCO (MOLTO IMPORTANTE):
 --------------------------------------------------------------------------------
 NOVITA' PRINCIPALI:
 --------------------------------------------------------------------------------
-1. PROC TRINKET & MANTELLO CON COUNTDOWN ICD (INTERNAL COOLDOWN):
-   - Trinket (Dying Curse, Sundial of the Exiled, DFO, Phylactery, CTS, Flare, Reign, ecc.)
-     e Mantello (Lightweave Embroidery) ora hanno un comportamento completo a 3 fasi:
-     * FASE 1 - PROC ATTIVO: Pixel Glow dorato animato, swipe circolare e secondi residui (es. 9.8s).
-     * FASE 2 - ICD (CONTO ALLA ROVESCIA RIPROC): Appena il proc scade, il glow si spegne e
-       l'icona mostra i secondi rimanenti in bianco (35, 34, ...) prima che il proc possa riattivarsi!
-     * FASE 3 - READY: Al termine dell'ICD l'icona torna pulita senza testi, pronta a riproccare.
-   - Supporto nativo ai buff/spellId 3.3.5a di Dying Curse (60494) e Sundial (60064).
+1. ENTRAMBI I TRINKET FUNZIONANTI (SLOT 13 E 14) & SWIPE AD OROLOGIO:
+   - Risolto il proc mancato sul secondo trinket (Dying Curse + Sundial of the Exiled).
+     I trinket sono tracciati in modo 100% indipendente con gestione case-insensitive
+     e matching su Spell ID, Item ID e nomi buff 3.3.5a.
+   - Caricamento stile orologio Blizzard nativo ("radial clock swipe") abilitato su tutti
+     i cooldown, sia durante i procs attivi sia durante il countdown dell'ICD prima del riproc.
+   - Fasi del tracciamento:
+     * FASE 1 - PROC ATTIVO: Pixel Glow dorato animato, swipe a orologio e secondi residui (9.8s).
+     * FASE 2 - ICD (RIPROC COUNTDOWN): Glow spento, swipe a orologio e secondi rimanenti (35, 34...).
+     * FASE 3 - READY: Icona pulita, luminosa e pronta al prossimo proc.
 
-2. MOLTEN ARMOR INTELLIGENTE (TIMER SOLO SE SOTTO I 5 MINUTI):
-   - Se Molten Armor ha piu' di 5 minuti residui, l'icona e' pulita senza numeri a schermo.
-   - Se scende a 5 minuti o meno (<= 5m), compare il countdown in giallo (es. 4:52, 3:15).
-   - Se manca del tutto, l'icona diventa grigia desaturata con scritta "OFF" in rosso.
+2. COMBUSTION ATTIVA-ONLY CON NUMERO DI STACK CENTRATO:
+   - L'icona compare SOLO quando Combustion e' attiva. Quando e' in CD o inattiva rimane nascosta.
+   - Mostra il numero di cariche/stack rimanenti (3, 2, 1) grande (dim. 18) al centro dell'icona
+     con Pixel Glow dorato animato. Si nasconde all'istante al consumo dell'ultima carica.
 
-3. NUOVO MODULO ARCANE INTELLECT / ARCANE BRILLIANCE:
-   - Monitora la presenza di Arcane Intellect, Arcane Brilliance, Dalaran Intellect o Fel Intelligence.
-   - Posizionato a sinistra sopra Molten Armor (x = -160, y = +22).
-   - Stessa logica anti-clutter: pulito se > 5m, countdown se <= 5m, avviso rosso "OFF" se manca.
+3. MOLTEN ARMOR E ARCANE INTELLECT NASCOSTI SE > 5 MINUTI:
+   - Schermo pulito in raid: se Molten Armor o Intellect durano piu' di 5 minuti, le icone
+     rimangono COMPLETAMENTE NASCOSTE.
+   - Compaiono con countdown a orologio e minuti:secondi SOLO quando mancano <= 5 minuti.
+   - Se il buff scade o manca del tutto, mostrano l'icona grigia con scritta rossa "OFF".
 
 4. SCORCH / IMPROVED SCORCH:
-   - Debuff monitorato nel gruppo procs con secondi residui (%p).
-   - Colora l'icona in rosso quando mancano <= 5s per ricordarti di rinfrescarlo sul boss.
+   - Debuff monitorato nel gruppo procs con swipe a orologio e secondi residui (%p).
+   - Colora l'icona in rosso quando mancano <= 5s per rinfrescarlo tempestivamente.
 
 5. SCALA AUMENTATA DEL 20% E POSIZIONAMENTO SOPRA LE BARRE:
    - Master scale impostato a 1.2 (+20% di dimensione).

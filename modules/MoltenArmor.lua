@@ -16,13 +16,17 @@
 function FireMageHUD_MoltenArmorActive_Trigger(event, unit)
     if unit and unit ~= "player" then return false end
     
-    -- Scansione buff sul player per Molten Armor (Rank 1, 2, 3 o Nome)
+    -- Mostra Molten Armor SOLO se la durata residua è <= 5 minuti (300 sec)
     local wantedName = GetSpellInfo(43046) or "Molten Armor"
     for i = 1, 40 do
-        local name = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
         if not name then break end
         if name == wantedName or name == "Molten Armor" then
-            return true
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return true
+            end
+            return false
         end
     end
     return false
@@ -32,10 +36,14 @@ function FireMageHUD_MoltenArmorActive_Untrigger(event, unit)
     if unit and unit ~= "player" then return false end
     local wantedName = GetSpellInfo(43046) or "Molten Armor"
     for i = 1, 40 do
-        local name = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
         if not name then break end
         if name == wantedName or name == "Molten Armor" then
-            return false
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return false
+            end
+            return true
         end
     end
     return true

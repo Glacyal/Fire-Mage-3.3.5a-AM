@@ -11,25 +11,23 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 
 ## Novità di Questo Aggiornamento
 
-1. **Trinket & Mantello con Tracking Completo dei Proc & ICD (Internal Cooldown)**:
-   - **Proc Attivo**: Quando il trinket (es. *The Dying Curse*, *Sundial of the Exiled*, *DFO*, *Phylactery*, *Charred Twilight Scale*, ecc.) o l'incantamento del Mantello (*Lightweave Embroidery*) si attivano, l'icona si illumina con un **Pixel Glow dorato animato**, swipe circolare e timer in secondi (`9.7s`).
-   - **Fase ICD (Conto alla rovescia prima del prossimo reproc)**: Non appena il proc termina, il glow si spegne e l'icona mostra un conto alla rovescia in bianco (`35`, `34`, ...) che indica esattamente i secondi mancanti prima che l'effetto possa riattivarsi (ICD di 45s).
-   - **Pronto (Ready)**: Allo scadere dell'ICD l'icona torna pulita senza testi, pronta al prossimo proc.
-   - **Riconoscimento Spell ID Nativo 3.3.5a**: Supporto per *The Dying Curse* (Spell ID 60494, buff "Dying Curse"), *Sundial of the Exiled* (Spell ID 60064, buff "Now is the time!"), e tutti i trinket da caster di WotLK.
+1. **Entrambi i Trinket Funzionanti (Slot 13 e 14) & Animazione a Orologio (Radial Clock Swipe)**:
+   - **Supporto Totale per Entrambi i Trinket**: Risolto il mancato proc sul secondo trinket (es. *The Dying Curse* su Slot 13 e *Sundial of the Exiled* su Slot 14). Riconoscimento garantito al 100% indipendente da maiuscole/minuscole, punteggiatura o spell ID.
+   - **Caricamento Stile Orologio Blizzard (Swipe Radiale)**: Abilitato nativamente (`cooldown: true`, `cooldownSwipe: true`) su tutti i moduli: sia durante la durata del proc attivo sia durante il countdown dell'ICD (Internal Cooldown), l'icona mostra l'animazione rotatoria a orologio oltre ai secondi rimanenti.
+   - **Tracciamento Indipendente**: Slot 13, Slot 14 e Mantello (Slot 15) hanno timer e cooldown interni separati che non interferiscono tra loro anche in caso di procs simultanei.
 
-2. **Molten Armor Intelligente (Soglia 5 Minuti)**:
-   - Mostra il timer di countdown (es. `4:30`) **solo ed esclusivamente se mancano meno di 5 minuti alla scadenza**.
-   - Con durata superiore a 5 minuti, l'icona rimane pulita ed elegante, senza numeri superflui.
-   - Se il buff è assente, l'icona diventa desaturata con avviso rosso **`OFF`**.
+2. **Combustion Attiva-Only con Numero di Stack all'Interno dell'Icona**:
+   - **Visibile Solo se Attiva**: Quando Combustion è pronta o in cooldown, l'icona è **completamente nascosta** per non occupare spazio.
+   - **Numero di Stack Centrato**: Non appena viene attivata, compare nel gruppo dinamico dei Proc mostrando al centro dell'icona il numero di cariche/stack rimanenti (`3`, `2`, `1`) a caratteri grandi (dimensione 18) con **Pixel Glow dorato animato**. Al consumo dell'ultima carica, scompare all'istante.
 
-3. **Nuovo Modulo Arcane Intellect / Arcane Brilliance**:
-   - Monitora la presenza del buff di intelletto (*Arcane Intellect*, *Arcane Brilliance*, *Dalaran Intellect*, *Dalaran Brilliance*, *Fel Intelligence*).
-   - Posizionato nell'ala sinistra sopra Molten Armor (`x = -160, y = +22`).
-   - Stessa logica anti-clutter: icona pulita se > 5 min, timer giallo se $\le 5$ min, e scritta rossa **`OFF`** se manca.
+3. **Molten Armor e Arcane Intellect Nascosti se > 5 Minuti**:
+   - **Nessun Ingombro Visivo**: Se Molten Armor o Intellect (*Arcane Intellect*, *Arcane Brilliance*, *Dalaran Brilliance*, ecc.) hanno più di 5 minuti di durata residua, le icone rimangono **completamente nascoste**.
+   - **Comparsa Automatica <= 5 Minuti**: Appaiono solo quando mancano 5 minuti o meno alla scadenza, mostrando il timer preciso di countdown (`4:30`, `45s`) e l'animazione a orologio.
+   - **Allerta OFF**: Se il buff scade o manca del tutto, compare l'icona desaturata con la scritta rossa **`OFF`**.
 
 4. **Tracciamento Debuff Scorch / Improved Scorch**:
    - Integrato nel gruppo dinamico `01 - Procs` con icona, swipe circolare e secondi residui.
-   - Allerta colorazione rossa quando il debuff scende sotto i 5 secondi, per non perdere mai il +5% critico magico sul boss.
+   - Allerta colorazione rossa quando il debuff scende sotto i 5 secondi.
 
 5. **Scala Aumentata del +20% e Posizionamento Perfetto**:
    - Master scale impostato a **`1.2`** (+20% di grandezza complessiva).
@@ -59,20 +57,20 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 │   ├── Living Bomb (Icona 34x34 + Timer debuff sul Target)
 │   ├── Ignite (Icona 34x34 + Timer debuff sul Target)
 │   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer + Avviso <= 5s)
-│   ├── Combustion (Icona 34x34 con Cooldown Progress)
+│   ├── Combustion (Icona 34x34 attiva-only + Stacks centrati grandezza 18 + Glow dorato)
 │   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
 ├── Ala Sinistra (Colonna Utility Personali - x = -160, 34px di spazio dalla Castbar)
-│   ├── 03 - Arcane Intellect (y = +22, size 32x32: Icona pulita > 5m, Timer <= 5m, OFF rosso)
-│   └── 02 - Molten Armor     (y = -16, size 32x32: Icona pulita > 5m, Timer <= 5m, OFF rosso)
+│   ├── 03 - Arcane Intellect (y = +22, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
+│   └── 02 - Molten Armor     (y = -16, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
 │
 ├── Ala Destra (Colonna Supporto Raid - x = +160, 33px di spazio dalla Castbar)
 │   └── 04 - Focus Magic      (y = -7, size 34x34: Timer attivo o OFF grigio se non assegnato)
 │
 ├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar)
-│   ├── 05 - Trinket 1 (x = -60, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
-│   ├── 05 - Trinket 2 (x = -20, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
-│   ├── 06 - Cloak     (x = +20, size 28x28: Glow attivo + Conto alla rovescia ICD riproc)
+│   ├── 05 - Trinket 1 (x = -60, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 05 - Trinket 2 (x = -20, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Cloak     (x = +20, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
 │   └── 06 - Mana Gem  (x = +60, size 28x28: Cooldown al centro + Cariche in alto a destra)
 │
 ├── Cluster Centrale

@@ -144,56 +144,56 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
         [14] = { lastStart = 0, lastEnd = 0, isProc = false },
         [15] = { lastStart = 0, lastEnd = 0, isProc = false },
     }
-    _G.FMHUD_TrinketDB = _G.FMHUD_TrinketDB or {
-        [40255] = { buff = "Dying Curse", altBuff = "Curse of the Eye", spellId = 60494, icd = 45, dur = 10 },
-        [40682] = { buff = "Now is the time!", altBuff = "Now is the Time!", spellId = 60064, icd = 45, dur = 10 },
-        [50348] = { buff = "Celestial Infusion", spellId = 71601, icd = 45, dur = 20 },
-        [50345] = { buff = "Celestial Infusion", spellId = 71644, icd = 45, dur = 20 },
-        [50360] = { buff = "Siphon of Aethas", spellId = 71605, icd = 90, dur = 20 },
-        [50365] = { buff = "Siphon of Aethas", altBuff = "Aethas' Siphon", spellId = 71636, icd = 90, dur = 20 },
-        [54572] = { buff = "Shared Twilight", spellId = 75473, icd = 45, dur = 15 },
-        [54588] = { buff = "Shared Twilight", spellId = 75466, icd = 45, dur = 15 },
-        [45518] = { buff = "Elusive Power", spellId = 64713, icd = 45, dur = 10 },
-        [47271] = { buff = "Motes of Flame", altBuff = "Pillar of Flame", icd = 2, dur = 0 },
-        [47477] = { buff = "Motes of Flame", altBuff = "Pillar of Flame", icd = 2, dur = 0 },
-        [47182] = { buff = "Motes of Flame", altBuff = "Pillar of Flame", icd = 2, dur = 0 },
-        [47316] = { buff = "Motes of Flame", altBuff = "Pillar of Flame", icd = 2, dur = 0 },
-        [47213] = { buff = "Deadly Precision", spellId = 67669, icd = 45, dur = 10 },
-        [37660] = { buff = "Forged Ember", spellId = 60479, icd = 45, dur = 10 },
-        [40432] = { buff = "Dragon Soul", spellId = 60486, icd = 0, dur = 10 },
-        [37264] = { buff = "Sudden Velocity", spellId = 60492, icd = 45, dur = 10 },
-        [44253] = { buff = "Greatness", spellId = 60233, icd = 45, dur = 15 },
-        [44255] = { buff = "Greatness", spellId = 60235, icd = 45, dur = 15 },
-        [42987] = { buff = "Greatness", spellId = 60234, icd = 45, dur = 15 },
-        [44254] = { buff = "Greatness", spellId = 60233, icd = 45, dur = 15 },
-        [50340] = { buff = "Gathering Tracker", icd = 0, dur = 10 },
-        [50353] = { buff = "Gathering Tracker", icd = 0, dur = 10 },
-        [45466] = { buff = "Velocity", spellId = 64707, icd = 120, dur = 20 },
-        [48724] = { buff = "Chilled Heart", spellId = 67696, icd = 120, dur = 20 },
-        [48722] = { buff = "Volatile Power", spellId = 67702, icd = 120, dur = 20 },
-        [50259] = { buff = "Deadly Precision", spellId = 71563, icd = 180, dur = 20 },
-        [37873] = { buff = "Soul Power", icd = 120, dur = 20 },
-        [50339] = { buff = "Pure Energy", icd = 120, dur = 0 },
-        [50346] = { buff = "Pure Energy", icd = 120, dur = 0 },
-        [47215] = { buff = "Revitalized", icd = 45, dur = 0 },
-        [45490] = { buff = "Pandora's Plea", icd = 45, dur = 10 },
-        [40685] = { buff = "Living Flame", icd = 120, dur = 20 },
-        [50357] = { buff = "Maghia's Misguided Quill", icd = 120, dur = 20 },
+    _G.FMHUD_TrinketDB = {
+        [40255] = { keywords = { "dyingcurse", "curseoftheeye" }, spellIds = { [60494] = true, [60493] = true, [60492] = true }, icd = 45, dur = 10 },
+        [40682] = { keywords = { "nowisthetime", "sundial" }, spellIds = { [60064] = true, [60063] = true }, icd = 45, dur = 10 },
+        [50348] = { keywords = { "celestialinfusion" }, spellIds = { [71601] = true }, icd = 45, dur = 20 },
+        [50345] = { keywords = { "celestialinfusion" }, spellIds = { [71644] = true }, icd = 45, dur = 20 },
+        [50360] = { keywords = { "siphonofaethas", "aethassiphon" }, spellIds = { [71605] = true }, icd = 90, dur = 20 },
+        [50365] = { keywords = { "siphonofaethas", "aethassiphon" }, spellIds = { [71636] = true }, icd = 90, dur = 20 },
+        [54572] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75473] = true }, icd = 45, dur = 15 },
+        [54588] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75466] = true }, icd = 45, dur = 15 },
+        [45518] = { keywords = { "elusivepower" }, spellIds = { [64713] = true }, icd = 45, dur = 10 },
+        [47271] = { keywords = { "motesofflame", "pillarofflame" }, icd = 2, dur = 0 },
+        [47477] = { keywords = { "motesofflame", "pillarofflame" }, icd = 2, dur = 0 },
+        [47182] = { keywords = { "motesofflame", "pillarofflame" }, icd = 2, dur = 0 },
+        [47316] = { keywords = { "motesofflame", "pillarofflame" }, icd = 2, dur = 0 },
+        [47213] = { keywords = { "deadlyprecision" }, spellIds = { [67669] = true }, icd = 45, dur = 10 },
+        [37660] = { keywords = { "forgedember" }, spellIds = { [60479] = true }, icd = 45, dur = 10 },
+        [40432] = { keywords = { "dragonsoul" }, spellIds = { [60486] = true }, icd = 0, dur = 10 },
+        [37264] = { keywords = { "suddenvelocity" }, spellIds = { [60492] = true }, icd = 45, dur = 10 },
+        [44253] = { keywords = { "greatness" }, spellIds = { [60233] = true }, icd = 45, dur = 15 },
+        [44255] = { keywords = { "greatness" }, spellIds = { [60235] = true }, icd = 45, dur = 15 },
+        [42987] = { keywords = { "greatness" }, spellIds = { [60234] = true }, icd = 45, dur = 15 },
+        [44254] = { keywords = { "greatness" }, spellIds = { [60233] = true }, icd = 45, dur = 15 },
+        [50340] = { keywords = { "gatheringtracker" }, icd = 0, dur = 10 },
+        [50353] = { keywords = { "gatheringtracker" }, icd = 0, dur = 10 },
+        [45466] = { keywords = { "velocity" }, spellIds = { [64707] = true }, icd = 120, dur = 20 },
+        [48724] = { keywords = { "chilledheart" }, spellIds = { [67696] = true }, icd = 120, dur = 20 },
+        [48722] = { keywords = { "volatilepower" }, spellIds = { [67702] = true }, icd = 120, dur = 20 },
+        [50259] = { keywords = { "deadlyprecision" }, spellIds = { [71563] = true }, icd = 180, dur = 20 },
+        [37873] = { keywords = { "soulpower" }, icd = 120, dur = 20 },
+        [50339] = { keywords = { "pureenergy" }, icd = 120, dur = 0 },
+        [50346] = { keywords = { "pureenergy" }, icd = 120, dur = 0 },
+        [47215] = { keywords = { "revitalized" }, icd = 45, dur = 0 },
+        [45490] = { keywords = { "pandorasplea" }, icd = 45, dur = 10 },
+        [40685] = { keywords = { "livingflame" }, icd = 120, dur = 20 },
+        [50357] = { keywords = { "maghiasmisguidedquill" }, icd = 120, dur = 20 },
     }
-    _G.FMHUD_CloakBuffs = _G.FMHUD_CloakBuffs or {
-        ["Lightweave"] = true,
-        ["Darkglow"] = true,
-        ["Swordguard"] = true,
-        ["Parachute"] = true,
-        ["Flexweave"] = true,
-        ["Springy Arachnoweave"] = true,
-    }
+    _G.FMHUD_CloakKeywords = { "lightweave", "darkglow", "swordguard", "parachute", "flexweave", "springyarachnoweave" }
+    _G.FMHUD_CloakSpellIds = { [55637] = true, [73849] = true }
 
     local now = GetTime()
     local itemID = GetInventoryItemID("player", slot)
+    if not itemID then
+        local link = GetInventoryItemLink("player", slot)
+        if link then
+            itemID = tonumber(link:match("item:(%d+)"))
+        end
+    end
     local entry = itemID and _G.FMHUD_TrinketDB[itemID]
     local icdState = _G.FMHUD_ICD[slot]
-    local targetICD = (entry and entry.icd) or (slot == 15 and 45) or 45
+    local targetICD = (entry and entry.icd) or 45
     local defaultDur = (entry and entry.dur) or (slot == 15 and 15) or 10
 
     local foundBuff = false
@@ -205,23 +205,47 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
         local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         local isMatch = false
+        local cName = string.lower(name):gsub("[%s%p%c]", "")
+
         if slot == 15 then
-            if name == "Lightweave" or spellId == 55637 or spellId == 73849 or _G.FMHUD_CloakBuffs[name] then
+            if spellId and _G.FMHUD_CloakSpellIds[spellId] then
                 isMatch = true
+            else
+                for _, kw in ipairs(_G.FMHUD_CloakKeywords) do
+                    if cName:find(kw) then
+                        isMatch = true
+                        break
+                    end
+                end
             end
         elseif entry then
-            if (entry.spellId and spellId == entry.spellId)
-               or (entry.altSpellId and spellId == entry.altSpellId)
-               or (entry.buff and string.lower(name) == string.lower(entry.buff))
-               or (entry.altBuff and string.lower(name) == string.lower(entry.altBuff)) then
+            if spellId and entry.spellIds and entry.spellIds[spellId] then
                 isMatch = true
+            elseif entry.keywords then
+                for _, kw in ipairs(entry.keywords) do
+                    if cName:find(kw) then
+                        isMatch = true
+                        break
+                    end
+                end
             end
         else
+            -- Unknown trinket: fallback by checking caster keywords
             local otherSlot = (slot == 13) and 14 or 13
             local otherID = GetInventoryItemID("player", otherSlot)
             local otherEntry = otherID and _G.FMHUD_TrinketDB[otherID]
-            if _G.FMHUD_CasterProcs and _G.FMHUD_CasterProcs[name] and (not otherEntry or (name ~= otherEntry.buff and name ~= otherEntry.altBuff)) then
-                isMatch = true
+            local matchedOther = false
+            if otherEntry and otherEntry.keywords then
+                for _, kw in ipairs(otherEntry.keywords) do
+                    if cName:find(kw) then matchedOther = true break end
+                end
+            end
+            if not matchedOther then
+                if cName:find("dyingcurse") or cName:find("curseoftheeye") or (spellId and spellId == 60494) then
+                    if slot == 13 then isMatch = true end
+                elseif cName:find("nowisthetime") or (spellId and spellId == 60064) then
+                    if slot == 14 then isMatch = true end
+                end
             end
         end
 
@@ -285,7 +309,7 @@ def make_slot_custom_text(slot):
         if LCG and aura_env and aura_env.region then
             LCG.PixelGlow_Stop(aura_env.region)
         end
-        if state == "ICD" or state == "COOLDOWN" then
+        if (state == "ICD" or state == "COOLDOWN") and rem > 0.1 then
             return string.format("%.0f", rem)
         end
         return ""
@@ -296,7 +320,7 @@ def make_slot_custom_duration(slot):
     return f"""function()
     _G.FMHUD_CheckSlot = _G.FMHUD_CheckSlot or {SHARED_SLOT_CHECK_LUA}
     local state, rem, dur = _G.FMHUD_CheckSlot({slot})
-    if state == "ACTIVE" or state == "ICD" or state == "COOLDOWN" then
+    if (state == "ACTIVE" or state == "ICD" or state == "COOLDOWN") and rem > 0 then
         return dur, GetTime() + rem
     end
     return 0, 0
@@ -382,8 +406,11 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Ability_Mage_HotStreak",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -425,7 +452,11 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Ability_Mage_LivingBomb",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -458,7 +489,11 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -491,8 +526,11 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SoulBurn",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -541,7 +579,7 @@ def build_wa_tree():
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
-            # Combustion (Cooldown & Active)
+            # Combustion (Active Only - Shows Stacks Inside Icon)
             {
                 "id": "Combustion",
                 "uid": "FMHUD_COMBUSTION",
@@ -553,17 +591,22 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "spell",
-                            "event": "Cooldown Progress (Spell)",
-                            "spellName": 11129,
-                            "realSpellName": "Combustion",
-                            "use_spellName": True,
-                            "genericShowOn": "showAlways",
-                            "use_genericShowOn": True,
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": ["Combustion"],
+                            "auraspellids": [11129, 28682, 29977],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": True,
                         },
                         "untrigger": {}
                     },
@@ -571,7 +614,16 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%s", justify="CENTER", anchor_point="CENTER", font_size=18),
+                    {
+                        "type": "subglow",
+                        "glow": True,
+                        "glowType": "Pixel",
+                        "glowLines": 8,
+                        "glowFrequency": 0.25,
+                        "glowLength": 10,
+                        "glowThickness": 2,
+                    }
                 ],
             },
             # Molten Fury (Target <= 35% HP)
@@ -623,7 +675,7 @@ def build_wa_tree():
                     "Molten Armor - OFF"
                 ],
             },
-            # Molten Armor Active (Timer only shown when <= 5 minutes!)
+            # Molten Armor Active (Appears ONLY when <= 5 minutes! Otherwise HIDDEN)
             {
                 "id": "Molten Armor - Active",
                 "uid": "FMHUD_MA_ACTIVE",
@@ -635,20 +687,25 @@ def build_wa_tree():
                 "displayIcon": "Interface\\Icons\\Spell_Fire_Incinerate",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": """function()
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
         if not name then break end
         if name == "Molten Armor" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 0 and rem <= 300 then
+            if rem > 60 then
                 local m = math.floor(rem / 60)
                 local s = math.floor(rem % 60)
                 return string.format("|cFFFFFF00%d:%02d|r", m, s)
+            elseif rem > 0 then
+                return string.format("|cFFFF4444%.0fs|r", rem)
             end
-            return ""
         end
     end
     return ""
@@ -656,14 +713,51 @@ end""",
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "aura2",
-                            "unit": "player",
-                            "auranames": ["Molten Armor"],
-                            "useName": True,
-                            "debuffType": "HELPFUL",
-                            "matchesShowOn": "showOnActive",
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "custom": """function(event, ...)
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if name == "Molten Armor" then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return true
+            end
+            return false
+        end
+    end
+    return false
+end""",
+                            "customDuration": """function()
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if name == "Molten Armor" then
+            return duration or 1800, expirationTime
+        end
+    end
+    return 0, 0
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if name == "Molten Armor" then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return false
+            end
+            return true
+        end
+    end
+    return true
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
@@ -721,7 +815,7 @@ end""",
                     "Arcane Intellect - OFF"
                 ],
             },
-            # Arcane Intellect Active (Timer only shown when <= 5 minutes!)
+            # Arcane Intellect Active (Appears ONLY when <= 5 minutes! Otherwise HIDDEN)
             {
                 "id": "Arcane Intellect - Active",
                 "uid": "FMHUD_AI_ACTIVE",
@@ -733,9 +827,44 @@ end""",
                 "displayIcon": "Interface\\Icons\\Spell_Holy_MagicalSentry",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": """function()
+    local b = {
+        ["Arcane Intellect"] = true,
+        ["Arcane Brilliance"] = true,
+        ["Dalaran Intellect"] = true,
+        ["Dalaran Brilliance"] = true,
+        ["Fel Intelligence"] = true,
+    }
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if b[name] then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 60 then
+                local m = math.floor(rem / 60)
+                local s = math.floor(rem % 60)
+                return string.format("|cFFFFFF00%d:%02d|r", m, s)
+            elseif rem > 0 then
+                return string.format("|cFFFF4444%.0fs|r", rem)
+            end
+        end
+    end
+    return ""
+end""",
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "custom": """function(event, ...)
     local b = {
         ["Arcane Intellect"] = true,
         ["Arcane Brilliance"] = true,
@@ -749,32 +878,54 @@ end""",
         if b[name] then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 0 and rem <= 300 then
-                local m = math.floor(rem / 60)
-                local s = math.floor(rem % 60)
-                return string.format("|cFFFFFF00%d:%02d|r", m, s)
+                return true
             end
-            return ""
+            return false
         end
     end
-    return ""
+    return false
 end""",
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "aura2",
-                            "unit": "player",
-                            "auranames": [
-                                "Arcane Intellect",
-                                "Arcane Brilliance",
-                                "Dalaran Intellect",
-                                "Dalaran Brilliance",
-                                "Fel Intelligence"
-                            ],
-                            "useName": True,
-                            "debuffType": "HELPFUL",
-                            "matchesShowOn": "showOnActive",
+                            "customDuration": """function()
+    local b = {
+        ["Arcane Intellect"] = true,
+        ["Arcane Brilliance"] = true,
+        ["Dalaran Intellect"] = true,
+        ["Dalaran Brilliance"] = true,
+        ["Fel Intelligence"] = true,
+    }
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if b[name] then
+            return duration or 3600, expirationTime
+        end
+    end
+    return 0, 0
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    local b = {
+        ["Arcane Intellect"] = true,
+        ["Arcane Brilliance"] = true,
+        ["Dalaran Intellect"] = true,
+        ["Dalaran Brilliance"] = true,
+        ["Fel Intelligence"] = true,
+    }
+    for i = 1, 40 do
+        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if b[name] then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 and rem <= 300 then
+                return false
+            end
+            return true
+        end
+    end
+    return true
+end"""
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
@@ -850,7 +1001,11 @@ end""",
                 "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
                 "auto": True,
                 "color": [1, 1, 1, 1],
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "triggers": {
                     1: {
                         "trigger": {
@@ -1064,8 +1219,11 @@ end"""
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
+                "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": make_slot_custom_text(13),
                 "triggers": {
@@ -1074,7 +1232,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
     return true
 end""",
@@ -1108,8 +1266,11 @@ end"""
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
+                "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": make_slot_custom_text(14),
                 "triggers": {
@@ -1118,7 +1279,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
     return true
 end""",
@@ -1152,8 +1313,11 @@ end"""
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
+                "cooldown": True,
                 "cooldownSwipe": True,
                 "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": make_slot_custom_text(15),
                 "triggers": {
@@ -1162,7 +1326,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_AURA,SPELL_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
     return true
 end""",
@@ -1197,7 +1361,11 @@ end"""
                 "width": 28,
                 "height": 28,
                 "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
+                "cooldown": True,
                 "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
                 "customTextUpdate": "update",
                 "customText": """function()
     local c = GetItemCount(33312, nil, true) or 0
