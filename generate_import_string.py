@@ -1795,6 +1795,9 @@ def build_wa_tree() -> dict:
             "yOffset": -190,
             "anchorPoint": "CENTER",
             "selfPoint": "CENTER",
+            "groupIcon": "Interface\\Icons\\Spell_Fire_FlameBolt",
+            "displayIcon": "Interface\\Icons\\Spell_Fire_FlameBolt",
+            "icon": "Interface\\Icons\\Spell_Fire_FlameBolt",
             "controlledChildren": [
                 "01 - Procs",
                 "02 - Molten Armor",

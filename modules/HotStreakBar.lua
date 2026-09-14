@@ -168,3 +168,4 @@ function FireMageHUD_HotStreak_Segment2()
     end
     return false, 0, 10.0
 end
+
