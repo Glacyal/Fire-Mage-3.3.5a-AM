@@ -51,6 +51,14 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
    - **Castbar con Icona a Sinistra**: Visualizza l'icona della magia in corso di lancio (cast o channel come Blizzard/Evocation) sul bordo sinistro della barra, con nome spell a sinistra, tempo rimanente a destra (`5.5`) e gradiente azzurro/ciano Blizzard.
    - **Allerta Mana <= 20%**: La barra del mana diventa automaticamente **Rossa** quando scende a $\le 20\%$, mentre rimane del colore blu abituale tra il 20% e il 100%.
 
+10. **Timer Procs con Allerta Rossa in Scadenza (Simile a Scorch)**:
+    - Tutti i proc e debuff del gruppo `01 - Procs` ora condividono lo stesso comportamento di Scorch:
+      - **Hot Streak**: Quando scende sotto i 3s (`<= 3s`), il timer diventa **rosso acceso** con decimali (`|cFFFF4444%.1fs|r`), altrimenti bianco intero (`%.0fs`).
+      - **Clearcasting / Lancio Limpido**: Quando scende sotto i 4s (`<= 4s`), il timer diventa **rosso** con decimali, altrimenti bianco intero.
+      - **Living Bomb**: Quando mancano 3s (`<= 3s`) all'esplosione, il conto alla rovescia diventa **rosso** con decimali per preparare il refresh immediato post-esplosione senza clippare.
+      - **Ignite**: Quando scende sotto 1.5s (`<= 1.5s`), il timer diventa **rosso** con decimali per avvertire che sta per cadere il debuff.
+      - **Scorch / Improved Scorch**: Confermato a `<= 5s` in rosso acceso.
+
 ---
 
 ## Come Aggiornare in Gioco (30 Secondi)
@@ -71,10 +79,11 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le barre)
 │
 ├── 01 - Procs (Dynamic Group orizzontale, y = +44 - Auto-allineato sopra la Castbar)
-│   ├── Hot Streak (Icona 34x34 + Timer + Glow Pixel dorato)
-│   ├── Living Bomb (Icona 34x34 + Timer debuff sul Target)
-│   ├── Ignite (Icona 34x34 + Timer debuff sul Target)
-│   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer + Avviso <= 5s)
+│   ├── Hot Streak (Icona 34x34 + Timer rosso <= 3s + Glow Pixel dorato)
+│   ├── Clearcasting (Icona 34x34 + Timer rosso <= 4s + Glow Pixel dorato)
+│   ├── Living Bomb (Icona 34x34 + Timer rosso <= 3s per refresh post-boom)
+│   ├── Ignite (Icona 34x34 + Timer rosso <= 1.5s)
+│   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer rosso <= 5s)
 │   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
 ├── Colonna Buff a Sinistra (x = -182, 34px dalla Castbar - 3 icone 32x32 una sotto l'altra)

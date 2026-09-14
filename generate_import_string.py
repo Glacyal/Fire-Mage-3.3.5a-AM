@@ -891,12 +891,34 @@ def build_wa_tree():
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" or string.find(name, "Hot Streak") or string.find(name, "Buona") then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 3 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.0fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
                             "type": "aura2",
                             "unit": "player",
-                            "auranames": ["Hot Streak"],
+                            "auranames": [
+                                "Hot Streak",
+                                "48108",
+                                "Buona sorte"
+                            ],
                             "useName": True,
                             "debuffType": "HELPFUL",
                             "matchesShowOn": "showOnActive",
@@ -908,7 +930,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                     {
                         "type": "subglow",
                         "glow": True,
@@ -937,6 +959,24 @@ def build_wa_tree():
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if spellId == 12536 or name == "Clearcasting" or name == "Arcane Concentration" or name == "Lancio limpido" or name == "Concentrazione Arcana" or string.find(name, "Clearcasting") or string.find(name, "Limpido") or string.find(name, "Concentrat") then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 4 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.0fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
@@ -946,6 +986,7 @@ def build_wa_tree():
                                 "Clearcasting",
                                 "Arcane Concentration",
                                 "Lancio limpido",
+                                "Concentrazione Arcana",
                                 "12536"
                             ],
                             "useName": True,
@@ -959,7 +1000,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                     {
                         "type": "subglow",
                         "glow": True,
@@ -988,12 +1029,37 @@ def build_wa_tree():
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    if not UnitExists("target") then return "" end
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, unitCaster, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if (unitCaster == "player" or not unitCaster) and (spellId == 55360 or spellId == 55359 or spellId == 44457 or name == "Living Bomb" or name == "Bomba Vivente" or string.find(name, "Living Bomb") or string.find(name, "Vivente")) then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 3 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.0fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
                             "type": "aura2",
                             "unit": "target",
-                            "auranames": ["Living Bomb"],
+                            "auranames": [
+                                "Living Bomb",
+                                "55360",
+                                "55359",
+                                "44457",
+                                "Bomba Vivente"
+                            ],
                             "useName": True,
                             "debuffType": "HARMFUL",
                             "matchesShowOn": "showOnActive",
@@ -1005,7 +1071,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
             # Ignite (Target Debuff)
@@ -1025,12 +1091,35 @@ def build_wa_tree():
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    if not UnitExists("target") then return "" end
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, unitCaster, _, _, spellId = UnitDebuff("target", i)
+        if not name then break end
+        if (unitCaster == "player" or not unitCaster) and (spellId == 12654 or name == "Ignite" or name == "Ignizione" or string.find(name, "Ignite") or string.find(name, "Igniz")) then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 1.5 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.1fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
                 "triggers": {
                     1: {
                         "trigger": {
                             "type": "aura2",
                             "unit": "target",
-                            "auranames": ["Ignite"],
+                            "auranames": [
+                                "Ignite",
+                                "12654",
+                                "Ignizione"
+                            ],
                             "useName": True,
                             "debuffType": "HARMFUL",
                             "matchesShowOn": "showOnActive",
@@ -1042,7 +1131,7 @@ def build_wa_tree():
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
                 ],
             },
             # Scorch / Improved Scorch (Target Debuff)
