@@ -47,6 +47,10 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
    - **Colonna Buff a Sinistra ("Uno sotto l'altro")**: *Arcane Intellect*, *Molten Armor* e *Focus Magic* sono posizionati verticalmente a sinistra (`x = -182`) mantenendo uno spazio pulito di 34px dalla barra.
    - **Fila Utility Adattata**: I 6 moduli (Trinket 1, Trinket 2, Mantello, Combustione, Copie, Gemma) sono distribuiti e centrati armoniosamente sotto la barra allungata.
 
+9. **Castbar con Icona Spell e Mana Bar Dinamica (Rosso <= 20%)**:
+   - **Castbar con Icona a Sinistra**: Visualizza l'icona della magia in corso di lancio (cast o channel come Blizzard/Evocation) sul bordo sinistro della barra, con nome spell a sinistra, tempo rimanente a destra (`5.5`) e gradiente azzurro/ciano Blizzard.
+   - **Allerta Mana <= 20%**: La barra del mana diventa automaticamente **Rossa** quando scende a $\le 20\%$, mentre rimane del colore blu abituale tra il 20% e il 100%.
+
 ---
 
 ## Come Aggiornare in Gioco (30 Secondi)

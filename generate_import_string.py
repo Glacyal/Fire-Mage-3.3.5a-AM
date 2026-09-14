@@ -1915,6 +1915,22 @@ end""",
                     },
                     "activeTriggerMode": -10,
                 },
+                "conditions": [
+                    {
+                        "check": {
+                            "trigger": 1,
+                            "op": "<=",
+                            "variable": "percentpower",
+                            "value": "20",
+                        },
+                        "changes": [
+                            {
+                                "property": "barColor",
+                                "value": [1.0, 0.15, 0.15, 1.0],
+                            }
+                        ]
+                    }
+                ],
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
@@ -1944,10 +1960,13 @@ end""",
                 "height": 20,
                 "xOffset": 0,
                 "yOffset": 0,
-                "barColor": [1.0, 0.55, 0.0, 1.0],
+                "barColor": [0.0, 0.77, 1.0, 1.0],
                 "backgroundColor": [0.15, 0.15, 0.15, 0.8],
-                "texture": "Interface\\TargetingFrame\\UI-StatusBar",
-                "icon": False,
+                "texture": "Blizzard",
+                "icon": True,
+                "icon_side": "LEFT",
+                "iconSource": -1,
+                "icon_color": [1, 1, 1, 1],
                 "triggers": {
                     1: {
                         "trigger": {
@@ -1963,7 +1982,17 @@ end""",
                 "subRegions": [
                     { "type": "subbackground" },
                     { "type": "subforeground" },
-                    make_subtext("%p", justify="RIGHT", anchor_point="INNER_RIGHT", font_size=11, extra_props={"anchorXOffset": -6}),
+                    make_subtext(
+                        "%p",
+                        justify="RIGHT",
+                        anchor_point="INNER_RIGHT",
+                        font_size=11,
+                        extra_props={
+                            "anchorXOffset": -6,
+                            "text_text_format_p_format": "timed",
+                            "text_text_format_p_time_precision": 1,
+                        }
+                    ),
                     make_subtext("%n", justify="LEFT", anchor_point="INNER_LEFT", font_size=11, extra_props={"anchorXOffset": 6}),
                 ],
             },
