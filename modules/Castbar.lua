@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 08: Castbar & Channeling
+--- Fire Mage 3.3.5a AM — Modulo 08: Castbar & Channeling
 --- =========================================================================
 --- Gestisce la Castbar centrale (larghezza 264px, yOffset = 0):
 --- - Rileva sia lanci standard (UnitCastingInfo) che incantesimi canalizzati (UnitChannelInfo).

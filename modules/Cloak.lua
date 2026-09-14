@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 06: Mantello / Ricamo (Slot 15)
+--- Fire Mage 3.3.5a AM — Modulo 06: Mantello / Ricamo (Slot 15)
 --- =========================================================================
 --- Monitora l'incantamento o l'effetto speciale del mantello (x = -22, y = -54):
 --- - Ricamo di Sartoria: Lightweave Embroidery (+295 SP per 15s, 45s ICD).

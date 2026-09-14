@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 05: Trinket 1 (Slot 13) e Trinket 2 (Slot 14)
+--- Fire Mage 3.3.5a AM — Modulo 05: Trinket 1 (Slot 13) e Trinket 2 (Slot 14)
 --- =========================================================================
 --- Gestisce in modo completamente separato ed indipendente:
 --- - Trinket 1 (Slot 13, x = -110, y = -54)

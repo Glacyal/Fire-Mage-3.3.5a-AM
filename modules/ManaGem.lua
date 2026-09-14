@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 06: Mana Gem (Gemma del Mana)
+--- Fire Mage 3.3.5a AM — Modulo 06: Mana Gem (Gemma del Mana)
 --- =========================================================================
 --- Monitora la Gemma del Mana (Mana Sapphire / Mana Emerald, x = +22, y = -54):
 --- Collocata nella riga utility tra Mantello (x = -22) e Combustion (x = +66).

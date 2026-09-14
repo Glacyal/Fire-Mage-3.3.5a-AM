@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Configurazione Centrale
+--- Fire Mage 3.3.5a AM — Configurazione Centrale
 --- Compatibile con World of Warcraft 3.3.5a (Wrath of the Lich King - Build 12340)
 --- Tabella SavedVariables opzionale per l'addon stand-alone FireMageHUD.
 --- =========================================================================
@@ -11,6 +11,7 @@
 ---@field Trinket1 table Configurazione slot 13 (Trinket 1)
 ---@field Trinket2 table Configurazione slot 14 (Trinket 2)
 ---@field Cloak table Configurazione slot 15 (Ricamo o incantamento Mantello)
+---@field Tier8 table Configurazione bonus 2P Tier 8 (Praxis: +350 SP, 45s ICD)
 ---@field Alerts table Impostazioni per avvisi a schermo (Hot Streak, Molten Armor)
 ---@field Target table Preferenze di visualizzazione dati target
 ---@field Focus table Preferenze di visualizzazione dati focus
@@ -236,5 +237,30 @@ FireMageHUD_Config = {
         T7BuffID     = 61062, -- Mana Surge (+225 Spell Power per 15s)
         CooldownItem = 33312, -- Mana Sapphire (2 min CD)
         ChargesMax   = 3,
+    },
+
+    -- ---------------------------------------------------------------------
+    -- 9. TIER 8 2-PIECE BONUS (Praxis: +350 SP per 15s, 45s ICD)
+    -- ---------------------------------------------------------------------
+    Tier8 = {
+        BuffID     = 64868, -- Praxis (+350 Spell Power per 15s)
+        TriggerID  = 64867, -- Item - Mage T8 2P Bonus
+        InternalCD = 45,    -- ICD stimato in secondi (15s attivo + 30s CD)
+        Duration   = 15.0,  -- Durata buff attivo
+        Icon       = "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
+        SetPieces  = {
+            -- 10-Man (Kirin Tor Valoroso)
+            [45367] = true, -- Elmo
+            [45369] = true, -- Spalle
+            [45365] = true, -- Torso
+            [45366] = true, -- Gambe
+            [45368] = true, -- Guanti
+            -- 25-Man (Kirin Tor Conquistatore)
+            [45357] = true, -- Elmo
+            [45359] = true, -- Spalle
+            [45355] = true, -- Torso
+            [45356] = true, -- Gambe
+            [45358] = true, -- Guanti
+        },
     },
 }

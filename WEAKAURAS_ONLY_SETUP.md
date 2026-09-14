@@ -1,9 +1,9 @@
-# Fire Mage HUD — Configurazione e Gestione WeakAuras (`/wa`)
+# Fire Mage 3.3.5a AM — Configurazione e Gestione WeakAuras (`/wa`)
 
-## Struttura Attuale dell'HUD
+## Struttura Attuale della Suite
 
 ```text
-Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
+Fire Mage 3.3.5a AM (Gruppo Master - Scale = 1.2, yOffset = -190)
 │
 ├── 01 - Procs (Dynamic Group orizzontale, y = +52 - centrato sopra la Castbar)
 │   ├── Hot Streak (Icona 34x34 + Timer rosso <= 3s + Pixel Glow dorato)
@@ -32,13 +32,24 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
 │       ├── Segmento 1 (sx: 130x5px, 50% 1° critico non-periodico persistente nel tempo)
 │       └── Proc Bar   (barra unica: 264x5px, Hot Streak proc countdown 10s con Pixel Glow, reset su Pyroblast)
 │
-├── Fila Utility Inferiore (y = -54, margine di 11.5px sotto la Hot Streak Bar - 6 icone 28x28 centrate)
-│   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
+│   │
+│   ├── Modalità 6 Icone (< 2 Pezzi T8 Equipaggiati - Spaziatura 44px):
+│   │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   │   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
+│   │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+│   │
+│   └── Modalità 7 Icone Ristrette (>= 2 Pezzi T8 Equipaggiati - Spaziatura 38px):
+│       ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│       ├── 06 - Tier 8       (x =    0: Praxis +350 SP per 15s con Glow dorato + Swipe ICD 30s)
+│       ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
+│       ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
+│       └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
 │
 └── 10 - Alerts (y = +105, sopra i Proc)
     └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!")
@@ -50,12 +61,13 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
 
 ### Metodo A: Aggiornamento Diretto (Update / Upgrade) — Consigliato
 1. Apri `IMPORT_STRING.txt` e copia tutto il contenuto (`Ctrl+A`, `Ctrl+C`).
+   *(Nota: la stringa della versione precedente è conservata in `IMPORT_STRINGOLD.txt`)*
 2. In gioco digita `/wa`, clicca su **Import** e incolla la stringa con `Ctrl+V`.
 3. Nella finestra di dialogo di WeakAuras, seleziona **`Update Auras`** (o **`Upgrade`**).
    - WeakAuras aggiornerà tutti i moduli sul posto preservando la gerarchia e le tue personalizzazioni di posizione.
 4. Chiudi WeakAuras (`Esc`).
 
 ### Metodo B: Reinstallazione Pulita (Reset Completo)
-1. In `/wa`, clic destro su **`Fire Mage HUD`** $\rightarrow$ seleziona **`Delete children and group`**.
+1. In `/wa`, clic destro sul gruppo precedente (`Fire Mage HUD` o `Fire Mage 3.3.5a AM`) $\rightarrow$ seleziona **`Delete children and group`**.
 2. Clicca su **Import** $\rightarrow$ incolla con `Ctrl+V` $\rightarrow$ clicca su **`Import Group`**.
 3. Chiudi con `Esc`.

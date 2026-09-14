@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 01: Proc & Rotazione Fire Mage
+--- Fire Mage 3.3.5a AM — Modulo 01: Proc & Rotazione Fire Mage
 --- =========================================================================
 --- Gestisce le icone della riga orizzontale superiore (yOffset = +44):
 --- 1. Hot Streak (Buff 48108, timer rosso <= 3s, pixel glow dorato).

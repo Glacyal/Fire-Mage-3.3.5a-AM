@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 07: Barra del Mana
+--- Fire Mage 3.3.5a AM — Modulo 07: Barra del Mana
 --- =========================================================================
 --- Gestisce il monitoraggio in tempo reale della percentuale di Mana del Mago.
 --- - Mostra unicamente la percentuale con due cifre decimali (es. "85.24%").

@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 07: Mirror Image (Copie & Proc T10 4P)
+--- Fire Mage 3.3.5a AM — Modulo 07: Mirror Image (Copie & Proc T10 4P)
 --- =========================================================================
 --- Monitora le Copie (Mirror Image, 55342, x = +110, y = -54):
 --- Collocata all'estremita' destra della riga utility simmetricamente a Trinket 1.

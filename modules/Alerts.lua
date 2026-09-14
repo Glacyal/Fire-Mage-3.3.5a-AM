@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 10: Avvisi a Schermo (Alerts)
+--- Fire Mage 3.3.5a AM — Modulo 10: Avvisi a Schermo (Alerts)
 --- =========================================================================
 --- Gestisce avvisi visivi ad alto impatto posizionati a yOffset = +105:
 --- 1. HOT STREAK! / PYROBLAST READY! (Avviso proc immediato al centro dello schermo).

@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 09: Global Cooldown (GCD)
+--- Fire Mage 3.3.5a AM — Modulo 09: Global Cooldown (GCD)
 --- =========================================================================
 --- Monitora il Global Cooldown (larghezza 264px, altezza 3px, yOffset = -12).
 --- Utilizza la spell di riferimento standard WotLK 61304 (con fallback su Fire Blast).

@@ -1,4 +1,4 @@
-# Fire Mage HUD 3.3.5a — WeakAuras Suite
+# Fire Mage 3.3.5a AM — WeakAuras Suite
 
 [![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/FireMageHUD-335)
 [![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/FireMageHUD-335)
@@ -36,22 +36,36 @@ Collocato a sinistra sotto i tre buff (`x = -180, y = -54`), monitora in tempo r
 - **Haste (Spell Haste %)**: Celerità magica in tempo reale con rating e moltiplicatori raid (*Bloodlust/Heroism +30%, Wrath of Air Totem +5%, Moonkin/Retri Aura +3%*).
 - **Hit (Spell Hit %)**: Indice di precisione magica con rating, talento Precision (+3%), razziale Draenei (+1%) e debuff boss (*Misery / Faerie Fire +3%*). Mostra l'indicatore verde **`(Cap)`** al raggiungimento del 17% (o 14% con debuff).
 
-### 4. Engine Universale per Monili & Mantello (Slot 13, 14 e 15)
+### 4. Gestione Dinamica Tier 8 (Bonus 2 Pezzi `06 - Tier 8` — Praxis)
+- **Auto-Rilevamento Intelligente Equipaggiamento**:
+  - Scansiona automaticamente i 10 Item ID dei pezzi Tier 8 Kirin Tor (Elmo, Spalle, Torso, Guanti, Gambe in versione 10m e 25m) ad ogni cambio di equipaggiamento (`PLAYER_EQUIPMENT_CHANGED`).
+- **Modalità 6 Icone (Solo T7 o Solo T10, oppure < 2 Pezzi T8)**:
+  - L'icona T8 resta completamente nascosta.
+  - La fila utility mantiene la spaziatura classica da 44px tra i centri (`x = [-110, -66, -22, +22, +66, +110]`), perfetta per chi gioca con bonus T7 o T10.
+- **Modalità 7 Icone Ristrette ($\ge 2$ Pezzi T8 Equipaggiati)**:
+  - Viene inserita l'icona del Tier 8 (`Spell_Arcane_StudentOfMagic`) al centro esatto della riga utility (`x = 0, y = -54`, tra Mantello e Gemma).
+  - Gli altri moduli si stringono dinamicamente con spaziatura da 38px (`x = [-114, -76, -38, 0, +38, +76, +114]`), occupando una larghezza totale di 256px perfettamente simmetrica e allineata sotto la barra da 264px!
+- **Meccanica Completa Proc & ICD**:
+  - **Buff Attivo Praxis (Spell ID 64868)**: +350 Spell Power per 15s con **Pixel Glow** dorato e countdown decimale in giallo (`|cFFFFFF00%.1fs|r`).
+  - **Cooldown ICD (45 secondi totali)**: Al termine dei 15s di buff, l'icona spegne il glow e avvia la ricarica radiale a orologio (*swipe*) con countdown numerico per i restanti 30 secondi prima del riproc.
+  - **Pronto**: Ritorno immediato all'icona pulita pronta al nuovo proc.
+
+### 5. Engine Universale per Monili & Mantello (Slot 13, 14 e 15)
 - **Database con oltre 40 Monili WotLK**: Riconoscimento automatico di oggetti On-Use e proc passivi con Internal Cooldown (ICD, es. 45s per *Dislodged Foreign Object / Charred Twilight Scale*, 90s per *Phylactery of the Nameless Lich*).
 - **Animazione a Orologio Blizzard (Radial Clock Swipe)**: Mostra il **Pixel Glow** dorato durante la durata attiva del buff, commutando poi sullo swipe a orologio e countdown del tempo residuo prima del prossimo riproc.
 - **Fallback Euristico Intelligente**: Se equipaggi un trinket non presente nel database, il modulo scansiona automaticamente le descrizioni per stimare l'effetto e applicare un timer affidabile.
 
-### 5. Gemma del Mana con Bonus 2 Pezzi T7 (`06 - Mana Gem`)
+### 6. Gemma del Mana con Bonus 2 Pezzi T7 (`06 - Mana Gem`)
 - **Commutazione Dinamica Icona**: All'uso della gemma, attiva il bonus 2 pezzi T7 (+225 Spell Power per 15s) commutando l'icona sul simbolo di **Mana Surge** (`Spell_Arcane_ManaSurge`), evidenziata dal Pixel Glow dorato e dal countdown decimale a sud (`%.1fs`).
 - **Ritorno a Cooldown Oggetto**: Al termine del buff, torna all'icona della gemma e visualizza il cooldown dell'oggetto (2 min).
 - **Conteggio Cariche**: Mostra le cariche residue in alto a destra (`%c`, con "0" rosso se esaurite o gemma mancante).
 
-### 6. Cluster Centrale Ergonomico (Larghezza 264px)
+### 7. Cluster Centrale Ergonomico (Larghezza 264px)
 - **Castbar con Icona Spell** (`264x20px`, `y = +8`): Icona della magia in lancio a sinistra, nome spell a sinistra, tempo residuo a destra, gradiente ciano Blizzard.
 - **Barra GCD** (`264x3px`, `y = -4`): Barra bianca sottile per il Global Cooldown (spell 61304).
 - **Barra del Mana Dinamica** (`264x14px`, `y = -15`): Visualizza solo la percentuale con 2 decimali (es. `85.24%`) e diventa automaticamente **Rossa** quando scende a $\le 20\%$.
 
-### 7. Gruppo Procs & Debuff con Timer Rossi in Scadenza (`01 - Procs`)
+### 8. Gruppo Procs & Debuff con Timer Rossi in Scadenza (`01 - Procs`)
 - Posizionato orizzontalmente sopra la Castbar a `y = +52`.
 - I timer commutano in **rosso vivo** con precisione decimale negli ultimi secondi di durata:
   - **Hot Streak**: Rosso sotto i 3s (`<= 3s`).
@@ -66,7 +80,7 @@ Collocato a sinistra sotto i tre buff (`x = -180, y = -54`), monitora in tempo r
 ## 📐 Layout e Coordinate dell'HUD
 
 ```text
-Fire Mage HUD (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
+Fire Mage 3.3.5a AM (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │
 ├── 01 - Procs (Dynamic Group orizzontale a y = +52 - Auto-centrato sopra la Castbar)
 │   ├── Hot Streak (Icona 34x34 + Timer rosso <= 3s + Pixel Glow dorato)
@@ -96,13 +110,24 @@ Fire Mage HUD (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │       ├── Hot Streak Bar - Segment 1  (texture: 130x5px a sx, 50% 1° critico persistente)
 │       └── Hot Streak Bar - Proc       (aurabar: 264x5px unificata, countdown 10s con Pixel Glow)
 │
-├── Fila Utility Inferiore (y = -54, margine di 11.5px sotto la Hot Streak Bar - 6 icone 28x28)
-│   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD 2m)
-│   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
+│   │
+│   ├── MODALITÀ 6 ICONE (Solo T7 o Solo T10, oppure < 2 pezzi T8 - Spaziatura 44px):
+│   │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│   │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+│   │
+│   └── MODALITÀ 7 ICONE RISTRETTE (con >= 2 pezzi T8 equipaggiati - Spaziatura 38px):
+│       ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Tier 8       (x =    0: Praxis +350 SP 15s con Glow + Swipe ICD 30s)
+│       ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│       ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
+│       └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
 │
 └── 10 - Alerts (y = +105, sopra i Procs)
     └── Alert - Hot Streak (text: alert "HOT STREAK! / PYROBLAST READY!" font expressway)
@@ -114,14 +139,15 @@ Fire Mage HUD (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 
 ### Opzione A: Aggiornamento Diretto (Update / Upgrade) — Consigliato
 1. Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/FireMageHUD-335/IMPORT_STRING.txt)** e copia tutto il contenuto (`Ctrl+A`, `Ctrl+C`).
+   *(Nota: la stringa precedente è archiviata come backup di sicurezza in [`IMPORT_STRINGOLD.txt`](file:///d:/0Progetti/FireMageHUD-335/IMPORT_STRINGOLD.txt))*
 2. In World of Warcraft, apri WeakAuras digitando `/wa`.
 3. Clicca su **Import** in alto a sinistra e incolla con `Ctrl+V`.
 4. Seleziona **`Update Auras`** (o **`Upgrade`**).
-5. Chiudi WeakAuras (`Esc`). L'HUD è aggiornato e mantiene intatte le tue impostazioni!
+5. Chiudi WeakAuras (`Esc`). L'HUD è aggiornato a **Fire Mage 3.3.5a AM**!
 
 ### Opzione B: Reinstallazione Pulita (Clean Reset)
 Se provieni da una versione precedente e desideri ripristinare coordinate e layout originali:
-1. In `/wa`, fai clic destro su **`Fire Mage HUD`** e seleziona **`Delete children and group`**.
+1. In `/wa`, fai clic destro sul gruppo precedente (`Fire Mage HUD` o `Fire Mage 3.3.5a AM`) e seleziona **`Delete children and group`**.
 2. Clicca su **Import** in alto a sinistra.
 3. Incolla il testo da `IMPORT_STRING.txt` con `Ctrl+V`.
 4. Clicca su **`Import Group`** (o **`Replace`**).

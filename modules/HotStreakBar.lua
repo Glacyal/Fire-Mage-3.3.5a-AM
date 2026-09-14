@@ -1,5 +1,5 @@
 -- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo: Barra Hot Streak (264x7px)
+--- Fire Mage 3.3.5a AM — Modulo: Barra Hot Streak (264x7px)
 --- =========================================================================
 --- Gestisce il monitoraggio in tempo reale del talento Hot Streak (Lancio Istantaneo)
 --- posizionata immediatamente sotto la Barra del Mana (264x7px):

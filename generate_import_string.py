@@ -1,5 +1,5 @@
 """
-Fire Mage HUD WeakAuras Suite Generator (WoW 3.3.5a - WeakAuras 4.0.0 Backport)
+Fire Mage 3.3.5a AM WeakAuras Suite Generator (WoW 3.3.5a - WeakAuras 4.0.0 Backport)
 ================================================================================
 Generatore deterministico della stringa di importazione WeakAuras (!WA:1!) per la
 suite Fire Mage Livello 80 in World of Warcraft 3.3.5a (Wrath of the Lich King).
@@ -8,7 +8,7 @@ Caratteristiche Architetturali:
 - Engine Target: WeakAuras 4.0.0 (internalVersion 52) con supporto subRegions native.
 - Formato di Codifica: AceSerializer-3.0 Protocol Rev 1 + Deflate compressione zlib
   + LibDeflate Little-Endian 6-bit Base64 encoding.
-- Gerarchia Rigorosa: Tutti i 28 moduli sono nidificati sotto il gruppo master "Fire Mage HUD"
+- Gerarchia Rigorosa: Tutti i moduli sono nidificati sotto il gruppo master "Fire Mage 3.3.5a AM"
   per consentire spostamenti in blocco o disinstallazione pulita con un solo clic.
 - Condizione di Caricamento: Classe Mago (Player Class: Mage) e talento Living Bomb (Fire),
   impostato su tutti i nodi foglia per conformità all'engine 3.3.5a.
@@ -399,11 +399,23 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
 end"""
 
 def make_slot_custom_text(slot: int) -> str:
-    """Genera la closure Lua per il testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo."""
+    """Genera la closure Lua per il testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo e riposizionamento dinamico."""
+    x6_map = {13: -110, 14: -66, 15: -22}
+    x7_map = {13: -114, 14: -76, 15: -38}
+    x6 = x6_map.get(slot, -110)
+    x7 = x7_map.get(slot, -114)
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
         _G.FMHUD_CheckSlot_v5 = true
+    end
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_SetUtilityPos then
+        _G.FMHUD_SetUtilityPos(aura_env, {x6}, {x7})
     end
     local state, rem, dur, icon = _G.FMHUD_CheckSlot({slot})
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -456,6 +468,166 @@ def make_slot_custom_icon(slot: int, default_icon: str) -> str:
     end
     return GetInventoryItemTexture("player", {slot}) or "{default_icon}"
 end"""
+
+
+SHARED_T8_CHECK_LUA = """function()
+    _G.FMHUD_T8_SetIDs = _G.FMHUD_T8_SetIDs or {
+        -- 10-Man Valorous Kirin Tor
+        [45367] = true, -- Head
+        [45369] = true, -- Shoulder
+        [45365] = true, -- Chest
+        [45366] = true, -- Legs
+        [45368] = true, -- Hands
+        -- 25-Man Conqueror's Kirin Tor
+        [45357] = true, -- Head
+        [45359] = true, -- Shoulder
+        [45355] = true, -- Chest
+        [45356] = true, -- Legs
+        [45358] = true, -- Hands
+    }
+    _G.FMHUD_CheckT8Equipped = function()
+        local now = GetTime()
+        if _G.FMHUD_T8_EquipCache and (now - _G.FMHUD_T8_EquipCache.time < 0.2) then
+            return _G.FMHUD_T8_EquipCache.count >= 2
+        end
+        local count = 0
+        local slots = { 1, 3, 5, 7, 10 }
+        for _, s in ipairs(slots) do
+            local id = GetInventoryItemID("player", s)
+            if id and _G.FMHUD_T8_SetIDs[id] then
+                count = count + 1
+            end
+        end
+        _G.FMHUD_T8_EquipCache = { time = now, count = count }
+        return count >= 2
+    end
+
+    _G.FMHUD_T8_State = _G.FMHUD_T8_State or { lastStart = 0, lastEnd = 0, isProc = false }
+
+    local isEquipped = _G.FMHUD_CheckT8Equipped()
+    if not isEquipped then
+        return "NONE", 0, 0, "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+    end
+
+    local now = GetTime()
+    local state = _G.FMHUD_T8_State
+    local icon = "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+
+    -- 1. Controllo buff attivo Praxis (SpellID 64868, +350 SP per 15s)
+    local foundBuff = false
+    local remBuff = 0
+    local durBuff = 15
+    for i = 1, 40 do
+        local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+            foundBuff = true
+            durBuff = (duration and duration > 0) and duration or 15
+            remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
+            if bIcon then icon = bIcon end
+            break
+        end
+    end
+
+    if foundBuff then
+        if not state.isProc or (now - state.lastStart > durBuff + 2) then
+            state.lastStart = now - (durBuff - remBuff)
+            state.lastEnd = state.lastStart + 45
+            state.isProc = true
+        end
+        return "ACTIVE", remBuff, durBuff, icon
+    end
+
+    if state.isProc then
+        state.isProc = false
+    end
+
+    -- 2. ICD Stimato (45s totale = 15s proc + 30s ricarica)
+    if state.lastStart > 0 then
+        local elapsed = now - state.lastStart
+        if elapsed < 45 then
+            local remICD = 45 - elapsed
+            return "ICD", remICD, 45, icon
+        end
+    end
+
+    -- 3. Pronto
+    return "READY", 0, 0, icon
+end"""
+
+SHARED_UTILITY_POS_LUA = """function(env, x6, x7)
+    if env and env.region then
+        if not _G.FMHUD_CheckT8Equipped then
+            if _G.FMHUD_CheckT8 then _G.FMHUD_CheckT8() end
+        end
+        local is7 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
+        local targetX = is7 and x7 or x6
+        local curPoint, curRelTo, curRelPoint, curX, curY = env.region:GetPoint(1)
+        if env.currentX ~= targetX or (curX and math.abs(curX - targetX) > 0.5) then
+            env.region:ClearAllPoints()
+            local p = env.region:GetParent() or UIParent
+            env.region:SetPoint("CENTER", p, "CENTER", targetX, -54)
+            env.currentX = targetX
+        end
+    end
+end"""
+
+def make_t8_custom_text() -> str:
+    """Genera la closure Lua per il testo descrittivo del Tier 8 2P (%c), con pixel glow su proc attivo e timer ICD."""
+    return f"""function()
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_SetUtilityPos then
+        _G.FMHUD_SetUtilityPos(aura_env, 0, 0)
+    end
+    local state, rem, dur, icon = _G.FMHUD_CheckT8()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {{1, 0.85, 0.1, 1}}, 8, 0.25, 10, 2)
+        end
+        return string.format("|cFFFFFF00%.1fs|r", rem)
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        if state == "ICD" and rem > 0.1 then
+            if rem >= 60 then
+                local m = math.floor(rem / 60)
+                local s = math.floor(rem % 60)
+                return string.format("%d:%02d", m, s)
+            else
+                return string.format("%.0f", rem)
+            end
+        end
+        return ""
+    end
+end"""
+
+def make_t8_custom_duration() -> str:
+    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per il Tier 8 2P."""
+    return f"""function()
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    local state, rem, dur = _G.FMHUD_CheckT8()
+    if (state == "ACTIVE" or state == "ICD") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end"""
+
+def make_t8_custom_icon() -> str:
+    """Genera la closure Lua per l'icona del Tier 8 2P (Student of Magic / Kirin Tor)."""
+    return """function()
+    return "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+end"""
+
 
 SHARED_FM_CHECK_LUA = """function(event, ...)
     FMHUD_State = FMHUD_State or {}
@@ -730,6 +902,14 @@ def make_combustion_custom_text() -> str:
     """Genera il testo descrittivo (%c) di Combustion con conteggio cariche critiche e pixel glow dorato."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_SetUtilityPos then
+        _G.FMHUD_SetUtilityPos(aura_env, 66, 76)
+    end
     local state, rem, dur, count = _G.FMHUD_CheckCombustion()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
     if state == "ACTIVE" then
@@ -847,6 +1027,14 @@ def make_mirrorimage_custom_text() -> str:
     if not _G.FMHUD_CheckMirrorImage_v4 then
         _G.FMHUD_CheckMirrorImage = {SHARED_MIRRORIMAGE_CHECK_LUA}
         _G.FMHUD_CheckMirrorImage_v4 = true
+    end
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_SetUtilityPos then
+        _G.FMHUD_SetUtilityPos(aura_env, 110, 114)
     end
     local state, rem, dur, icon, isT10 = _G.FMHUD_CheckMirrorImage()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -990,6 +1178,14 @@ def make_managem_custom_text() -> str:
     if not _G.FMHUD_CheckManaGem_v4 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
         _G.FMHUD_CheckManaGem_v4 = true
+    end
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
+        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_SetUtilityPos then
+        _G.FMHUD_SetUtilityPos(aura_env, 22, 38)
     end
     local state, rem, dur, icon = _G.FMHUD_CheckManaGem()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -1463,7 +1659,7 @@ def build_wa_tree() -> dict:
         "v": 2000,
         "w": "4.0.0",
         "d": {
-            "id": "Fire Mage HUD",
+            "id": "Fire Mage 3.3.5a AM",
             "uid": "FMHUD_ROOT",
             "regionType": "group",
             "internalVersion": 52,
@@ -1483,6 +1679,7 @@ def build_wa_tree() -> dict:
                 "05 - Trinket 1",
                 "05 - Trinket 2",
                 "06 - Cloak",
+                "06 - Tier 8",
                 "06 - Mana Gem",
                 "06 - Combustion",
                 "06 - Mirror Image",
@@ -1502,7 +1699,7 @@ def build_wa_tree() -> dict:
             {
                 "id": "01 - Procs",
                 "uid": "FMHUD_PROCS_DG",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "dynamicgroup",
                 "internalVersion": 52,
                 "grow": "HORIZONTAL",
@@ -1940,7 +2137,7 @@ end"""
             {
                 "id": "02 - Molten Armor",
                 "uid": "FMHUD_MOLTENARMOR_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -180,
@@ -2083,7 +2280,7 @@ end"""
             {
                 "id": "03 - Arcane Intellect",
                 "uid": "FMHUD_INTELLECT_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -210,
@@ -2257,7 +2454,7 @@ end"""
             {
                 "id": "04 - Focus Magic",
                 "uid": "FMHUD_FOCUS_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -150,
@@ -2349,7 +2546,7 @@ end""",
             {
                 "id": "05 - Trinket 1",
                 "uid": "FMHUD_TRINKET1",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -110,
@@ -2396,7 +2593,7 @@ end"""
             {
                 "id": "05 - Trinket 2",
                 "uid": "FMHUD_TRINKET2",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -66,
@@ -2443,7 +2640,7 @@ end"""
             {
                 "id": "06 - Cloak",
                 "uid": "FMHUD_CLOAK",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -22,
@@ -2485,12 +2682,71 @@ end"""
             },
 
             # =================================================================
+            # 06 - TIER 8 (Center of Utility Row at x = 0, y = -54)
+            # Active when >= 2 pieces of T8 equipped (Praxis: +350 SP, 45s ICD)
+            # =================================================================
+            {
+                "id": "06 - Tier 8",
+                "uid": "FMHUD_TIER8",
+                "parent": "Fire Mage 3.3.5a AM",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 0,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_t8_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "update",
+                            "custom": """function(event, ...)
+    if not _G.FMHUD_CheckT8_v1 then
+        _G.FMHUD_CheckT8 = """ + SHARED_T8_CHECK_LUA + """
+        _G.FMHUD_SetUtilityPos = """ + SHARED_UTILITY_POS_LUA + """
+        _G.FMHUD_CheckT8_v1 = true
+    end
+    if _G.FMHUD_CheckT8Equipped then
+        return _G.FMHUD_CheckT8Equipped()
+    end
+    return false
+end""",
+                            "customDuration": make_t8_custom_duration(),
+                            "customIcon": make_t8_custom_icon(),
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    if _G.FMHUD_CheckT8Equipped then
+        return not _G.FMHUD_CheckT8Equipped()
+    end
+    return true
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+                ],
+            },
+
+            # =================================================================
             # 06 - MANA GEM (Between Cloak and Combustion - T7 Proc + CD + Charges)
             # =================================================================
             {
                 "id": "06 - Mana Gem",
                 "uid": "FMHUD_MANAGEM",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 22,
@@ -2558,7 +2814,7 @@ end"""
             {
                 "id": "06 - Combustion",
                 "uid": "FMHUD_COMBUSTION",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 66,
@@ -2579,7 +2835,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                            "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
                             "custom": """function(event, ...)
     return true
 end""",
@@ -2608,7 +2864,7 @@ end"""
             {
                 "id": "06 - Mirror Image",
                 "uid": "FMHUD_MIRRORIMAGE",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 110,
@@ -2655,7 +2911,7 @@ end"""
             {
                 "id": "07 - Mana Bar",
                 "uid": "FMHUD_MANABAR",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
                 "width": 264,
@@ -2719,7 +2975,7 @@ end"""
             {
                 "id": "10 - Hot Streak Bar",
                 "uid": "FMHUD_HOTSTREAK_BAR_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": 0,
@@ -2849,7 +3105,7 @@ end"""
             {
                 "id": "08 - Castbar",
                 "uid": "FMHUD_CASTBAR",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
                 "width": 264,
@@ -2899,7 +3155,7 @@ end"""
             {
                 "id": "09 - GCD",
                 "uid": "FMHUD_GCD",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
                 "width": 264,
@@ -2935,7 +3191,7 @@ end"""
             {
                 "id": "10 - Alerts",
                 "uid": "FMHUD_ALERTS_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": 0,
@@ -2982,7 +3238,7 @@ end"""
             {
                 "id": "12 - Stats Panel",
                 "uid": "FMHUD_STATS_GRP",
-                "parent": "Fire Mage HUD",
+                "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -180,

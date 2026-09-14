@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Core Library & Utilities
+--- Fire Mage 3.3.5a AM — Core Library & Utilities
 --- Compatibile con World of Warcraft 3.3.5a (Wrath of the Lich King - Build 12340)
 --- Fornisce funzioni sicure di scansione aure, formattazione, castbar e ICD.
 --- =========================================================================

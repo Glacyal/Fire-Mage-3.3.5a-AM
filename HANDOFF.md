@@ -1,4 +1,4 @@
-# Fire Mage HUD (WoW 3.3.5a) — Handoff Tecnico
+# Fire Mage 3.3.5a AM (WoW 3.3.5a) — Handoff Tecnico
 
 Suite WeakAura modulare, ad altissime prestazioni e ad architettura pura per **Mago Fuoco Livello 80** in World of Warcraft 3.3.5a (*Wrath of the Lich King - Build 12340*).
 
@@ -11,6 +11,7 @@ Suite WeakAura modulare, ad altissime prestazioni e ad architettura pura per **M
 | **Piattaforma Target** | World of Warcraft 3.3.5a (*WotLK Build 12340*) | Compatibile con tutti i core emulatore (*TrinityCore, AzerothCore, Mangos*) |
 | **Addon Target** | WeakAuras 4.0.0 (Backport WotLK 3.3.5a) | Engine nativo WA4, `internalVersion = 52` |
 | **Modalità di Distribuzione** | **WeakAura 100% Pura** (`IMPORT_STRING.txt`) | Importabile con un solo clic. Nessun file esterno o addon obbligatorio |
+| **Backup Versione Precedente** | `IMPORT_STRINGOLD.txt` | Stringa di backup della versione prima dell'integrazione T8 |
 | **Addon Companion Standalone** | `FireMageHUD.toc` + moduli in `modules/` | Opzionale per chi preferisce l'esecuzione diretta come addon Lua nativo |
 | **Formato di Serializzazione** | `!WA:1!` (LibDeflate Little-Endian 6-bit) | Compressione LibDeflate + AceSerializer-3.0 Protocol Rev 1 |
 | **Tipografia & Texture** | Font `Expressway` (Outline) & Blizzard StatusBars | SubRegions WA4 (`subbackground`, `subforeground`, `subtext`, `subglow`) |
@@ -29,7 +30,10 @@ L'interfaccia è progettata secondo i principi di **massima ergonomia e pulizia 
    - Se assenti o scaduti, mostrano l'icona desaturata con avviso rosso **`OFF`**.
 2. **Cluster Centrale Unificato (Larghezza 264px)**:
    - Castbar, GCD, Mana Bar e Hot Streak Bar condividono la medesima larghezza di 264px, perfettamente impilate l'una sull'altra.
-3. **Timer Intelligenti con Allerta Rossa di Scadenza**:
+3. **Fila Utility Dinamica Adattiva (6 vs 7 Icone)**:
+   - Se si usano solo T7 o solo T10 (o $< 2$ pezzi T8), la riga è predisposta a 6 moduli simmetrici spaziati a 44px.
+   - Con $\ge 2$ pezzi T8, viene inserito il modulo T8 al centro e gli altri si restringono dinamicamente a 38px, mantenendo la simmetria assoluta.
+4. **Timer Intelligenti con Allerta Rossa di Scadenza**:
    - I procs e debuff dinamici (*Scorch $\le$ 5s, Hot Streak $\le$ 3s, Living Bomb $\le$ 3s prima dell'esplosione, Ignite $\le$ 1.5s*) commutano automaticamente il testo in rosso vivo a 1 decimale (`|cFFFF4444%.1fs|r`), avvertendo tempestivamente del momento ottimale per il refresh senza clippare i tick.
 
 ---
@@ -55,11 +59,9 @@ Lancio di Pyroblast (o scadenza 10s):
 ```
 
 - **Rilevazione 1° Critico (Fix CLEU WotLK 3.3.5a)**:
-  - In WeakAuras 3.3.5a, `COMBAT_LOG_EVENT_UNFILTERED` non viene processato in modo affidabile da trigger di tipo `custom_type: "status"`.
-  - È stato inserito un frame invisibile dedicato nativo (`FMHUD_HSFrame`) che si registra direttamente agli eventi del motore di gioco (`COMBAT_LOG_EVENT_UNFILTERED`, `UNIT_AURA`, `UNIT_SPELLCAST_SUCCEEDED`, `PLAYER_REGEN_ENABLED`, `PLAYER_DEAD`, `PLAYER_UNGHOST`, `PLAYER_ENTERING_WORLD`).
-  - Parsing multi-offset per garantire compatibilità con tutti i core emulatore (verifica argomenti 9/10 per la spell e argomenti 18/19/20 per il flag `critical` sia booleano `true` che intero `1`).
+  - Frame invisibile dedicato nativo (`FMHUD_HSFrame`) registrato a `COMBAT_LOG_EVENT_UNFILTERED`, `UNIT_AURA`, `UNIT_SPELLCAST_SUCCEEDED`, ecc.
+  - Parsing multi-offset compatibile con tutti i core emulatore.
   - Filtro rigoroso su `SPELL_DAMAGE` diretto: i DoT periodici (*Ignite, tick di Living Bomb*) producono `SPELL_PERIODIC_DAMAGE` e vengono ignorati, preservando lo streak.
-  - Al verificarsi di una variazione, il frame invia `WeakAuras.ScanEvents("FMHUD_HS_UPDATE")`.
 - **1° Critico**: Illumina esattamente il 50% a sinistra (`width: 130px, xOffset: -66`) e **resta persistente nel tempo** in attesa del colpo successivo.
 - **2° Critico Consecutivo (Hot Streak Proc)**:
   - Il segmento al 50% si nasconde e viene attivata la **Barra di Proc unificata a piena larghezza (264x5px a `xOffset: 0`)**!
@@ -70,55 +72,64 @@ Lancio di Pyroblast (o scadenza 10s):
 
 ---
 
-### 3.2 Focus Magic Monitor (`04 - Focus Magic`) — Tracking Intelligente
+### 3.2 Modulo Tier 8 2-Piece Bonus (`06 - Tier 8` — Praxis)
+
+Posizionato a `x = 0, y = -54` al centro della riga utility:
+- **Auto-Rilevamento Intelligente**:
+  - Scansiona i 10 pezzi T8 Kirin Tor (10m: 45367, 45369, 45365, 45366, 45368; 25m: 45357, 45359, 45355, 45356, 45358).
+- **Adattamento Dinamico del Layout**:
+  - Funzione condivisa `_G.FMHUD_SetUtilityPos(env, x6, x7)` che aggiorna i punti delle icone utility senza ricaricare la UI.
+  - Con $< 2$ pezzi T8: `06 - Tier 8` è nascosto, le altre 6 icone si posizionano su `[-110, -66, -22, +22, +66, +110]` (spaziatura 44px).
+  - Con $\ge 2$ pezzi T8: `06 - Tier 8` appare a `x = 0`, le altre 6 icone si stringono su `[-114, -76, -38, +38, +76, +114]` (spaziatura 38px).
+- **Tracciamento Proc & ICD**:
+  - **Buff Attivo**: Praxis (Spell ID 64868, +350 SP per 15s) con **Pixel Glow** e timer decimale giallo `|cFFFFFF00%.1fs|r`.
+  - **Internal Cooldown (ICD)**: 45 secondi complessivi (15s buff + 30s ricarica a orologio con timer residuo `%.0f`).
+  - **Stato Pronto**: Icona desaturata o pulita pronta al prossimo proc.
+
+---
+
+### 3.3 Focus Magic Monitor (`04 - Focus Magic`) — Tracking Intelligente
 
 Posizionato a `x = -150, y = -14` (in riga sopra il pannello statistiche).
-- **Meccanica WotLK**: Lanciare Focus Magic applica un buff di 30 minuti all'alleato (`caster == "player"`), mentre il Mago riceve il proc da critico di 10s (Spell ID 54648) ogni volta che l'alleato mette a segno un colpo critico.
-- **Back-Propagation del Proc**: Quando il Mago riceve il buff di 10s, il sistema riconosce matematicamente che l'alleato ha ancora Focus Magic attivo. La scadenza viene automaticamente mantenuta/estesa a 30 minuti senza clippare a 10s, prevenendo falsi allarmi "OFF" ed evitando la necessità di ritarghettare l'alleato.
+- **Back-Propagation del Proc**: Quando il Mago riceve il buff di 10s dall'alleato, il sistema estende la durata del buff alleato a 30 minuti, prevenendo falsi allarmi "OFF" ed evitando la necessità di ritarghettare l'alleato.
 - **Scansione Automatica**: Monitora continuamente `target`, `focus`, `party1..4`, `raid1..40`.
 
 ---
 
-### 3.3 Gemma del Mana (`06 - Mana Gem`) — Proc Bonus T7 & Cooldown Dinamico
+### 3.4 Gemma del Mana (`06 - Mana Gem`) — Proc Bonus T7 & Cooldown Dinamico
 
-Posizionata a `x = +22, y = -54` nella fila utility (tra Mantello `x = -22` e Combustione `x = +66`).
+Posizionata nella fila utility a `y = -54`:
 - **Bonus Set Tier 7 (2 pezzi - "Mana Surge")**:
-  - All'uso della gemma attiva il buff "Improved Mana Gems" / "Mana Surge" (+225 Spell Power per 15s, Spell ID 61062).
-  - L'icona **commuta dinamicamente sul simbolo di Mana Surge** (`Spell_Arcane_ManaSurge`), accende il **Pixel Glow** dorato e mostra il conto alla rovescia del proc con 1 decimale (`%.1fs`).
+  - All'uso attiva il buff "Mana Surge" (+225 Spell Power per 15s, Spell ID 61062).
+  - L'icona **commuta dinamicamente sul simbolo di Mana Surge** (`Spell_Arcane_ManaSurge`), accende il **Pixel Glow** dorato e mostra il conto alla rovescia del proc (`%.1fs`).
 - **Cooldown Oggetto (2 minuti)**:
-  - Al termine del buff T7, l'icona ritorna allo Zaffiro del Mana (`INV_Misc_Gem_Sapphire_02`), spegne il glow e mostra lo swipe radiale e il timer del cooldown residuo della gemma.
-- **Anti-Sovrapposizione Testi**:
-  - Timer di scorrimento (`%p`): Ancorato in zona SUD (`INNER_BOTTOM`).
-  - Cariche residue (`%c`): Ancorate in ALTO A DESTRA (`INNER_TOPRIGHT`). Mostra "0" rosso se la gemma è esaurita o assente.
+  - Al termine del buff T7, l'icona ritorna allo Zaffiro del Mana (`INV_Misc_Gem_Sapphire_02`), spegne il glow e mostra lo swipe radiale e il cooldown residuo.
+- **Cariche Residue**: Ancorate in ALTO A DESTRA (`INNER_TOPRIGHT`).
 
 ---
 
-### 3.4 Trinkets Slot 13 & 14 (`05 - Trinket 1` & `05 - Trinket 2`) — Engine ICD Universale
+### 3.5 Trinkets Slot 13 & 14 (`05 - Trinket 1` & `05 - Trinket 2`) & Mantello (`06 - Cloak`)
 
-Posizionati a `x = -110` e `x = -66` a `y = -54`.
-- **Database 40+ Trinket WotLK**: Include tutti i monili da caster (*Dislodged Foreign Object, Phylactery of the Nameless Lich, Charred Twilight Scale, Reign of the Dead, Flare of the Heavens, Muradin's Spyglass, Sundial of the Exiled, Nevermelting Ice Crystal*, ecc.).
-- **Dual State (On-Use vs Proc Passivo con ICD)**:
-  - Rileva gli oggetti On-Use interrogando `GetItemCooldown`.
-  - Per i proc passivi, monitora l'applicazione del buff sul giocatore e traccia l'Internal Cooldown (ICD, es. 45s per DFO/CTS, 90s per Filatterio).
-  - Mostra il **Pixel Glow** durante i secondi di proc attivo, commutando poi sullo swipe a orologio e countdown del tempo prima del riproc.
-- **Fallback Euristico Universale**: Se equipaggi un trinket non presente nel database, il modulo scansiona automaticamente le parole chiave (*spellpower, haste, crit, spell damage*) e applica un tracciamento stimato con ICD predefinito di 45s.
+Posizionati a `y = -54`:
+- **Database 40+ Trinket WotLK**: Riconoscimento automatico On-Use e proc passivi con ICD (45s per DFO/CTS, 90s per Filatterio).
+- **Pixel Glow & Swipe Radiale**: Glow durante il proc attivo, swipe a orologio durante l'ICD.
 
 ---
 
-### 3.5 Real-Time Stats Panel (`12 - Stats Panel`)
+### 3.6 Real-Time Stats Panel (`12 - Stats Panel`)
 
-Posizionato a `x = -180, y = -54` (box compatto 88x48px con 4 righe di statistiche aggiornate in tempo reale):
-1. **SP (Spell Power)**: `GetSpellBonusDamage(3)` per la scuola Fuoco. Include gear, incantamenti, proc attivi, gemme e pozioni.
-2. **Crit (Spell Crit %)**: `GetSpellCritChance(3)` + Molten Armor (con spirito e glifo) + talenti Fire + stack di Combustion (+10% a carica) + debuff boss (+5% da *Improved Scorch/Winter's Chill*, +3% da *Heart of the Crusader/Master Poisoner*). Supporta visualizzazione a 3 cifre (es. `102.50%`).
-3. **Haste (Spell Haste %)**: `UnitSpellHaste("player")` combinato con i moltiplicatori di raid attivi (*Bloodlust/Heroism +30%, Wrath of Air Totem +5%, Moonkin/Retri Aura +3%*).
-4. **Hit (Spell Hit %)**: Combat rating + Talento Precision (+3%) + Razziale Draenei (+1%) + debuff boss (*Misery / Faerie Fire +3%*). Mostra l'indicatore verde **`(Cap)`** al raggiungimento del 17% (o 14% con debuff).
+Posizionato a `x = -180, y = -54` (box 88x48px con 4 righe real-time):
+1. **SP**: `GetSpellBonusDamage(3)` per la scuola Fuoco (gear, buff, proc, pozioni).
+2. **Crit**: `GetSpellCritChance(3)` + Molten Armor + talenti Fire + stack Combustion (+10% a carica) + debuff boss (+5% Scorch, +3% Totem).
+3. **Haste**: `UnitSpellHaste("player")` + moltiplicatori raid (*Bloodlust, Totem, Moonkin*).
+4. **Hit**: Rating + Precision (+3%) + Draenei (+1%) + debuff boss (+3% Misery/Faerie Fire) con indicatore verde **`(Cap)`** a $\ge 17\%$.
 
 ---
 
-## 4. Architettura Completa dei Moduli (27 Displays WA4)
+## 4. Architettura Completa dei Moduli (28 Displays WA4)
 
 ```text
-Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scale: 1.2, load: Mage + Living Bomb)
+Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scale: 1.2, load: Mage + Living Bomb)
 │
 ├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 6px, yOffset: +52)
 │   ├── Hot Streak (icon: aura2 buff "Hot Streak", matchesShowOn: "showOnActive", Pixel Glow dorato)
@@ -148,13 +159,23 @@ Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scal
 │       ├── Hot Streak Bar - Segment 1  (texture: 130x5px a sx, 50% 1° critico persistente)
 │       └── Hot Streak Bar - Proc       (aurabar: 264x5px intera, countdown 10s con Pixel Glow)
 │
-├── Fila Utility Inferiore (y = -54, margine di 11.5px sotto la Hot Streak Bar - 6 icone 28x28)
-│   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
+│   ├── MODALITÀ 6 ICONE (< 2 pezzi T8 equipaggiati - Spaziatura 44px):
+│   │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Mana Gem     (x =  +22: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│   │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
+│   │
+│   └── MODALITÀ 7 ICONE RISTRETTE (>= 2 pezzi T8 equipaggiati - Spaziatura 38px):
+│       ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD)
+│       ├── 06 - Tier 8       (x =    0: Praxis +350 SP 15s con Glow + Swipe ICD 30s)
+│       ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│       ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
+│       └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
 │
 └── 10 - Alerts (y = +105, sopra i Proc)
     └── Alert - Hot Streak (text: alert "HOT STREAK! / PYROBLAST READY!" font expressway)
@@ -185,4 +206,4 @@ python scratch/test_lua.py
 2. In World of Warcraft, digita `/wa` per aprire WeakAuras.
 3. Clicca su **Import** in alto a sinistra e incolla la stringa (`Ctrl+V`).
 4. Seleziona **`Update Auras`** (o **`Replace`** per una reinstallazione pulita).
-5. Chiudi la finestra con `Esc`. Il tuo HUD è pronto all'uso!
+5. Chiudi la finestra con `Esc`. Il tuo HUD **Fire Mage 3.3.5a AM** è pronto all'uso!

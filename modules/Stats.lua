@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 12: Real-time Stats Panel (SP, Crit, Haste, Hit)
+--- Fire Mage 3.3.5a AM — Modulo 12: Real-time Stats Panel (SP, Crit, Haste, Hit)
 --- =========================================================================
 --- Monitoraggio in tempo reale delle 4 statistiche fondamentali del Mago Fuoco:
 --- - SP: Spell Power specifico per la scuola Fuoco (GetSpellBonusDamage(3))

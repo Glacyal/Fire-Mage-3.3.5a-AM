@@ -1,5 +1,5 @@
 --- =========================================================================
---- Fire Mage HUD 3.3.5a — Modulo 02: Molten Armor (Monitor Colonna Sinistra)
+--- Fire Mage 3.3.5a AM — Modulo 02: Molten Armor (Monitor Colonna Sinistra)
 --- =========================================================================
 --- Regole di visualizzazione per Molten Armor (x = -180, y = -14, sopra Stats Panel):
 --- 1. Durata > 5 minuti: Completamente NASCOSTA per pulizia visiva in combattimento.
