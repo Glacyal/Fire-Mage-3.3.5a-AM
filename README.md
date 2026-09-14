@@ -36,6 +36,12 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
    - Barra del Mana con visualizzazione percentuale fino alla seconda cifra decimale (es. `85.24%`).
    - Master scale **`1.2`** (+20% di grandezza) con coordinata `yOffset = -190` (sopra le action bar).
 
+6. **Mirror Image (Copie)**:
+   - Integrata nella fila utility tra Combustion e Mana Gem (`x = +54, y = -54`) con durata attiva 30s (glow dorato e countdown) e cooldown swipe di 3m.
+
+7. **Condizione di Caricamento (Load Tab)**:
+   - Configurato nativamente su **Player Class: Mage** e **Talent: Living Bomb** su tutto l'albero di auras e su ogni singolo elemento, garantendo che l'HUD si carichi esclusivamente per maghi con talento Bomba Vivente (Fire).
+
 ---
 
 ## Come Aggiornare in Gioco (30 Secondi)
@@ -69,12 +75,13 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 ├── Ala Destra (Colonna Buff Supporto - x = +160, 33px dalla Castbar)
 │   └── 04 - Focus Magic      (y =  -7, size 34x34: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
 │
-├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 5 icone 28x28 centrate)
-│   ├── 05 - Trinket 1    (x = -72: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2    (x = -36: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak        (x =   0: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Combustion   (x = +36: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   └── 06 - Mana Gem     (x = +72: Cooldown al centro + Cariche in alto a destra)
+├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 6 icone 28x28 centrate)
+│   ├── 05 - Trinket 1    (x = -90: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 05 - Trinket 2    (x = -54: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Cloak        (x = -18: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Combustion   (x = +18: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   ├── 06 - Mirror Image (x = +54: Glow attivo 30s + Swipe orologio CD 3m)
+│   └── 06 - Mana Gem     (x = +90: Cooldown al centro + Cariche in alto a destra)
 │
 ├── Cluster Centrale
 │   ├── 08 - Castbar  (y =   0, w = 220, h = 20: Testo spell a sx, tempo a dx, no icona)
