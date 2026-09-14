@@ -23,8 +23,21 @@ local T8_SetIDs = {
     [45358] = true, -- Hands
 }
 
+local ARMOR_SLOTS = { 1, 3, 5, 7, 10 }
 local T8_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false, lastSeen = 0 }
 local T8_EquipCache = { time = 0, isEquipped = false }
+local T8_EquippedPersistent = false
+
+-- Frame per invalidare la cache all'effettivo cambio di equipaggiamento
+local T8_EventFrame = CreateFrame("Frame")
+T8_EventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+T8_EventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
+T8_EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+T8_EventFrame:SetScript("OnEvent", function()
+    T8_EquipCache.time = 0
+    T8_EquipCache.isEquipped = false
+    T8_EquippedPersistent = false
+end)
 
 --- Verifica se il bonus 2P Tier 8 e' attivo sul mago con rilevamento multi-stadio.
 ---@return boolean isActive
@@ -34,28 +47,38 @@ function FireMageHUD_Tier8_IsActive()
         return T8_EquipCache.isEquipped
     end
 
+    -- Check 0: Stato persistente gia' confermato
+    if T8_EquippedPersistent then
+        T8_EquipCache.time = now
+        T8_EquipCache.isEquipped = true
+        return true
+    end
+
     -- 1. Controllo buff attivo Praxis (64868 / "Praxis" / "Prassi")
     for i = 1, 40 do
         local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
             T8_ProcTimer.lastSeen = now
-            T8_EquipCache = { time = now, isEquipped = true }
+            T8_EquippedPersistent = true
+            T8_EquipCache.time = now
+            T8_EquipCache.isEquipped = true
             return true
         end
     end
 
     -- 2. Controllo Item ID hardcoded
     local count = 0
-    local slots = { 1, 3, 5, 7, 10 }
-    for _, slot in ipairs(slots) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local itemID = GetInventoryItemID("player", slot)
         if itemID and T8_SetIDs[itemID] then
             count = count + 1
         end
     end
     if count >= 2 then
-        T8_EquipCache = { time = now, isEquipped = true }
+        T8_EquippedPersistent = true
+        T8_EquipCache.time = now
+        T8_EquipCache.isEquipped = true
         return true
     end
 
@@ -67,7 +90,7 @@ function FireMageHUD_Tier8_IsActive()
         tt:SetOwner(WorldFrame, "ANCHOR_NONE")
         _G.FMHUD_AddonScanTT = tt
     end
-    for _, slot in ipairs(slots) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local itemID = GetInventoryItemID("player", slot)
         if itemID then
             tt:ClearLines()
@@ -86,17 +109,22 @@ function FireMageHUD_Tier8_IsActive()
         end
     end
     if ttCount >= 2 then
-        T8_EquipCache = { time = now, isEquipped = true }
+        T8_EquippedPersistent = true
+        T8_EquipCache.time = now
+        T8_EquipCache.isEquipped = true
         return true
     end
 
-    -- 4. Buff visto di recente (ultimi 60s)
-    if T8_ProcTimer.lastSeen > 0 and (now - T8_ProcTimer.lastSeen < 60) then
-        T8_EquipCache = { time = now, isEquipped = true }
+    -- 4. Buff visto di recente (ultimi 60s) o durante sessione
+    if T8_ProcTimer.lastSeen > 0 then
+        T8_EquippedPersistent = true
+        T8_EquipCache.time = now
+        T8_EquipCache.isEquipped = true
         return true
     end
 
-    T8_EquipCache = { time = now, isEquipped = false }
+    T8_EquipCache.time = now
+    T8_EquipCache.isEquipped = false
     return false
 end
 

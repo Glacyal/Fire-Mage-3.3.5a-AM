@@ -48,17 +48,28 @@ local T10_PIECE_ITEM_IDS = {
     [50072] = true, [51156] = true, [51281] = true,
 }
 
+local ARMOR_SLOTS = { 1, 3, 5, 7, 10 }
+local T10_4P_Cache = { time = 0, hasT10 = false }
+
 --- Verifica se il giocatore ha equipaggiato almeno 4 pezzi del Tier 10.
 ---@return boolean hasT10
 function FireMageHUD_MirrorImage_HasT10()
+    local now = GetTime()
+    if (now - T10_4P_Cache.time < 0.5) then
+        return T10_4P_Cache.hasT10
+    end
+
     local count = 0
-    for _, slot in ipairs({1, 3, 5, 7, 10}) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local id = GetInventoryItemID("player", slot)
         if id and T10_PIECE_ITEM_IDS[id] then
             count = count + 1
         end
     end
-    return count >= 4
+    local hasT10 = count >= 4
+    T10_4P_Cache.time = now
+    T10_4P_Cache.hasT10 = hasT10
+    return hasT10
 end
 
 --- Determina lo stato operativo corrente di Mirror Image (ACTIVE, COOLDOWN, READY).

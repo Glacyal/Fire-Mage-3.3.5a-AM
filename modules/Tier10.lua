@@ -34,6 +34,7 @@ local T10_SetIDs = {
     [51300] = true, [51301] = true, [51302] = true, [51303] = true, [51304] = true,
 }
 
+local ARMOR_SLOTS = { 1, 3, 5, 7, 10 }
 local T10_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false, lastSeen = 0 }
 local T10_EquipCache = { time = 0, isEquipped = false }
 local T10_EquippedPersistent = false
@@ -59,7 +60,8 @@ function FireMageHUD_Tier10_IsActive()
 
     -- Check 0: Stato persistente gia' confermato
     if T10_EquippedPersistent then
-        T10_EquipCache = { time = now, isEquipped = true }
+        T10_EquipCache.time = now
+        T10_EquipCache.isEquipped = true
         return true
     end
 
@@ -70,15 +72,15 @@ function FireMageHUD_Tier10_IsActive()
         if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
             T10_ProcTimer.lastSeen = now
             T10_EquippedPersistent = true
-            T10_EquipCache = { time = now, isEquipped = true }
+            T10_EquipCache.time = now
+            T10_EquipCache.isEquipped = true
             return true
         end
     end
 
     -- 2. Controllo Item ID sui 5 slot armatura (1=Head, 3=Shoulder, 5=Chest, 7=Legs, 10=Hands)
     local count = 0
-    local slots = { 1, 3, 5, 7, 10 }
-    for _, slot in ipairs(slots) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local itemID = GetInventoryItemID("player", slot)
         if itemID and T10_SetIDs[itemID] then
             count = count + 1
@@ -86,13 +88,14 @@ function FireMageHUD_Tier10_IsActive()
     end
     if count >= 2 then
         T10_EquippedPersistent = true
-        T10_EquipCache = { time = now, isEquipped = true }
+        T10_EquipCache.time = now
+        T10_EquipCache.isEquipped = true
         return true
     end
 
     -- 3. Scansione stringa Item Link & Nome oggetto
     local nameCount = 0
-    for _, slot in ipairs(slots) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local link = GetInventoryItemLink("player", slot)
         if link then
             local lk = link:lower()
@@ -111,7 +114,8 @@ function FireMageHUD_Tier10_IsActive()
     end
     if nameCount >= 2 then
         T10_EquippedPersistent = true
-        T10_EquipCache = { time = now, isEquipped = true }
+        T10_EquipCache.time = now
+        T10_EquipCache.isEquipped = true
         return true
     end
 
@@ -122,7 +126,7 @@ function FireMageHUD_Tier10_IsActive()
         tt = CreateFrame("GameTooltip", "FMHUD_AddonScanTT", nil, "GameTooltipTemplate")
         _G.FMHUD_AddonScanTT = tt
     end
-    for _, slot in ipairs(slots) do
+    for _, slot in ipairs(ARMOR_SLOTS) do
         local link = GetInventoryItemLink("player", slot)
         if link then
             tt:SetOwner(UIParent, "ANCHOR_NONE")
@@ -143,18 +147,21 @@ function FireMageHUD_Tier10_IsActive()
     end
     if ttCount >= 2 then
         T10_EquippedPersistent = true
-        T10_EquipCache = { time = now, isEquipped = true }
+        T10_EquipCache.time = now
+        T10_EquipCache.isEquipped = true
         return true
     end
 
     -- 5. Buff visto durante la sessione
     if T10_ProcTimer.lastSeen > 0 then
         T10_EquippedPersistent = true
-        T10_EquipCache = { time = now, isEquipped = true }
+        T10_EquipCache.time = now
+        T10_EquipCache.isEquipped = true
         return true
     end
 
-    T10_EquipCache = { time = now, isEquipped = false }
+    T10_EquipCache.time = now
+    T10_EquipCache.isEquipped = false
     return false
 end
 

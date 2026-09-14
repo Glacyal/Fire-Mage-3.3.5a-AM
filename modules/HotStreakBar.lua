@@ -17,7 +17,9 @@ FireMageHUD_HotStreak = FireMageHUD_HotStreak or {
     hasBuff = false,
     duration = 10,
     expirationTime = 0,
-    lastEventKey = nil,
+    lastTimestamp = 0,
+    lastSpellId = 0,
+    lastDestGUID = "",
 }
 
 local HS = FireMageHUD_HotStreak
@@ -153,10 +155,11 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
                 if IsQualifyingSpell(spellId, spellName) then
                     local timestamp = select(1, ...)
                     local destGUID = select(7, ...) or select(8, ...) or ""
-                    local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
 
-                    if HS.lastEventKey ~= eventKey then
-                        HS.lastEventKey = eventKey
+                    if HS.lastTimestamp ~= timestamp or HS.lastSpellId ~= spellId or HS.lastDestGUID ~= destGUID then
+                        HS.lastTimestamp = timestamp
+                        HS.lastSpellId = spellId
+                        HS.lastDestGUID = destGUID
 
                         local c18, c19, c20 = select(18, ...)
                         local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)

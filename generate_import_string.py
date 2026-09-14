@@ -33,24 +33,20 @@ CHARS = [
     '4', '5', '6', '7', '8', '9', '(', ')'
 ]
 
+# Tabella di traduzione precalcolata per escape AceSerializer-3.0 (C-level str.translate)
+ACE_ESCAPE_TRANS = {
+    30: '~z',
+    94: '~}',
+    126: '~|',
+    127: '~{',
+}
+for _n in range(33):
+    if _n != 30:
+        ACE_ESCAPE_TRANS[_n] = '~' + chr(_n + 64)
+
 def serialize_string(s: str) -> str:
-    """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo."""
-    res = ['^S']
-    for ch in s:
-        n = ord(ch)
-        if n == 30:
-            res.append('~z')
-        elif n <= 32:
-            res.append('~' + chr(n + 64))
-        elif n == 94:
-            res.append('~}')
-        elif n == 126:
-            res.append('~|')
-        elif n == 127:
-            res.append('~{')
-        else:
-            res.append(ch)
-    return ''.join(res)
+    """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo via str.translate."""
+    return '^S' + s.translate(ACE_ESCAPE_TRANS)
 
 def serialize_value(v) -> str:
     """Serializza ricorsivamente valori Python (None, bool, int/float, str, dict, list) in formato AceSerializer."""
@@ -157,91 +153,93 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
         [14] = { lastStart = 0, lastEnd = 0, isProc = false, lastItemID = 0 },
         [15] = { lastStart = 0, lastEnd = 0, isProc = false, lastItemID = 0 },
     }
-    _G.FMHUD_TrinketDB = {
-        -- The Dying Curse
-        [40255] = { keywords = { "dyingcurse", "curseoftheeye", "thedyingcurse" }, spellIds = { [60494] = true, [60493] = true, [60492] = true, [60491] = true }, icd = 45, dur = 10 },
-        -- Sundial of the Exiled
-        [40682] = { keywords = { "nowisthetime", "sundial" }, spellIds = { [60064] = true, [60063] = true }, icd = 45, dur = 10 },
-        -- Living Flame (On-Use)
-        [40685] = { keywords = { "livingflame" }, spellIds = { [64701] = true, [60480] = true }, icd = 120, dur = 20, onUse = true },
-        -- Mark of the War Prisoner (On-Use)
-        [37873] = { keywords = { "soulpower" }, spellIds = { [60481] = true, [60480] = true }, icd = 120, dur = 20, onUse = true },
-        -- Forge Ember
-        [37660] = { keywords = { "forgedember", "forgeember" }, spellIds = { [60479] = true, [60478] = true }, icd = 45, dur = 10 },
-        -- Embrace of the Spider
-        [37264] = { keywords = { "suddenvelocity", "embraceofthespider" }, spellIds = { [60492] = true, [60491] = true }, icd = 45, dur = 10 },
-        [39229] = { keywords = { "suddenvelocity", "embraceofthespider" }, spellIds = { [60492] = true, [60491] = true }, icd = 45, dur = 10 },
-        -- Illustration of the Dragon Soul
-        [40432] = { keywords = { "dragonsoul" }, spellIds = { [60486] = true, [60485] = true }, icd = 0, dur = 10 },
-        -- Eye of the Broodmother
-        [45308] = { keywords = { "broodmother", "blessingofthebroodmother" }, spellIds = { [65006] = true, [65004] = true, [65005] = true }, icd = 0, dur = 10 },
-        -- DMC Greatness
-        [44253] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
-        [44255] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
-        [42987] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
-        [44254] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
-        -- Scale of Fates (On-Use)
-        [45466] = { keywords = { "velocity" }, spellIds = { [64707] = true, [64708] = true }, icd = 120, dur = 20, onUse = true },
-        -- Flare of the Heavens
-        [45518] = { keywords = { "elusivepower" }, spellIds = { [64713] = true, [64712] = true }, icd = 45, dur = 10 },
-        -- Pandora's Plea
-        [45490] = { keywords = { "pandorasplea", "pandora" }, spellIds = { [64741] = true, [64740] = true }, icd = 45, dur = 10 },
-        -- Reign of the Dead / Unliving
-        [47271] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67759] = true, [67760] = true }, icd = 2, dur = 0 },
-        [47477] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67759] = true, [67760] = true }, icd = 2, dur = 0 },
-        [47182] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67713] = true, [67714] = true }, icd = 2, dur = 0 },
-        [47316] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67713] = true, [67714] = true }, icd = 2, dur = 0 },
-        -- Abyssal Rune
-        [47213] = { keywords = { "deadlyprecision" }, spellIds = { [67669] = true, [67668] = true }, icd = 45, dur = 10 },
-        -- Talisman of Resurgence (On-Use)
-        [48722] = { keywords = { "volatilepower" }, spellIds = { [67702] = true, [67701] = true }, icd = 120, dur = 20, onUse = true },
-        -- Shard of the Crystal Heart (On-Use)
-        [48724] = { keywords = { "chilledheart" }, spellIds = { [67696] = true, [67695] = true }, icd = 120, dur = 20, onUse = true },
-        -- Dislodged Foreign Object
-        [50348] = { keywords = { "celestialinfusion" }, spellIds = { [71601] = true, [71644] = true }, icd = 45, dur = 20 },
-        [50345] = { keywords = { "celestialinfusion" }, spellIds = { [71601] = true, [71644] = true }, icd = 45, dur = 20 },
-        -- Phylactery of the Nameless Lich
-        [50360] = { keywords = { "siphonofaethas", "aethassiphon", "aethas" }, spellIds = { [71605] = true, [71636] = true }, icd = 90, dur = 20 },
-        [50365] = { keywords = { "siphonofaethas", "aethassiphon", "aethas" }, spellIds = { [71605] = true, [71636] = true }, icd = 90, dur = 20 },
-        -- Muradin's Spyglass
-        [50340] = { keywords = { "gatheringtracker" }, spellIds = { [71570] = true, [71572] = true }, icd = 0, dur = 10 },
-        [50353] = { keywords = { "gatheringtracker" }, spellIds = { [71570] = true, [71572] = true }, icd = 0, dur = 10 },
-        -- Charred Twilight Scale
-        [54572] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75473] = true, [75466] = true }, icd = 45, dur = 15 },
-        [54588] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75473] = true, [75466] = true }, icd = 45, dur = 15 },
-        -- Nevermelting Ice Crystal (On-Use)
-        [50259] = { keywords = { "deadlyprecision" }, spellIds = { [71563] = true, [71562] = true }, icd = 180, dur = 20, onUse = true },
-        -- Maghia's Misguided Quill (On-Use)
-        [50357] = { keywords = { "maghiasmisguidedquill", "maghia", "elusivepower" }, spellIds = { [71584] = true }, icd = 120, dur = 20, onUse = true },
-        -- Sliver of Pure Ice (On-Use)
-        [50339] = { keywords = { "pureenergy" }, spellIds = { [71586] = true }, icd = 120, dur = 0, onUse = true },
-        [50346] = { keywords = { "pureenergy" }, spellIds = { [71586] = true }, icd = 120, dur = 0, onUse = true },
-        -- Tears of the Vanquished
-        [47215] = { keywords = { "revitalized" }, spellIds = { [67700] = true }, icd = 45, dur = 0 },
-        -- Jewelcrafting Figurines (On-Use)
-        [42395] = { keywords = { "twilightserpent" }, spellIds = { [59757] = true }, icd = 120, dur = 20, onUse = true },
-        [42413] = { keywords = { "sapphireowl" }, spellIds = { [59758] = true }, icd = 120, dur = 20, onUse = true },
-        -- Cannoneer's
-        [44013] = { keywords = { "fusillade" }, icd = 120, dur = 20, onUse = true },
-        [44014] = { keywords = { "morale" }, icd = 120, dur = 20, onUse = true },
-        -- DMC Death
-        [42990] = { keywords = { "darkmooncarddeath" }, spellIds = { [60203] = true }, icd = 45, dur = 0 },
-        -- Ashen Band
-        [50398] = { keywords = { "peerlessdestruction" }, spellIds = { [73077] = true }, icd = 60, dur = 10 },
-        [50400] = { keywords = { "peerlessdestruction" }, spellIds = { [73077] = true }, icd = 60, dur = 10 },
-    }
-    _G.FMHUD_AllCasterKeywords = {
-        "dyingcurse", "curseoftheeye", "thedyingcurse", "nowisthetime", "sundial", "livingflame",
-        "soulpower", "forgedember", "suddenvelocity", "dragonsoul", "broodmother",
-        "blessingofthebroodmother", "greatness", "velocity", "elusivepower",
-        "pandorasplea", "pandora", "motesofflame", "pillarofflame", "deadlyprecision",
-        "volatilepower", "chilledheart", "celestialinfusion", "siphonofaethas",
-        "aethassiphon", "aethas", "gatheringtracker", "sharedtwilight",
-        "twilightflame", "twilightserpent", "sapphireowl", "pureenergy", "revitalized",
-        "fusillade", "morale", "battlemaster", "medallion", "peerlessdestruction"
-    }
-    _G.FMHUD_CloakKeywords = { "lightweave", "darkglow", "swordguard", "parachute", "flexweave", "springyarachnoweave" }
-    _G.FMHUD_CloakSpellIds = { [55637] = true, [73849] = true, [55775] = true, [55767] = true }
+    if not _G.FMHUD_TrinketDB then
+        _G.FMHUD_TrinketDB = {
+            -- The Dying Curse
+            [40255] = { keywords = { "dyingcurse", "curseoftheeye", "thedyingcurse" }, spellIds = { [60494] = true, [60493] = true, [60492] = true, [60491] = true }, icd = 45, dur = 10 },
+            -- Sundial of the Exiled
+            [40682] = { keywords = { "nowisthetime", "sundial" }, spellIds = { [60064] = true, [60063] = true }, icd = 45, dur = 10 },
+            -- Living Flame (On-Use)
+            [40685] = { keywords = { "livingflame" }, spellIds = { [64701] = true, [60480] = true }, icd = 120, dur = 20, onUse = true },
+            -- Mark of the War Prisoner (On-Use)
+            [37873] = { keywords = { "soulpower" }, spellIds = { [60481] = true, [60480] = true }, icd = 120, dur = 20, onUse = true },
+            -- Forge Ember
+            [37660] = { keywords = { "forgedember", "forgeember" }, spellIds = { [60479] = true, [60478] = true }, icd = 45, dur = 10 },
+            -- Embrace of the Spider
+            [37264] = { keywords = { "suddenvelocity", "embraceofthespider" }, spellIds = { [60492] = true, [60491] = true }, icd = 45, dur = 10 },
+            [39229] = { keywords = { "suddenvelocity", "embraceofthespider" }, spellIds = { [60492] = true, [60491] = true }, icd = 45, dur = 10 },
+            -- Illustration of the Dragon Soul
+            [40432] = { keywords = { "dragonsoul" }, spellIds = { [60486] = true, [60485] = true }, icd = 0, dur = 10 },
+            -- Eye of the Broodmother
+            [45308] = { keywords = { "broodmother", "blessingofthebroodmother" }, spellIds = { [65006] = true, [65004] = true, [65005] = true }, icd = 0, dur = 10 },
+            -- DMC Greatness
+            [44253] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
+            [44255] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
+            [42987] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
+            [44254] = { keywords = { "greatness" }, spellIds = { [60233] = true, [60234] = true, [60235] = true }, icd = 45, dur = 15 },
+            -- Scale of Fates (On-Use)
+            [45466] = { keywords = { "velocity" }, spellIds = { [64707] = true, [64708] = true }, icd = 120, dur = 20, onUse = true },
+            -- Flare of the Heavens
+            [45518] = { keywords = { "elusivepower" }, spellIds = { [64713] = true, [64712] = true }, icd = 45, dur = 10 },
+            -- Pandora's Plea
+            [45490] = { keywords = { "pandorasplea", "pandora" }, spellIds = { [64741] = true, [64740] = true }, icd = 45, dur = 10 },
+            -- Reign of the Dead / Unliving
+            [47271] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67759] = true, [67760] = true }, icd = 2, dur = 0 },
+            [47477] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67759] = true, [67760] = true }, icd = 2, dur = 0 },
+            [47182] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67713] = true, [67714] = true }, icd = 2, dur = 0 },
+            [47316] = { keywords = { "motesofflame", "pillarofflame" }, spellIds = { [67713] = true, [67714] = true }, icd = 2, dur = 0 },
+            -- Abyssal Rune
+            [47213] = { keywords = { "deadlyprecision" }, spellIds = { [67669] = true, [67668] = true }, icd = 45, dur = 10 },
+            -- Talisman of Resurgence (On-Use)
+            [48722] = { keywords = { "volatilepower" }, spellIds = { [67702] = true, [67701] = true }, icd = 120, dur = 20, onUse = true },
+            -- Shard of the Crystal Heart (On-Use)
+            [48724] = { keywords = { "chilledheart" }, spellIds = { [67696] = true, [67695] = true }, icd = 120, dur = 20, onUse = true },
+            -- Dislodged Foreign Object
+            [50348] = { keywords = { "celestialinfusion" }, spellIds = { [71601] = true, [71644] = true }, icd = 45, dur = 20 },
+            [50345] = { keywords = { "celestialinfusion" }, spellIds = { [71601] = true, [71644] = true }, icd = 45, dur = 20 },
+            -- Phylactery of the Nameless Lich
+            [50360] = { keywords = { "siphonofaethas", "aethassiphon", "aethas" }, spellIds = { [71605] = true, [71636] = true }, icd = 90, dur = 20 },
+            [50365] = { keywords = { "siphonofaethas", "aethassiphon", "aethas" }, spellIds = { [71605] = true, [71636] = true }, icd = 90, dur = 20 },
+            -- Muradin's Spyglass
+            [50340] = { keywords = { "gatheringtracker" }, spellIds = { [71570] = true, [71572] = true }, icd = 0, dur = 10 },
+            [50353] = { keywords = { "gatheringtracker" }, spellIds = { [71570] = true, [71572] = true }, icd = 0, dur = 10 },
+            -- Charred Twilight Scale
+            [54572] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75473] = true, [75466] = true }, icd = 45, dur = 15 },
+            [54588] = { keywords = { "sharedtwilight", "twilightflame" }, spellIds = { [75473] = true, [75466] = true }, icd = 45, dur = 15 },
+            -- Nevermelting Ice Crystal (On-Use)
+            [50259] = { keywords = { "deadlyprecision" }, spellIds = { [71563] = true, [71562] = true }, icd = 180, dur = 20, onUse = true },
+            -- Maghia's Misguided Quill (On-Use)
+            [50357] = { keywords = { "maghiasmisguidedquill", "maghia", "elusivepower" }, spellIds = { [71584] = true }, icd = 120, dur = 20, onUse = true },
+            -- Sliver of Pure Ice (On-Use)
+            [50339] = { keywords = { "pureenergy" }, spellIds = { [71586] = true }, icd = 120, dur = 0, onUse = true },
+            [50346] = { keywords = { "pureenergy" }, spellIds = { [71586] = true }, icd = 120, dur = 0, onUse = true },
+            -- Tears of the Vanquished
+            [47215] = { keywords = { "revitalized" }, spellIds = { [67700] = true }, icd = 45, dur = 0 },
+            -- Jewelcrafting Figurines (On-Use)
+            [42395] = { keywords = { "twilightserpent" }, spellIds = { [59757] = true }, icd = 120, dur = 20, onUse = true },
+            [42413] = { keywords = { "sapphireowl" }, spellIds = { [59758] = true }, icd = 120, dur = 20, onUse = true },
+            -- Cannoneer's
+            [44013] = { keywords = { "fusillade" }, icd = 120, dur = 20, onUse = true },
+            [44014] = { keywords = { "morale" }, icd = 120, dur = 20, onUse = true },
+            -- DMC Death
+            [42990] = { keywords = { "darkmooncarddeath" }, spellIds = { [60203] = true }, icd = 45, dur = 0 },
+            -- Ashen Band
+            [50398] = { keywords = { "peerlessdestruction" }, spellIds = { [73077] = true }, icd = 60, dur = 10 },
+            [50400] = { keywords = { "peerlessdestruction" }, spellIds = { [73077] = true }, icd = 60, dur = 10 },
+        }
+        _G.FMHUD_AllCasterKeywords = {
+            "dyingcurse", "curseoftheeye", "thedyingcurse", "nowisthetime", "sundial", "livingflame",
+            "soulpower", "forgedember", "suddenvelocity", "dragonsoul", "broodmother",
+            "blessingofthebroodmother", "greatness", "velocity", "elusivepower",
+            "pandorasplea", "pandora", "motesofflame", "pillarofflame", "deadlyprecision",
+            "volatilepower", "chilledheart", "celestialinfusion", "siphonofaethas",
+            "aethassiphon", "aethas", "gatheringtracker", "sharedtwilight",
+            "twilightflame", "twilightserpent", "sapphireowl", "pureenergy", "revitalized",
+            "fusillade", "morale", "battlemaster", "medallion", "peerlessdestruction"
+        }
+        _G.FMHUD_CloakKeywords = { "lightweave", "darkglow", "swordguard", "parachute", "flexweave", "springyarachnoweave" }
+        _G.FMHUD_CloakSpellIds = { [55637] = true, [73849] = true, [55775] = true, [55767] = true }
+    end
 
     local now = GetTime()
     _G.FMHUD_SlotCache = _G.FMHUD_SlotCache or {}
@@ -251,7 +249,16 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
     end
 
     local function finish(st, r, d, ic)
-        _G.FMHUD_SlotCache[slot] = { time = now, state = st, rem = r, dur = d, icon = ic }
+        local c = _G.FMHUD_SlotCache[slot]
+        if not c then
+            c = {}
+            _G.FMHUD_SlotCache[slot] = c
+        end
+        c.time = now
+        c.state = st
+        c.rem = r
+        c.dur = d
+        c.icon = ic
         return st, r, d, ic
     end
 
@@ -311,44 +318,45 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
         local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         local isMatch = false
-        local cName = string.lower(name):gsub("[%s%p%c]", "")
 
         if slot == 15 then
             if spellId and _G.FMHUD_CloakSpellIds[spellId] then
                 isMatch = true
             else
+                local cName = string.lower(name):gsub("[%s%p%c]", "")
                 for _, kw in ipairs(_G.FMHUD_CloakKeywords) do
                     if cName:find(kw) then isMatch = true break end
                 end
             end
         else
             -- 1. Direct match with this slot's known entry
-            if entry then
-                if spellId and entry.spellIds and entry.spellIds[spellId] then
-                    isMatch = true
-                elseif entry.keywords then
+            if entry and spellId and entry.spellIds and entry.spellIds[spellId] then
+                isMatch = true
+            else
+                local cName = string.lower(name):gsub("[%s%p%c]", "")
+                if entry and entry.keywords then
                     for _, kw in ipairs(entry.keywords) do
                         if cName:find(kw) then isMatch = true break end
                     end
                 end
-            end
 
-            -- 2. Fallback matching if not matched directly
-            if not isMatch then
-                local isOther = false
-                if otherEntry then
-                    if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
-                        isOther = true
-                    elseif otherEntry.keywords then
-                        for _, kw in ipairs(otherEntry.keywords) do
-                            if cName:find(kw) then isOther = true break end
+                -- 2. Fallback matching if not matched directly
+                if not isMatch then
+                    local isOther = false
+                    if otherEntry then
+                        if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
+                            isOther = true
+                        elseif otherEntry.keywords then
+                            for _, kw in ipairs(otherEntry.keywords) do
+                                if cName:find(kw) then isOther = true break end
+                            end
                         end
                     end
-                end
 
-                if not isOther then
-                    for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
-                        if cName:find(kw) then isMatch = true break end
+                    if not isOther then
+                        for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
+                            if cName:find(kw) then isMatch = true break end
+                        end
                     end
                 end
             end
@@ -468,6 +476,9 @@ end"""
 SHARED_T8_INIT_LUA = """function()
     if _G.FMHUD_T8_InitDone then return end
 
+    local ARMOR_SLOTS = { 1, 3, 5, 7, 10 }
+    _G.FMHUD_ArmorSlots = ARMOR_SLOTS
+
     _G.FMHUD_T8_SetIDs = {
         -- 10-Man Valorous Kirin Tor
         [45367] = true, -- Head
@@ -487,8 +498,20 @@ SHARED_T8_INIT_LUA = """function()
 
     _G.FMHUD_CheckT8Equipped = function()
         local now = GetTime()
-        if _G.FMHUD_T8_EquipCache and (now - _G.FMHUD_T8_EquipCache.time < 0.3) then
-            return _G.FMHUD_T8_EquipCache.isEquipped
+        local cache = _G.FMHUD_T8_EquipCache
+        if cache and (now - cache.time < 0.3) then
+            return cache.isEquipped
+        end
+        if not cache then
+            cache = { time = 0, isEquipped = false }
+            _G.FMHUD_T8_EquipCache = cache
+        end
+
+        -- Check 0: Stato persistente gia' confermato per questa sessione di equipaggiamento
+        if _G.FMHUD_T8_Equipped then
+            cache.time = now
+            cache.isEquipped = true
+            return true
         end
 
         -- Check 1: Buff Praxis is currently active on player (Spell ID 64868, "Praxis", "Prassi")
@@ -497,22 +520,25 @@ SHARED_T8_INIT_LUA = """function()
             if not name then break end
             if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
                 _G.FMHUD_T8_LastSeen = now
-                _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+                _G.FMHUD_T8_Equipped = true
+                cache.time = now
+                cache.isEquipped = true
                 return true
             end
         end
 
         -- Check 2: Known Item IDs
         local count = 0
-        local slots = { 1, 3, 5, 7, 10 }
-        for _, s in ipairs(slots) do
+        for _, s in ipairs(ARMOR_SLOTS) do
             local id = GetInventoryItemID("player", s)
             if id and _G.FMHUD_T8_SetIDs[id] then
                 count = count + 1
             end
         end
         if count >= 2 then
-            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+            _G.FMHUD_T8_Equipped = true
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
@@ -524,7 +550,7 @@ SHARED_T8_INIT_LUA = """function()
             tt:SetOwner(WorldFrame, "ANCHOR_NONE")
             _G.FMHUD_ScanTT = tt
         end
-        for _, s in ipairs(slots) do
+        for _, s in ipairs(ARMOR_SLOTS) do
             local id = GetInventoryItemID("player", s)
             if id then
                 tt:ClearLines()
@@ -543,17 +569,22 @@ SHARED_T8_INIT_LUA = """function()
             end
         end
         if ttCount >= 2 then
-            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+            _G.FMHUD_T8_Equipped = true
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
-        -- Check 4: Recent buff within 60s
-        if _G.FMHUD_T8_LastSeen and (now - _G.FMHUD_T8_LastSeen < 60) then
-            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+        -- Check 4: Recent buff within session
+        if _G.FMHUD_T8_LastSeen and _G.FMHUD_T8_LastSeen > 0 then
+            _G.FMHUD_T8_Equipped = true
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
-        _G.FMHUD_T8_EquipCache = { time = now, isEquipped = false }
+        cache.time = now
+        cache.isEquipped = false
         return false
     end
 
@@ -638,13 +669,19 @@ SHARED_T8_INIT_LUA = """function()
 
     _G.FMHUD_CheckT10Equipped = function()
         local now = GetTime()
-        if _G.FMHUD_T10_EquipCache and (now - _G.FMHUD_T10_EquipCache.time < 0.3) then
-            return _G.FMHUD_T10_EquipCache.isEquipped
+        local cache = _G.FMHUD_T10_EquipCache
+        if cache and (now - cache.time < 0.3) then
+            return cache.isEquipped
+        end
+        if not cache then
+            cache = { time = 0, isEquipped = false }
+            _G.FMHUD_T10_EquipCache = cache
         end
 
         -- Check 0: Stato persistente gia' confermato per questa sessione di equipaggiamento
         if _G.FMHUD_T10_Equipped then
-            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
@@ -655,15 +692,15 @@ SHARED_T8_INIT_LUA = """function()
             if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
                 _G.FMHUD_T10_LastSeen = now
                 _G.FMHUD_T10_Equipped = true
-                _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+                cache.time = now
+                cache.isEquipped = true
                 return true
             end
         end
 
         -- Check 2: Controllo Item ID sui 5 slot armatura (1=Head, 3=Shoulder, 5=Chest, 7=Legs, 10=Hands)
         local count = 0
-        local slots = { 1, 3, 5, 7, 10 }
-        for _, s in ipairs(slots) do
+        for _, s in ipairs(ARMOR_SLOTS) do
             local id = GetInventoryItemID("player", s)
             if id and _G.FMHUD_T10_SetIDs[id] then
                 count = count + 1
@@ -671,13 +708,14 @@ SHARED_T8_INIT_LUA = """function()
         end
         if count >= 2 then
             _G.FMHUD_T10_Equipped = true
-            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
         -- Check 3: Scansione stringa Item Link & Nome oggetto (Bloodmage / Mago del Sangue / etc.)
         local nameCount = 0
-        for _, s in ipairs(slots) do
+        for _, s in ipairs(ARMOR_SLOTS) do
             local link = GetInventoryItemLink("player", s)
             if link then
                 local lk = link:lower()
@@ -696,7 +734,8 @@ SHARED_T8_INIT_LUA = """function()
         end
         if nameCount >= 2 then
             _G.FMHUD_T10_Equipped = true
-            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
@@ -707,7 +746,7 @@ SHARED_T8_INIT_LUA = """function()
             tt = CreateFrame("GameTooltip", "FMHUD_ScanTT", nil, "GameTooltipTemplate")
             _G.FMHUD_ScanTT = tt
         end
-        for _, s in ipairs(slots) do
+        for _, s in ipairs(ARMOR_SLOTS) do
             local link = GetInventoryItemLink("player", s)
             if link then
                 tt:SetOwner(UIParent, "ANCHOR_NONE")
@@ -728,18 +767,21 @@ SHARED_T8_INIT_LUA = """function()
         end
         if ttCount >= 2 then
             _G.FMHUD_T10_Equipped = true
-            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
         -- Check 5: Se il proc e' stato visto durante la sessione corrente, mantiene attivo l'equip
         if _G.FMHUD_T10_LastSeen and _G.FMHUD_T10_LastSeen > 0 then
             _G.FMHUD_T10_Equipped = true
-            _G.FMHUD_T10_EquipCache = { time = now, isEquipped = true }
+            cache.time = now
+            cache.isEquipped = true
             return true
         end
 
-        _G.FMHUD_T10_EquipCache = { time = now, isEquipped = false }
+        cache.time = now
+        cache.isEquipped = false
         return false
     end
 
@@ -788,7 +830,52 @@ SHARED_T8_INIT_LUA = """function()
         return "READY", 0, 0, icon, true
     end
 
-    _G.FMHUD_UpdateUtilityRowPositions = function()
+    -- Layout predefiniti statici per evitare allocazioni in combattimento
+    _G.FMHUD_LayoutA = {
+        ["05 - Trinket 1"]    = -115,
+        ["05 - Trinket 2"]    = -82,
+        ["06 - Cloak"]        = -49,
+        ["06 - Tier 8"]       = -16,
+        ["06 - Tier 10"]      = 16,
+        ["06 - Mana Gem"]     = 49,
+        ["06 - Combustion"]   = 82,
+        ["06 - Mirror Image"] = 115,
+    }
+    _G.FMHUD_LayoutB = {
+        ["05 - Trinket 1"]    = -114,
+        ["05 - Trinket 2"]    = -76,
+        ["06 - Cloak"]        = -38,
+        ["06 - Tier 8"]       = 0,
+        ["06 - Mana Gem"]     = 38,
+        ["06 - Combustion"]   = 76,
+        ["06 - Mirror Image"] = 114,
+    }
+    _G.FMHUD_LayoutC = {
+        ["05 - Trinket 1"]    = -114,
+        ["05 - Trinket 2"]    = -76,
+        ["06 - Cloak"]        = -38,
+        ["06 - Tier 10"]      = 0,
+        ["06 - Mana Gem"]     = 38,
+        ["06 - Combustion"]   = 76,
+        ["06 - Mirror Image"] = 114,
+    }
+    _G.FMHUD_LayoutD = {
+        ["05 - Trinket 1"]    = -110,
+        ["05 - Trinket 2"]    = -66,
+        ["06 - Cloak"]        = -22,
+        ["06 - Mana Gem"]     = 22,
+        ["06 - Combustion"]   = 66,
+        ["06 - Mirror Image"] = 110,
+    }
+
+    local lastRowUpdate = 0
+    _G.FMHUD_UpdateUtilityRowPositions = function(force)
+        local now = GetTime()
+        if not force and (now - lastRowUpdate < 0.25) then
+            return
+        end
+        lastRowUpdate = now
+
         if not WeakAuras or not WeakAuras.regions then return end
         local groupObj = WeakAuras.regions["Fire Mage 3.3.5a AM"]
         local group = groupObj and (groupObj.region or (groupObj.GetPoint and groupObj))
@@ -797,62 +884,27 @@ SHARED_T8_INIT_LUA = """function()
         local hasT8 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
         local hasT10 = _G.FMHUD_CheckT10Equipped and _G.FMHUD_CheckT10Equipped()
 
-        local layout, targetW
-        if hasT8 and hasT10 then
-            -- Scenario A: 8 Componenti (T8 + T10 contemporaneamente)
-            -- Compattazione riga a 26px, passo 33px, larghezza totale 256px sotto la barra centrale da 264px
-            -- T8 e T10 convivono proporzionatamente al centro tra Mantello (-49) e Gemma (+49)
-            targetW = 26
-            layout = {
-                ["05 - Trinket 1"]    = -115,
-                ["05 - Trinket 2"]    = -82,
-                ["06 - Cloak"]        = -49,
-                ["06 - Tier 8"]       = -16,
-                ["06 - Tier 10"]      = 16,
-                ["06 - Mana Gem"]     = 49,
-                ["06 - Combustion"]   = 82,
-                ["06 - Mirror Image"] = 115,
-            }
-        elseif hasT8 then
-            -- Scenario B: 7 Componenti (Solo T8)
-            -- Larghezza 28px, passo 38px, T8 tra Mantello e Gemma a x = 0
-            targetW = 28
-            layout = {
-                ["05 - Trinket 1"]    = -114,
-                ["05 - Trinket 2"]    = -76,
-                ["06 - Cloak"]        = -38,
-                ["06 - Tier 8"]       = 0,
-                ["06 - Mana Gem"]     = 38,
-                ["06 - Combustion"]   = 76,
-                ["06 - Mirror Image"] = 114,
-            }
-        elseif hasT10 then
-            -- Scenario C: 7 Componenti (Solo T10)
-            -- Larghezza 28px, passo 38px, T10 a sinistra della Gemma a x = 0 e Gemma a destra a x = +38
-            targetW = 28
-            layout = {
-                ["05 - Trinket 1"]    = -114,
-                ["05 - Trinket 2"]    = -76,
-                ["06 - Cloak"]        = -38,
-                ["06 - Tier 10"]      = 0,
-                ["06 - Mana Gem"]     = 38,
-                ["06 - Combustion"]   = 76,
-                ["06 - Mirror Image"] = 114,
-            }
-        else
-            -- Scenario D: 6 Componenti (Ne' T8 ne' T10, standard 6 icone simmetriche)
-            -- Larghezza 28px, passo 44px
-            targetW = 28
-            layout = {
-                ["05 - Trinket 1"]    = -110,
-                ["05 - Trinket 2"]    = -66,
-                ["06 - Cloak"]        = -22,
-                ["06 - Mana Gem"]     = 22,
-                ["06 - Combustion"]   = 66,
-                ["06 - Mirror Image"] = 110,
-            }
+        local mode = (hasT8 and hasT10 and "A") or (hasT8 and "B") or (hasT10 and "C") or "D"
+        if not force and mode == _G.FMHUD_LastLayoutMode then
+            return
         end
 
+        local layout, targetW
+        if mode == "A" then
+            targetW = 26
+            layout = _G.FMHUD_LayoutA
+        elseif mode == "B" then
+            targetW = 28
+            layout = _G.FMHUD_LayoutB
+        elseif mode == "C" then
+            targetW = 28
+            layout = _G.FMHUD_LayoutC
+        else
+            targetW = 28
+            layout = _G.FMHUD_LayoutD
+        end
+
+        local allFound = true
         for id, targetX in pairs(layout) do
             local regObj = WeakAuras.regions[id]
             local r = regObj and (regObj.region or (regObj.GetPoint and regObj))
@@ -866,7 +918,15 @@ SHARED_T8_INIT_LUA = """function()
                     r:SetWidth(targetW)
                     r:SetHeight(targetW)
                 end
+            else
+                allFound = false
             end
+        end
+
+        if allFound then
+            _G.FMHUD_LastLayoutMode = mode
+        else
+            _G.FMHUD_LastLayoutMode = nil
         end
     end
 
@@ -879,7 +939,7 @@ SHARED_T8_INIT_LUA = """function()
         local elapsed = 0
         f:SetScript("OnUpdate", function(self, delta)
             elapsed = elapsed + delta
-            if elapsed >= 0.1 then
+            if elapsed >= 0.25 then
                 elapsed = 0
                 _G.FMHUD_UpdateUtilityRowPositions()
             end
@@ -891,8 +951,9 @@ SHARED_T8_INIT_LUA = """function()
                 _G.FMHUD_T10_EquipCache = nil
                 _G.FMHUD_T8_Equipped = nil
                 _G.FMHUD_T10_Equipped = nil
+                _G.FMHUD_LastLayoutMode = nil
             end
-            _G.FMHUD_UpdateUtilityRowPositions()
+            _G.FMHUD_UpdateUtilityRowPositions(true)
         end)
         _G.FMHUD_LayoutFrame = f
     end
@@ -1354,15 +1415,20 @@ SHARED_MIRRORIMAGE_CHECK_LUA = """function()
     
     -- 1. Controllo pezzi T10 equipaggiati (Elmo 50069/51159/51284, Spalle 50073/51155/51280, Veste 50070/51158/51283, Guanti 50071/51157/51282, Gambe 50072/51156/51281)
     local hasT10_4P = false
-    local t10Pieces = {
-        [50069]=true,[51159]=true,[51284]=true,
-        [50073]=true,[51155]=true,[51280]=true,
-        [50070]=true,[51158]=true,[51283]=true,
-        [50071]=true,[51157]=true,[51282]=true,
-        [50072]=true,[51156]=true,[51281]=true,
-    }
+    local t10Pieces = _G.FMHUD_T10_4P_Pieces
+    if not t10Pieces then
+        t10Pieces = {
+            [50069]=true,[51159]=true,[51284]=true,
+            [50073]=true,[51155]=true,[51280]=true,
+            [50070]=true,[51158]=true,[51283]=true,
+            [50071]=true,[51157]=true,[51282]=true,
+            [50072]=true,[51156]=true,[51281]=true,
+        }
+        _G.FMHUD_T10_4P_Pieces = t10Pieces
+    end
+    local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
     local t10Count = 0
-    for _, slot in ipairs({1, 3, 5, 7, 10}) do
+    for _, slot in ipairs(slots) do
         local id = GetInventoryItemID("player", slot)
         if id and t10Pieces[id] then
             t10Count = t10Count + 1
