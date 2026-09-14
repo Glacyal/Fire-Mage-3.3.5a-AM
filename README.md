@@ -61,15 +61,25 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 
 ---
 
-## Come Aggiornare in Gioco (30 Secondi)
+## Modalità di Installazione e Aggiornamento in Gioco
 
-1. In gioco, digita `/wa`.
-2. Fai clic destro su **`Fire Mage HUD`** e seleziona **`Delete children and group`**.
-3. Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/FireMageHUD-335/IMPORT_STRING.txt)** e copia tutto il contenuto (`Ctrl+A`, `Ctrl+C`).
-4. In `/wa`, clicca su **Import** in alto a sinistra.
-5. Incolla la stringa con `Ctrl+V` nel riquadro.
-6. Clicca su **Import Group**.
-7. Chiudi WeakAuras (`Esc`). Fatto!
+In WeakAuras sono disponibili due modalità per installare o aggiornare l'HUD:
+
+### Metodo A: Aggiornamento Diretto (Update / Upgrade) — Più Veloce
+1. Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/FireMageHUD-335/IMPORT_STRING.txt)** e copia tutto il contenuto (`Ctrl+A`, `Ctrl+C`).
+2. In World of Warcraft, apri WeakAuras digitando `/wa`.
+3. Clicca su **Import** in alto a sinistra e incolla la stringa con `Ctrl+V`.
+4. Nella schermata di importazione di WeakAuras, seleziona **`Update Auras`** (o **`Upgrade`**).
+   - WeakAuras riconoscerà gli identificatori (UID) esistenti e aggiornerà direttamente l'HUD sul posto, mantenendo le tue posizioni a schermo!
+5. Chiudi WeakAuras (`Esc`). Fatto!
+
+### Metodo B: Reinstallazione Pulita (Reset Completo) — Consigliato se hai vecchie versioni o duplicati
+Se provieni da una configurazione modificata o vuoi ripristinare coordinate e layout originali al 100%:
+1. In `/wa`, fai clic destro su **`Fire Mage HUD`** e seleziona **`Delete children and group`**.
+2. Clicca su **Import** in alto a sinistra.
+3. Incolla la stringa da `IMPORT_STRING.txt` con `Ctrl+V`.
+4. Clicca su **`Import Group`**.
+5. Chiudi WeakAuras (`Esc`). Fatto!
 
 ---
 

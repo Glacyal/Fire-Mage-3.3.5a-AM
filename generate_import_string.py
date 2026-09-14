@@ -1,14 +1,21 @@
 """
-Generator for Fire Mage HUD WeakAuras (WoW 3.3.5a - WeakAuras 4.0.0 backport)
-Built to exactly match the native WeakAuras 4.0.0 (internalVersion 52) engine specifications.
-Includes:
-- Full ICD (Internal Cooldown) tracking for Trinket 1, Trinket 2, and Cloak.
-- Exact spell ID and case-insensitive matching for Dying Curse (60494), Sundial (60064), etc.
-- Molten Armor timer only when <= 5 minutes (clean otherwise).
-- Arcane Intellect / Arcane Brilliance monitor with <= 5 min timer and OFF warning.
-- Scorch / Improved Scorch debuff tracking with remaining seconds and <= 5s refresh alert.
-- Master scale increased by 20% (scale = 1.2).
-- Ergonomic position just above action bars (yOffset = -190).
+Fire Mage HUD WeakAuras Suite Generator (WoW 3.3.5a - WeakAuras 4.0.0 Backport)
+================================================================================
+Generatore deterministico della stringa di importazione WeakAuras (!WA:1!) per la
+suite Fire Mage Livello 80 in World of Warcraft 3.3.5a (Wrath of the Lich King).
+
+Caratteristiche Architetturali:
+- Engine Target: WeakAuras 4.0.0 (internalVersion 52) con supporto subRegions native.
+- Formato di Codifica: AceSerializer-3.0 Protocol Rev 1 + Deflate compressione zlib
+  + LibDeflate Little-Endian 6-bit Base64 encoding.
+- Gerarchia Rigorosa: Tutti i 28 moduli sono nidificati sotto il gruppo master "Fire Mage HUD"
+  per consentire spostamenti in blocco o disinstallazione pulita con un solo clic.
+- Condizione di Caricamento: Classe Mago (Player Class: Mage) e talento Living Bomb (Fire),
+  impostato su tutti i nodi foglia per conformità all'engine 3.3.5a.
+- Tracciamento Cooldown Avanzato: ICD (Internal Cooldown) software per Trinket e Mantello,
+  timer a orologio (cooldown swipe) e allerta rossa numerica (|cFFFF4444%.1fs|r) su tutti i proc.
+- Layout Ergonomico: Barre centrali da 264px (+20%), colonna buff a sinistra (x = -182),
+  fila utility a 6 icone simmetriche a y = -54.
 """
 import zlib
 
@@ -27,6 +34,7 @@ CHARS = [
 ]
 
 def serialize_string(s: str) -> str:
+    """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo."""
     res = ['^S']
     for ch in s:
         n = ord(ch)
@@ -44,7 +52,8 @@ def serialize_string(s: str) -> str:
             res.append(ch)
     return ''.join(res)
 
-def serialize_value(v):
+def serialize_value(v) -> str:
+    """Serializza ricorsivamente valori Python (None, bool, int/float, str, dict, list) in formato AceSerializer."""
     if v is None:
         return '^Z'
     elif isinstance(v, bool):
@@ -71,10 +80,12 @@ def serialize_value(v):
         return ''.join(res)
     raise ValueError(f'Unsupported type: {type(v)}')
 
-def ace_serialize(obj):
+def ace_serialize(obj) -> str:
+    """Incapsula un oggetto serializzato con l'header AceSerializer '^1' e il terminatore '^^'."""
     return '^1' + serialize_value(obj) + '^^'
 
 def libdeflate_encode_for_print(data: bytes) -> str:
+    """Codifica un buffer binario compresso secondo l'alfabeto personalizzato a 64 caratteri di LibDeflate."""
     n = len(data)
     i = 0
     buffer = []
@@ -106,14 +117,16 @@ def libdeflate_encode_for_print(data: bytes) -> str:
     
     return ''.join(buffer)
 
-def generate_wa_string(data_table):
+def generate_wa_string(data_table: dict) -> str:
+    """Serializza, comprime con Deflate (livello 9) e codifica la tabella WeakAuras generando la stringa '!WA:1!'."""
     serialized = ace_serialize(data_table)
     comp_obj = zlib.compressobj(level=9, method=zlib.DEFLATED, wbits=-15)
     compressed = comp_obj.compress(serialized.encode('latin1')) + comp_obj.flush()
     encoded = libdeflate_encode_for_print(compressed)
     return f"!WA:1!{encoded}"
 
-def make_subtext(text, justify="CENTER", anchor_point="INNER_BOTTOM", font_size=12, y_offset=0, extra_props=None):
+def make_subtext(text: str, justify: str = "CENTER", anchor_point: str = "INNER_BOTTOM", font_size: int = 12, y_offset: int = 0, extra_props: dict = None) -> dict:
+    """Genera la struttura per una subRegion di tipo subtext con font Expressway OUTLINE ad alta leggibilità."""
     res = {
         "type": "subtext",
         "text_text": text,
@@ -385,7 +398,8 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
     return finish("READY", 0, 0, nil)
 end"""
 
-def make_slot_custom_text(slot):
+def make_slot_custom_text(slot: int) -> str:
+    """Genera la closure Lua per il testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -415,7 +429,8 @@ def make_slot_custom_text(slot):
     end
 end"""
 
-def make_slot_custom_duration(slot):
+def make_slot_custom_duration(slot: int) -> str:
+    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per lo slot indicato."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -428,7 +443,8 @@ def make_slot_custom_duration(slot):
     return 0, 0
 end"""
 
-def make_slot_custom_icon(slot, default_icon):
+def make_slot_custom_icon(slot: int, default_icon: str) -> str:
+    """Genera la closure Lua per determinare dinamicamente l'icona dell'oggetto equipaggiato o del proc attivo."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -584,7 +600,8 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
     return rem, dur, exp
 end"""
 
-def make_fm_trigger():
+def make_fm_trigger() -> str:
+    """Genera il trigger Lua per Focus Magic attivo con durata residua <= 5 minuti (300s)."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
@@ -594,7 +611,8 @@ def make_fm_trigger():
     return false
 end"""
 
-def make_fm_untrigger():
+def make_fm_untrigger() -> str:
+    """Genera l'untrigger Lua per nascondere Focus Magic se > 5m o scaduto."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
@@ -604,7 +622,8 @@ def make_fm_untrigger():
     return true
 end"""
 
-def make_fm_custom_duration():
+def make_fm_custom_duration() -> str:
+    """Genera la closure Lua per la durata e scadenza dello swipe circolare di Focus Magic."""
     return f"""function()
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem, dur, exp = _G.FMHUD_CheckFM()
@@ -614,7 +633,8 @@ def make_fm_custom_duration():
     return 0, 0
 end"""
 
-def make_fm_custom_text():
+def make_fm_custom_text() -> str:
+    """Genera il conto alla rovescia (%c) per Focus Magic attivo: m:ss in giallo (> 60s), secondi in rosso (<= 60s)."""
     return f"""function()
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem = _G.FMHUD_CheckFM()
@@ -628,7 +648,8 @@ def make_fm_custom_text():
     return ""
 end"""
 
-def make_fm_off_trigger():
+def make_fm_off_trigger() -> str:
+    """Genera il trigger Lua per lo stato OFF di Focus Magic se il buff non è assegnato ad alcun alleato."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem = _G.FMHUD_CheckFM(event, ...)
@@ -638,7 +659,8 @@ def make_fm_off_trigger():
     return false
 end"""
 
-def make_fm_off_untrigger():
+def make_fm_off_untrigger() -> str:
+    """Disattiva lo stato OFF non appena Focus Magic risulta attivo su un alleato."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem = _G.FMHUD_CheckFM(event, ...)
@@ -678,7 +700,8 @@ SHARED_COMBUSTION_CHECK_LUA = """function()
     return "READY", 0, 0, 0, "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
 end"""
 
-def make_combustion_custom_text():
+def make_combustion_custom_text() -> str:
+    """Genera il testo descrittivo (%c) di Combustion con conteggio cariche critiche e pixel glow dorato."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
     local state, rem, dur, count = _G.FMHUD_CheckCombustion()
@@ -710,7 +733,8 @@ def make_combustion_custom_text():
     end
 end"""
 
-def make_combustion_custom_duration():
+def make_combustion_custom_duration() -> str:
+    """Genera la durata e scadenza per lo swipe di Combustion (CD o buff attivo)."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
     local state, rem, dur = _G.FMHUD_CheckCombustion()
@@ -762,7 +786,8 @@ SHARED_MIRRORIMAGE_CHECK_LUA = """function()
     return "READY", 0, 0, icon
 end"""
 
-def make_mirrorimage_custom_text():
+def make_mirrorimage_custom_text() -> str:
+    """Genera il testo descrittivo (%c) delle Copie (Mirror Image): durata attiva 30s con glow cyan o CD 3 min."""
     return f"""function()
     _G.FMHUD_CheckMirrorImage = _G.FMHUD_CheckMirrorImage or {SHARED_MIRRORIMAGE_CHECK_LUA}
     local state, rem, dur = _G.FMHUD_CheckMirrorImage()
@@ -792,7 +817,8 @@ def make_mirrorimage_custom_text():
     end
 end"""
 
-def make_mirrorimage_custom_duration():
+def make_mirrorimage_custom_duration() -> str:
+    """Genera la durata e scadenza per lo swipe di Mirror Image."""
     return f"""function()
     _G.FMHUD_CheckMirrorImage = _G.FMHUD_CheckMirrorImage or {SHARED_MIRRORIMAGE_CHECK_LUA}
     local state, rem, dur = _G.FMHUD_CheckMirrorImage()
@@ -802,7 +828,8 @@ def make_mirrorimage_custom_duration():
     return 0, 0
 end"""
 
-def make_mirrorimage_custom_icon():
+def make_mirrorimage_custom_icon() -> str:
+    """Restituisce la texture dell'icona di Mirror Image (Spell ID 55342)."""
     return """function()
     local icon = GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
     return icon
@@ -817,7 +844,8 @@ FIRE_MAGE_LOAD = {
     "talent": { "single": 68, "multi": { 68: True } },
 }
 
-def build_wa_tree():
+def build_wa_tree() -> dict:
+    """Costruisce e restituisce l'albero gerarchico completo delle 28 aure per WeakAuras 4.0.0 (internalVersion 52)."""
     data = {
         "m": "d",
         "v": 2000,

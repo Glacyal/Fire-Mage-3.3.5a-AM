@@ -1,37 +1,39 @@
--- =========================================================================
--- Fire Mage HUD 3.3.5a — Modulo 01: Proc & Rotazione Fire Mage
--- =========================================================================
--- Include i trigger e i testi personalizzati per:
--- 1. Hot Streak (Buff Player 48108)
--- 2. Living Bomb (Debuff Target 55360 - Active & Missing)
--- 3. Ignite (Debuff Target 12654 - Stacks & Duration)
--- 4. Combustion (Spell Cooldown 11129 & Active Buff 28682)
--- 5. Molten Fury (Talento passivo <= 35% HP Target)
--- =========================================================================
+--- =========================================================================
+--- Fire Mage HUD 3.3.5a — Modulo 01: Proc & Rotazione Fire Mage
+--- =========================================================================
+--- Gestisce le icone della riga orizzontale superiore (yOffset = +44):
+--- 1. Hot Streak (Buff 48108, timer rosso <= 3s, pixel glow dorato).
+--- 2. Clearcasting (Buff 12536, timer rosso <= 4s, pixel glow dorato).
+--- 3. Living Bomb (Debuff 55360 sul target, timer rosso <= 3s per refresh senza clippare).
+--- 4. Ignite (Debuff 12654 sul target, timer rosso <= 1.5s).
+--- 5. Scorch / Improved Scorch (Debuff 22959 sul target, timer rosso <= 5s).
+--- 6. Combustion (Stato a 3 fasi: READY, ACTIVE con stacks x%d, COOLDOWN).
+--- 7. Molten Fury (Attivo quando il target scende a <= 35% HP).
+--- =========================================================================
 
--- =========================================================================
--- 1. HOT STREAK (Buff Player)
--- =========================================================================
--- In WeakAuras puoi usare il Trigger Nativo:
--- Type: Aura | Unit: Player | Aura Type: Buff | Spell Name or ID: 48108
--- Display Text: %p (timer) e %s (stacks)
--- Animations > Start: Preset "Zoom" o "Flash"
+-- -------------------------------------------------------------------------
+-- 1. HOT STREAK (Buff Giocatore)
+-- -------------------------------------------------------------------------
 
--- Custom Trigger Event Alternativo:
--- Eventi: UNIT_AURA PLAYER_ENTERING_WORLD
+--- Rileva la presenza del proc Hot Streak sul giocatore.
+---@param event string Nome evento
+---@param unit? string Unità
+---@return boolean isProcActive
 function FireMageHUD_HotStreak_Trigger(event, unit)
     if unit and unit ~= "player" then return false end
-    local wantedName = GetSpellInfo(48108) or "Hot Streak"
+    local wanted = GetSpellInfo(48108) or "Hot Streak"
     for i = 1, 40 do
         local name = UnitBuff("player", i)
         if not name then break end
-        if name == wantedName or name == "Hot Streak" then
+        if name == wanted or name == "Hot Streak" then
             return true
         end
     end
     return false
 end
 
+--- Genera il conto alla rovescia (%c): rosso vivo <= 3s, bianco intero > 3s.
+---@return string formattedTimer
 function FireMageHUD_HotStreak_CustomText()
     for i = 1, 40 do
         local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
@@ -50,6 +52,12 @@ function FireMageHUD_HotStreak_CustomText()
     return ""
 end
 
+-- -------------------------------------------------------------------------
+-- 2. CLEARCASTING / CONCENTRAZIONE ARCANA (Buff Giocatore)
+-- -------------------------------------------------------------------------
+
+--- Genera il conto alla rovescia (%c): rosso vivo <= 4s, bianco intero > 4s.
+---@return string formattedTimer
 function FireMageHUD_Clearcasting_CustomText()
     for i = 1, 40 do
         local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
@@ -68,12 +76,12 @@ function FireMageHUD_Clearcasting_CustomText()
     return ""
 end
 
--- =========================================================================
--- 2. LIVING BOMB (Debuff Target)
--- =========================================================================
--- In WeakAuras:
--- Type: Aura | Unit: Target | Aura Type: Debuff | Own Only: Spunta | Spell ID: 55360
+-- -------------------------------------------------------------------------
+-- 3. LIVING BOMB (Debuff Bersaglio)
+-- -------------------------------------------------------------------------
 
+--- Genera il conto alla rovescia (%c): rosso vivo <= 3s prima dell'esplosione finale.
+---@return string formattedTimer
 function FireMageHUD_LivingBomb_CustomText()
     if not UnitExists("target") then return "" end
     for i = 1, 40 do
@@ -93,34 +101,12 @@ function FireMageHUD_LivingBomb_CustomText()
     return ""
 end
 
--- Custom Trigger per indicatore "LIVING BOMB MISSING" (opzionale):
--- Mostra quando hai un target vivo in combattimento ma manca Living Bomb
--- Eventi: UNIT_AURA PLAYER_TARGET_CHANGED PLAYER_REGEN_DISABLED PLAYER_REGEN_ENABLED
-function FireMageHUD_LivingBombMissing_Trigger(event, unit)
-    if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
-        return false
-    end
-    local wantedName = GetSpellInfo(55360) or "Living Bomb"
-    for i = 1, 40 do
-        local name, _, _, _, _, _, _, caster = UnitDebuff("target", i)
-        if not name then break end
-        if (name == wantedName or name == "Living Bomb") and caster == "player" then
-            return false -- Debuff presente
-        end
-    end
-    return true -- Debuff mancante sul target valido
-end
+-- -------------------------------------------------------------------------
+-- 4. IGNITE (Debuff Bersaglio)
+-- -------------------------------------------------------------------------
 
-function FireMageHUD_LivingBombMissing_CustomText()
-    return "LIVING BOMB\n|cFFFF2222MISSING|r"
-end
-
--- =========================================================================
--- 3. IGNITE (Debuff Target)
--- =========================================================================
--- In WeakAuras:
--- Type: Aura | Unit: Target | Aura Type: Debuff | Spell ID: 12654
-
+--- Genera il conto alla rovescia (%c): rosso vivo <= 1.5s, bianco con 1 decimale > 1.5s.
+---@return string formattedTimer
 function FireMageHUD_Ignite_CustomText()
     if not UnitExists("target") then return "" end
     for i = 1, 40 do
@@ -140,19 +126,20 @@ function FireMageHUD_Ignite_CustomText()
     return ""
 end
 
--- =========================================================================
--- 3b. SCORCH / IMPROVED SCORCH (Debuff Target - +5% Spell Crit)
--- =========================================================================
--- Monitora il debuff di Scorch applicato al target (Improved Scorch ID 22959,
--- Scorch o Shadow and Flame). Mostra durata residua in secondi.
--- Eventi: UNIT_AURA PLAYER_TARGET_CHANGED PLAYER_ENTERING_WORLD
+-- -------------------------------------------------------------------------
+-- 5. SCORCH / IMPROVED SCORCH (Debuff Bersaglio)
+-- -------------------------------------------------------------------------
 
+--- Rileva se il debuff di Scorch è presente sul bersaglio corrente.
+---@param event string Nome evento
+---@param unit? string Unità
+---@return boolean isDebuffPresent
 function FireMageHUD_Scorch_Trigger(event, unit)
     if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
         return false
     end
     for i = 1, 40 do
-        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
+        local name, _, _, _, _, _, _, _, _, _, spellId = UnitDebuff("target", i)
         if not name then break end
         if name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or spellId == 22959 then
             return true
@@ -161,6 +148,8 @@ function FireMageHUD_Scorch_Trigger(event, unit)
     return false
 end
 
+--- Fornisce la durata e la scadenza per lo swipe di Scorch.
+---@return number duration, number expiration
 function FireMageHUD_Scorch_Duration()
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
@@ -172,6 +161,8 @@ function FireMageHUD_Scorch_Duration()
     return 0, 0
 end
 
+--- Genera il conto alla rovescia (%c): rosso vivo <= 5s, bianco intero > 5s.
+---@return string formattedTimer
 function FireMageHUD_Scorch_CustomText()
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitDebuff("target", i)
@@ -179,30 +170,26 @@ function FireMageHUD_Scorch_CustomText()
         if name == "Improved Scorch" or name == "Scorch" or name == "Shadow and Flame" or spellId == 22959 then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem <= 5.0 then
-                return string.format("SCORCH\n|cFFFF2222%.1fs REFRESH!|r", rem)
+                return string.format("|cFFFF4444%.1fs|r", rem)
             else
-                return string.format("SCORCH\n|cFF00FF00ACTIVE %.1fs|r", rem)
+                return string.format("%.0fs", rem)
             end
         end
     end
     return ""
 end
 
--- =========================================================================
--- 4. COMBUSTION (Cooldown & Active Buff)
--- =========================================================================
--- Gestione completa a 3 stati (READY, ACTIVE, COOLDOWN):
--- Eventi: SPELL_UPDATE_COOLDOWN UNIT_AURA PLAYER_ENTERING_WORLD
+-- -------------------------------------------------------------------------
+-- 6. COMBUSTION (Cooldown & Buff Attivo con Stack)
+-- -------------------------------------------------------------------------
 
-function FireMageHUD_Combustion_Trigger(event, unit)
-    return true -- Il testo personalizzato gestisce i 3 stati
-end
-
+--- Gestione a 3 stati di Combustion: READY, ACTIVE con stacks, COOLDOWN (%c).
+---@return string statusDescription
 function FireMageHUD_Combustion_CustomText()
-    -- 1. Controllo se il Buff di Combustion è attivo sul player
+    -- 1. Controllo buff attivo sul giocatore
     local buffName = GetSpellInfo(28682) or "Combustion"
     for i = 1, 40 do
-        local name, _, _, count, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, count, _, _, expirationTime = UnitBuff("player", i)
         if not name then break end
         if name == buffName or name == "Combustion" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
@@ -210,7 +197,7 @@ function FireMageHUD_Combustion_CustomText()
         end
     end
 
-    -- 2. Controllo Cooldown della magia (Spell ID: 11129)
+    -- 2. Controllo tempo di ricarica
     local start, duration = GetSpellCooldown(11129)
     if not start or duration == 0 then
         start, duration = GetSpellCooldown("Combustion")
@@ -227,12 +214,14 @@ function FireMageHUD_Combustion_CustomText()
     return "COMBUSTION\n|cFF00FF00READY|r"
 end
 
--- =========================================================================
--- 5. MOLTEN FURY (Talento passivo <= 35% HP Target)
--- =========================================================================
--- Rileva quando il target scende sotto il 35% di vita per massimizzare il DPS
--- Eventi: PLAYER_TARGET_CHANGED UNIT_HEALTH UNIT_MAXHEALTH PLAYER_ENTERING_WORLD
+-- -------------------------------------------------------------------------
+-- 7. MOLTEN FURY (Talento Execute Bersaglio <= 35% HP)
+-- -------------------------------------------------------------------------
 
+--- Rileva quando il bersaglio scende a vita <= 35% per la fase di Execute.
+---@param event string Nome evento
+---@param unit? string Unità
+---@return boolean isExecuteActive
 function FireMageHUD_MoltenFury_Trigger(event, unit)
     if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
         return false
@@ -240,22 +229,19 @@ function FireMageHUD_MoltenFury_Trigger(event, unit)
     local max = UnitHealthMax("target") or 1
     if max <= 0 then return false end
     local cur = UnitHealth("target") or 0
-    local pct = (cur / max) * 100
-    
-    return pct <= 35.0
+    return (cur / max) * 100 <= 35.0
 end
 
+--- Disattiva l'indicatore se il bersaglio supera il 35% o muore.
+---@param event string Nome evento
+---@param unit? string Unità
+---@return boolean isExecuteInactive
 function FireMageHUD_MoltenFury_Untrigger(event, unit)
-    if not UnitExists("target") or UnitIsDeadOrGhost("target") then
-        return true
-    end
-    local max = UnitHealthMax("target") or 1
-    if max <= 0 then return true end
-    local cur = UnitHealth("target") or 0
-    return (cur / max) * 100 > 35.0
+    return not FireMageHUD_MoltenFury_Trigger(event, unit)
 end
 
+--- Testo indicatore Execute (%c).
+---@return string
 function FireMageHUD_MoltenFury_CustomText()
     return "|cFFFF5500MOLTEN FURY\nEXECUTE PHASE|r"
 end
-

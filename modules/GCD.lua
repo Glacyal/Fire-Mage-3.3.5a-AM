@@ -1,29 +1,27 @@
--- =========================================================================
--- Fire Mage HUD 3.3.5a — Modulo 09: Global Cooldown (GCD)
--- =========================================================================
--- Monitora il Global Cooldown (GCD) separatamente dal tempo di cast.
--- Utilizza la spell di riferimento standard di WotLK (ID 61304) o fallback
--- su abilità istantanee (Fire Blast / Frost Nova).
--- =========================================================================
+--- =========================================================================
+--- Fire Mage HUD 3.3.5a — Modulo 09: Global Cooldown (GCD)
+--- =========================================================================
+--- Monitora il Global Cooldown (larghezza 264px, altezza 3px, yOffset = -12).
+--- Utilizza la spell di riferimento standard WotLK 61304 (con fallback su Fire Blast).
+--- Limita rigidamente il controllo a durate <= 1.5 secondi per isolare il vero GCD.
+--- =========================================================================
 
--- =========================================================================
--- CUSTOM TRIGGER WEAKAURAS (Event-based Progress Bar)
--- =========================================================================
--- Eventi: SPELL_UPDATE_COOLDOWN PLAYER_ENTERING_WORLD
-
+--- Verifica se il Global Cooldown è attualmente in corso.
+---@param event string Nome evento WoW
+---@param unit? string Unità di riferimento
+---@return boolean isGCDActive
 function FireMageHUD_GCD_Trigger(event, unit)
     local start, duration = GetSpellCooldown(61304)
     if not start or duration == 0 or duration > 1.5 then
-        -- Fallback su Fire Blast (Spell ID 42873) o Frost Nova (Spell ID 122)
         start, duration = GetSpellCooldown(42873)
     end
-
-    if start and duration and start > 0 and duration > 0 and duration <= 1.5 then
-        return true
-    end
-    return false
+    return (start and duration and start > 0 and duration > 0 and duration <= 1.5) or false
 end
 
+--- Segnala la conclusione del Global Cooldown.
+---@param event string Nome evento WoW
+---@param unit? string Unità di riferimento
+---@return boolean isGCDInactive
 function FireMageHUD_GCD_Untrigger(event, unit)
     local start, duration = GetSpellCooldown(61304)
     if not start or duration == 0 or duration > 1.5 then
@@ -32,7 +30,10 @@ function FireMageHUD_GCD_Untrigger(event, unit)
     return (not start) or (duration == 0) or (duration > 1.5)
 end
 
--- Custom Duration Function:
+--- Fornisce durata e scadenza per la barra grafica di avanzamento del GCD.
+---@return number duration Durata del GCD (base 1.5s ridotta da Haste)
+---@return number expiration Scadenza in secondi
+---@return boolean isStatic
 function FireMageHUD_GCD_Duration()
     local start, duration = GetSpellCooldown(61304)
     if not start or duration == 0 or duration > 1.5 then
@@ -44,7 +45,8 @@ function FireMageHUD_GCD_Duration()
     return 0, 0, true
 end
 
--- Custom Text (%c opzionale per mostrare i decimi di GCD rimanente):
+--- Restituisce il valore numerico dei decimi di secondo rimanenti di GCD (%c).
+---@return string formattedSeconds
 function FireMageHUD_GCD_CustomText()
     local start, duration = GetSpellCooldown(61304)
     if not start or duration == 0 or duration > 1.5 then
@@ -56,4 +58,3 @@ function FireMageHUD_GCD_CustomText()
     end
     return ""
 end
-

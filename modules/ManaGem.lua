@@ -1,20 +1,18 @@
--- =========================================================================
--- Fire Mage HUD 3.3.5a — Modulo 06: Mana Gem (Gemma del Mana)
--- =========================================================================
--- Monitora in tempo reale la Gemma del Mana (Mana Sapphire / Mana Emerald):
--- - Posizionato nella riga delle utility sotto la barra del Mana (x = +51, y = -48).
--- - Timer di Cooldown: visualizza il countdown (%p) e lo swipe circolare quando in ricarica (2 min).
--- - Cariche Rimanenti: visualizza in basso a destra il numero di cariche rimaste (3, 2, 1) tramite %c.
--- - Allarme Cariche Esaurite: se le cariche sono 0 o non hai gemme in borsa, mostra uno "0" rosso
---   per ricordarti immediatamente di evocare una nuova gemma!
--- =========================================================================
+--- =========================================================================
+--- Fire Mage HUD 3.3.5a — Modulo 06: Mana Gem (Gemma del Mana)
+--- =========================================================================
+--- Monitora la Gemma del Mana (Mana Sapphire / Mana Emerald, x = +110, y = -54):
+--- - Visualizza il cooldown residuo (2 min) con swipe circolare al centro dell'icona.
+--- - Conta in tempo reale le cariche disponibili (3, 2, 1) mostrate in basso a destra.
+--- - Se le cariche sono esaurite o la gemma non è in borsa, mostra uno "0" rosso
+---   per avvisare immediatamente di ri-evocare la gemma prima del fight.
+--- =========================================================================
 
-local MANA_SAPPHIRE_ID = 33312 -- Livello 80 (Rank 6)
-local MANA_EMERALD_ID  = 22044 -- Livello 70 (Rank 5)
+local MANA_SAPPHIRE_ID = 33312 -- Rank 6 (Livello 80)
+local MANA_EMERALD_ID  = 22044 -- Rank 5 (Livello 70)
 
--- =========================================================================
--- CUSTOM TEXT FUNZIONE PER LE CARICHE (%c)
--- =========================================================================
+--- Restituisce il conteggio delle cariche disponibili in borsa (%c).
+---@return string cariche (es. "3", "2", "1", oppure "|cFFFF22220|r")
 function FireMageHUD_ManaGem_Charges_CustomText()
     local c = GetItemCount(MANA_SAPPHIRE_ID, nil, true) or 0
     if c == 0 then
@@ -26,9 +24,10 @@ function FireMageHUD_ManaGem_Charges_CustomText()
     return "|cFFFF22220|r"
 end
 
--- =========================================================================
--- CONTROLLO COOLDOWN GEMMA DEL MANA
--- =========================================================================
+--- Recupera i parametri di cooldown dell'oggetto per la barra/icona WeakAuras.
+---@return number startTime Inizio del cooldown
+---@return number duration Durata totale (120 secondi)
+---@return number enable 1 se abilitato
 function FireMageHUD_ManaGem_GetCooldown()
     local startTime, duration, enable = GetItemCooldown(MANA_SAPPHIRE_ID)
     if not startTime or startTime == 0 then
@@ -36,4 +35,3 @@ function FireMageHUD_ManaGem_GetCooldown()
     end
     return startTime or 0, duration or 0, enable or 1
 end
-

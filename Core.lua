@@ -1,24 +1,28 @@
--- =========================================================================
--- Fire Mage HUD 3.3.5a — Core Library & Utilities
--- Compatibile con World of Warcraft 3.3.5a (Wrath of the Lich King - Build 12340)
--- =========================================================================
+--- =========================================================================
+--- Fire Mage HUD 3.3.5a — Core Library & Utilities
+--- Compatibile con World of Warcraft 3.3.5a (Wrath of the Lich King - Build 12340)
+--- Fornisce funzioni sicure di scansione aure, formattazione, castbar e ICD.
+--- =========================================================================
 
 FireMageHUD_Core = FireMageHUD_Core or {}
 
 local Core = FireMageHUD_Core
 local Config = FireMageHUD_Config or {}
 
--- Tabella interna per il tracciamento degli Internal Cooldown (ICD) software
+--- Tabella per il tracciamento interno degli Internal Cooldown (ICD) passivi
 Core.ICD_Tracker = Core.ICD_Tracker or {
     Trinket1 = { lastProc = 0, icd = 45 },
     Trinket2 = { lastProc = 0, icd = 45 },
     Cloak    = { lastProc = 0, icd = 45 },
 }
 
--- =========================================================================
--- FUNZIONI DIAGNOSTICHE E LOGGING
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- LOGGING E DIAGNOSTICA
+-- -------------------------------------------------------------------------
 
+--- Stampa messaggi diagnostici in chat se la modalità Debug è attiva in Config.
+---@param formatStr string Stringa di formattazione compatibile con string.format
+---@param ... any Parametri opzionali per la formattazione
 function Core:Log(formatStr, ...)
     local cfg = FireMageHUD_Config or Config
     if cfg and cfg.Debug then
@@ -27,10 +31,14 @@ function Core:Log(formatStr, ...)
     end
 end
 
--- =========================================================================
--- FORMATTAZIONE NUMERI E TEMPO
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- FORMATTAZIONE NUMERI E TEMPI
+-- -------------------------------------------------------------------------
 
+--- Formatta un valore numerico in formato compatto (k, M) o esteso.
+---@param value number Il numero da formattare
+---@param mode? string "SHORT" (es. 14.8k) o "FULL" (es. 14820)
+---@return string Valore formattato
 function Core:FormatNumber(value, mode)
     if not value or value < 0 then return "0" end
     mode = mode or (Config.Mana and Config.Mana.Format) or "SHORT"
@@ -48,6 +56,9 @@ function Core:FormatNumber(value, mode)
     end
 end
 
+--- Formatta i secondi rimanenti in una stringa leggibile (m:ss, secondi interi o decimali).
+---@param seconds number Secondi da formattare
+---@return string Tempo formattato
 function Core:FormatTime(seconds)
     if not seconds or seconds <= 0 then return "0.0s" end
     if seconds >= 60 then
@@ -61,11 +72,14 @@ function Core:FormatTime(seconds)
     end
 end
 
--- =========================================================================
--- WRAPPER SICURI API AURE E BUFF / DEBUFF (3.3.5a)
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- WRAPPER SICURI API AURE (BUFF / DEBUFF)
+-- -------------------------------------------------------------------------
 
--- Cerca un Buff su un'unità per SpellID o Nome (scansione 1..40)
+--- Scansiona i buff di un'unità per SpellID o per nome (slot 1..40).
+---@param unit string Identificatore unità (es. "player", "target")
+---@param spellIdentifier number|string Spell ID numerico o nome testuale
+---@return string|nil name, string|nil rank, string|nil icon, number|nil count, number|nil duration, number|nil expirationTime, string|nil unitCaster, number|nil spellId
 function Core:FindBuff(unit, spellIdentifier)
     if not UnitExists(unit) then return nil end
     local targetName = type(spellIdentifier) == "number" and GetSpellInfo(spellIdentifier) or spellIdentifier
@@ -80,7 +94,10 @@ function Core:FindBuff(unit, spellIdentifier)
     return nil
 end
 
--- Cerca un Debuff su un'unità per SpellID o Nome (scansione 1..40)
+--- Scansiona i debuff di un'unità per SpellID o per nome (slot 1..40).
+---@param unit string Identificatore unità (es. "target")
+---@param spellIdentifier number|string Spell ID numerico o nome testuale
+---@return string|nil name, string|nil rank, string|nil icon, number|nil count, number|nil duration, number|nil expirationTime, string|nil unitCaster, number|nil spellId
 function Core:FindDebuff(unit, spellIdentifier)
     if not UnitExists(unit) then return nil end
     local targetName = type(spellIdentifier) == "number" and GetSpellInfo(spellIdentifier) or spellIdentifier
@@ -95,15 +112,16 @@ function Core:FindDebuff(unit, spellIdentifier)
     return nil
 end
 
--- =========================================================================
--- MOLTEN ARMOR MONITOR PERMANENTE
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- STATO MOLTEN ARMOR E MOLTEN FURY
+-- -------------------------------------------------------------------------
 
+--- Controlla la presenza e la durata residua di Molten Armor sul giocatore.
+---@return boolean isPresent, string name, string icon, number remainingSeconds
 function Core:CheckMoltenArmor()
     local spells = (Config.Spells and Config.Spells.MoltenArmor) or { 43046, 43045, 30482 }
     local nameFallback = (Config.Spells and Config.Spells.MoltenArmor and Config.Spells.MoltenArmor.Name) or "Molten Armor"
 
-    -- Prova con i rank ID
     if type(spells) == "table" then
         for _, id in pairs(spells) do
             if type(id) == "number" then
@@ -116,7 +134,6 @@ function Core:CheckMoltenArmor()
         end
     end
 
-    -- Prova per nome
     local name, rank, icon, count, duration, expirationTime = Core:FindBuff("player", nameFallback)
     if name then
         local rem = expirationTime and (expirationTime > 0) and math.max(0, expirationTime - GetTime()) or 0
@@ -126,10 +143,8 @@ function Core:CheckMoltenArmor()
     return false, nameFallback, "Interface\\Icons\\Spell_Fire_Incinerate", 0
 end
 
--- =========================================================================
--- MOLTEN FURY STATUS (Talento <= 35% HP Target)
--- =========================================================================
-
+--- Verifica se il bersaglio si trova nella fase di Execute (vita <= 35% per Molten Fury).
+---@return boolean isExecuteActive, number currentHpPercent
 function Core:CheckMoltenFury()
     if not UnitExists("target") or UnitIsDeadOrGhost("target") then
         return false, 0
@@ -143,10 +158,13 @@ function Core:CheckMoltenFury()
     return (pct <= threshold), pct
 end
 
--- =========================================================================
--- TARGET & FOCUS HEALTH & STATUS
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- STATO VITA TARGET E FOCUS
+-- -------------------------------------------------------------------------
 
+--- Restituisce i dati di salute correnti e massimi per un'unità.
+---@param unit string Identificatore unità (es. "target", "focus")
+---@return boolean exists, string name, number currentHp, number maxHp, number percent, boolean isDead
 function Core:GetUnitHealthData(unit)
     if not UnitExists(unit) then
         return false, "NO " .. string.upper(unit), 0, 0, 0, false
@@ -160,32 +178,35 @@ function Core:GetUnitHealthData(unit)
     return true, name, cur, max, pct, isDead
 end
 
--- =========================================================================
--- CASTBAR & CHANNELING STATUS (3.3.5a)
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- CASTBAR E CANALIZZAZIONE (3.3.5a)
+-- -------------------------------------------------------------------------
 
+--- Recupera i dettagli del cast o della canalizzazione in corso per un'unità.
+---@param unit? string Identificatore unità (predefinito: "player")
+---@return string castType "CAST", "CHANNEL" oppure "NONE"
+---@return string|nil spellName Nome della magia
+---@return string|nil icon Texture icona
+---@return number elapsed Tempo trascorso in secondi
+---@return number remaining Tempo rimanente in secondi
+---@return number duration Durata complessiva in secondi
+---@return boolean notInterruptible Vero se il lancio è protetto da interruzioni
 function Core:GetCastOrChannelInfo(unit)
     unit = unit or "player"
     
-    -- Controllo Cast standard
     local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
     if spell then
         local now = GetTime() * 1000
-        local startSec = startTime / 1000
-        local endSec = endTime / 1000
-        local duration = endSec - startSec
+        local duration = (endTime - startTime) / 1000
         local elapsed = (now - startTime) / 1000
         local remaining = (endTime - now) / 1000
         return "CAST", spell, icon, elapsed, remaining, duration, notInterruptible
     end
 
-    -- Controllo Channeling (es. Evocation, Blizzard)
     spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
     if spell then
         local now = GetTime() * 1000
-        local startSec = startTime / 1000
-        local endSec = endTime / 1000
-        local duration = endSec - startSec
+        local duration = (endTime - startTime) / 1000
         local remaining = (endTime - now) / 1000
         local elapsed = duration - remaining
         return "CHANNEL", spell, icon, elapsed, remaining, duration, notInterruptible
@@ -194,15 +215,16 @@ function Core:GetCastOrChannelInfo(unit)
     return "NONE", nil, nil, 0, 0, 0, false
 end
 
--- =========================================================================
+-- -------------------------------------------------------------------------
 -- GLOBAL COOLDOWN (GCD)
--- =========================================================================
+-- -------------------------------------------------------------------------
 
+--- Calcola lo stato del Global Cooldown via spell 61304 o fallback su Fire Blast.
+---@return boolean isActive, number startTime, number duration, number remaining
 function Core:GetGCD()
     local gcdSpell = (Config.Spells and Config.Spells.GCDReferenceSpell) or 61304
     local start, duration = GetSpellCooldown(gcdSpell)
     
-    -- Fallback su Fire Blast se la reference spell non è disponibile
     if not start or duration == 0 or duration > 1.5 then
         local fbSpell = (Config.Spells and Config.Spells.FireBlast and Config.Spells.FireBlast.SpellID) or 42873
         start, duration = GetSpellCooldown(fbSpell)
@@ -216,21 +238,31 @@ function Core:GetGCD()
     return false, 0, 0, 0
 end
 
--- =========================================================================
--- TRINKET & CLOAK TRACKER (On-Use vs Proc Buff + ICD)
--- =========================================================================
+-- -------------------------------------------------------------------------
+-- TRACCIAMENTO TRINKET E MANTELLO (On-Use vs Proc Passivo + ICD)
+-- -------------------------------------------------------------------------
 
+--- Determina lo stato operativo di uno slot di equipaggiamento (13, 14 o 15).
+---@param slot number Numero slot (13, 14 o 15)
+---@param buffID? number ID buff opzionale per il monitoraggio proc
+---@param customICD? number Secondi di Internal Cooldown per proc passivi
+---@param isOnUse? boolean Vero se l'oggetto è ad attivazione manuale
+---@return string state "ACTIVE", "COOLDOWN", oppure "READY"
+---@return string name Nome dell'oggetto o slot
+---@return string icon Texture icona
+---@return number remaining Tempo rimanente
+---@return number duration Durata totale
+---@return number count Cariche o stack
 function Core:GetEquipSlotStatus(slot, buffID, customICD, isOnUse)
     local itemID = GetInventoryItemID("player", slot)
     local itemName, _, _, _, _, _, _, _, _, itemTexture = itemID and GetItemInfo(itemID) or nil
     itemName = itemName or ("Slot " .. slot)
 
-    -- 1. Controllo Buff Proc attivo (se specificato)
+    -- 1. Buff proc attivo
     if buffID and buffID > 0 then
         local bName, bRank, bIcon, bCount, bDur, bExp = Core:FindBuff("player", buffID)
         if bName then
             local rem = bExp and (bExp > 0) and math.max(0, bExp - GetTime()) or 0
-            -- Aggiorna l'ultimo momento di proc per il calcolo dell'ICD
             if slot == 13 then Core.ICD_Tracker.Trinket1.lastProc = GetTime() end
             if slot == 14 then Core.ICD_Tracker.Trinket2.lastProc = GetTime() end
             if slot == 15 then Core.ICD_Tracker.Cloak.lastProc = GetTime() end
@@ -238,7 +270,7 @@ function Core:GetEquipSlotStatus(slot, buffID, customICD, isOnUse)
         end
     end
 
-    -- 2. Controllo Cooldown On-Use da API
+    -- 2. Cooldown nativo Blizzard On-Use
     local start, duration, enable = GetInventoryItemCooldown("player", slot)
     if start and duration and start > 0 and duration > 1.5 then
         local rem = (start + duration) - GetTime()
@@ -247,7 +279,7 @@ function Core:GetEquipSlotStatus(slot, buffID, customICD, isOnUse)
         end
     end
 
-    -- 3. Controllo ICD Software per Proc Passivi
+    -- 3. ICD stimato per proc passivi
     local lastProcInfo = (slot == 13 and Core.ICD_Tracker.Trinket1)
                       or (slot == 14 and Core.ICD_Tracker.Trinket2)
                       or (slot == 15 and Core.ICD_Tracker.Cloak)
@@ -263,4 +295,3 @@ function Core:GetEquipSlotStatus(slot, buffID, customICD, isOnUse)
     -- 4. Oggetto pronto
     return "READY", itemName, itemTexture, 0, 0, 0
 end
-

@@ -77,32 +77,38 @@ Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scal
 │   ├── Scorch (icon: custom status trigger debuff su target, countdown esatto, alert rosso <=5s)
 │   └── Molten Fury (icon: unit Health target <= 35%, subtext "35%")
 │
-├── 02 - Molten Armor (group: ala sinistra HUD, xOffset: -160, yOffset: -14)
+├── 02 - Molten Armor (group: colonna sinistra HUD, xOffset: -182, yOffset: -18)
 │   ├── Molten Armor - Active (icon: compare SOLO se <= 5 min con timer m:ss / ss, nascosto se > 5m)
 │   └── Molten Armor - OFF (icon: aura2 buff missing, icona desaturata con avviso rosso "OFF")
 │
-├── 03 - Arcane Intellect (group: ala sinistra HUD, xOffset: -160, yOffset: +22)
+├── 03 - Arcane Intellect (group: colonna sinistra HUD, xOffset: -182, yOffset: +18)
 │   ├── Arcane Intellect - Active (icon: compare SOLO se <= 5 min con timer m:ss / ss, nascosto se > 5m)
 │   └── Arcane Intellect - OFF (icon: aura2 buff missing, icona desaturata con avviso rosso "OFF")
 │
-├── 04 - Focus Magic (group: ala destra HUD, xOffset: +160, yOffset: -7)
+├── 04 - Focus Magic (group: colonna sinistra HUD, xOffset: -182, yOffset: -54)
 │   ├── Focus Magic - Active (icon: compare SOLO se <= 5 min con countdown scadenza se applicato)
 │   └── Focus Magic - OFF (custom status trigger: scansione raid/party/target/focus, sparisce se applicato)
 │
-├── 05 - Trinket 1 (icon: Slot 13, On-Use CD + ICD passivi, swipe Blizzlike, golden glow, xOffset: -90, yOffset: -54)
-├── 05 - Trinket 2 (icon: Slot 14, 100% simmetrico a Trinket 1, xOffset: -54, yOffset: -54)
-├── 06 - Cloak (icon: Slot 15 ricamo mantello con ICD, xOffset: -18, yOffset: -54)
-├── 06 - Combustion (icon: a sinistra di Mirror Image, stack quando attiva, swipe CD, xOffset: +18, yOffset: -54)
-├── 06 - Mirror Image (icon: copie tra Combustion e Gemma, 30s attivo con glow, swipe CD, xOffset: +54, yOffset: -54)
-├── 06 - Mana Gem (icon: cariche + swipe CD, xOffset: +90, yOffset: -54)
+├── 05 - Trinket 1 (icon: Slot 13, On-Use CD + ICD passivi, swipe Blizzlike, golden glow, xOffset: -110, yOffset: -54)
+├── 05 - Trinket 2 (icon: Slot 14, 100% simmetrico a Trinket 1, xOffset: -66, yOffset: -54)
+├── 06 - Cloak (icon: Slot 15 ricamo mantello con ICD, xOffset: -22, yOffset: -54)
+├── 06 - Combustion (icon: a sinistra di Mirror Image, stack quando attiva, swipe CD, xOffset: +22, yOffset: -54)
+├── 06 - Mirror Image (icon: copie tra Combustion e Gemma, 30s attivo con glow, swipe CD, xOffset: +66, yOffset: -54)
+├── 06 - Mana Gem (icon: cariche + swipe CD, xOffset: +110, yOffset: -54)
 │
-├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -23, width: 220, height: 14, solo % a 2 decimali)
-├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 220, height: 20)
-├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -12, width: 220, height: 3)
+├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -23, width: 264, height: 14, % con 2 decimali, rossa <= 20%)
+├── 08 - Castbar (aurabar: unit Cast player con icona a sinistra, yOffset: 0, width: 264, height: 20)
+├── 09 - GCD (aurabar: spell Cooldown Progress 61304, yOffset: -12, width: 264, height: 3)
 │
 └── 10 - Alerts (group: yOffset: +105)
     └── Alert - Hot Streak (text: aura2 buff "Hot Streak", large text expressway outline)
 ```
+
+---
+
+## Modalità di Aggiornamento per l'Utente
+- **Metodo A (Update / Upgrade)**: In `/wa` -> Import -> Incolla -> clic su `Update Auras`. Sovrascrive direttamente le aure esistenti mantenendo le impostazioni.
+- **Metodo B (Clean Reset)**: In `/wa` -> Clic destro su `Fire Mage HUD` -> `Delete children and group` -> Import -> `Import Group`.
 
 ---
 

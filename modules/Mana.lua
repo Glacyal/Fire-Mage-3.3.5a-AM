@@ -1,24 +1,15 @@
--- =========================================================================
--- Fire Mage HUD 3.3.5a — Modulo 07: Mana Bar
--- =========================================================================
--- Questo file contiene il codice per la Progress Bar del Mana in WeakAuras.
--- È progettato per essere autonomo e modificabile direttamente in /wa.
--- =========================================================================
+--- =========================================================================
+--- Fire Mage HUD 3.3.5a — Modulo 07: Barra del Mana
+--- =========================================================================
+--- Gestisce il monitoraggio in tempo reale della percentuale di Mana del Mago.
+--- - Mostra unicamente la percentuale con due cifre decimali (es. "85.24%").
+--- - Transizione cromatica dinamica: Blu standard tra 20% e 100%, Rosso vivo <= 20%.
+--- =========================================================================
 
--- =========================================================================
--- OPZIONE A: Trigger Nativo WeakAuras (Consigliato per la barra grafica)
--- =========================================================================
--- Tipo: Status
--- Status: Power (o Mana)
--- Unit: Player
--- Power Type: Mana
-
--- =========================================================================
--- OPZIONE B: Custom Trigger (Event-based per massima compatibilità 3.3.5a)
--- =========================================================================
--- Eventi: UNIT_POWER_UPDATE UNIT_MAXPOWER UNIT_MANA UNIT_MAXMANA PLAYER_ENTERING_WORLD
-
--- Custom Trigger Function:
+--- Trigger per l'aggiornamento del mana su eventi di potenza o ingresso nel mondo.
+---@param event string Nome evento WoW
+---@param unit string Unità associata all'evento
+---@return boolean isValid Vero se l'evento riguarda il giocatore
 function FireMageHUD_Mana_Trigger(event, unit)
     if event == "UNIT_POWER_UPDATE" or event == "UNIT_MANA" or event == "UNIT_MAXMANA" or event == "UNIT_MAXPOWER" then
         if unit ~= "player" then return false end
@@ -26,19 +17,18 @@ function FireMageHUD_Mana_Trigger(event, unit)
     return true
 end
 
--- Custom Duration Function:
+--- Calcola i valori correnti e massimi per la barra grafica di avanzamento.
+---@return number currentMana Mana attuale
+---@return number maxMana Mana massimo
+---@return boolean isStatic Vero per barre di stato standard
 function FireMageHUD_Mana_Duration()
     local cur = UnitPower("player", 0) or UnitMana("player") or 0
     local max = UnitPowerMax("player", 0) or UnitManaMax("player") or 1
     return cur, max, true
 end
 
--- =========================================================================
--- TESTO PERSONALIZZATO (%c) PER WEAKAURAS
--- =========================================================================
--- Inserisci questo codice nel campo "Custom Function" del testo della barra (%c).
--- Mostra: Solo la Percentuale con due decimali (es. "85.24%")
-
+--- Genera il testo personalizzato (%c) formattato come percentuale con due decimali.
+---@return string Testo percentuale (es. "85.24%")
 function FireMageHUD_Mana_CustomText()
     local cur = UnitPower("player", 0) or UnitMana("player") or 0
     local max = UnitPowerMax("player", 0) or UnitManaMax("player") or 1
@@ -47,12 +37,3 @@ function FireMageHUD_Mana_CustomText()
 
     return string.format("%.2f%%", pct)
 end
-
--- =========================================================================
--- CONDIZIONI DI COLORE DINAMICHE (Configurabili in /wa > Tab 'Conditions')
--- =========================================================================
--- Condition 1: If Power(%) <= 15  --> Color = Rosso Critico (#FF1A1A) + Animazione Glow/Flash
--- Condition 2: If Power(%) <= 30  --> Color = Arancione (#FF7300)
--- Condition 3: If Power(%) <= 50  --> Color = Giallo (#FFD700)
--- Condition 4: If Power(%) > 50   --> Color = Blu Mana (#0088FF)
-
