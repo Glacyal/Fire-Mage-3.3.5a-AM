@@ -11,27 +11,30 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 
 ## Novità di Questo Aggiornamento
 
-1. **Entrambi i Trinket Funzionanti (Slot 13 e 14) & Animazione a Orologio (Radial Clock Swipe)**:
-   - **Supporto Totale per Entrambi i Trinket**: Risolto il mancato proc sul secondo trinket (es. *The Dying Curse* su Slot 13 e *Sundial of the Exiled* su Slot 14). Riconoscimento garantito al 100% indipendente da maiuscole/minuscole, punteggiatura o spell ID.
-   - **Caricamento Stile Orologio Blizzard (Swipe Radiale)**: Abilitato nativamente (`cooldown: true`, `cooldownSwipe: true`) su tutti i moduli: sia durante la durata del proc attivo sia durante il countdown dell'ICD (Internal Cooldown), l'icona mostra l'animazione rotatoria a orologio oltre ai secondi rimanenti.
-   - **Tracciamento Indipendente**: Slot 13, Slot 14 e Mantello (Slot 15) hanno timer e cooldown interni separati che non interferiscono tra loro anche in caso di procs simultanei.
+1. **Combustion nella Fila Utility a Sinistra della Mana Gem**:
+   - **Posizione**: Collocata a sinistra di Mana Gem (`x = +36, y = -54`), perfettamente allineata nella fila inferiore.
+   - **Comportamento identico a Trinket e Mantello**:
+     - **READY**: Icona visibile a colori pieni, pronta al cast, senza scritte.
+     - **ATTIVA**: Pixel Glow dorato animato brillante, contatore di cariche/stack all'interno dell'icona (`x%d`).
+     - **IN COOLDOWN**: Animazione a orologio (radial clock swipe Blizzard) con conto alla rovescia del CD in tempo reale (`m:ss` o secondi).
+     - **DI NUOVO PRONTA**: Lo swipe si completa, il glow si spegne e l'icona torna pulita.
 
-2. **Combustion Attiva-Only con Numero di Stack all'Interno dell'Icona**:
-   - **Visibile Solo se Attiva**: Quando Combustion è pronta o in cooldown, l'icona è **completamente nascosta** per non occupare spazio.
-   - **Numero di Stack Centrato**: Non appena viene attivata, compare nel gruppo dinamico dei Proc mostrando al centro dell'icona il numero di cariche/stack rimanenti (`3`, `2`, `1`) a caratteri grandi (dimensione 18) con **Pixel Glow dorato animato**. Al consumo dell'ultima carica, scompare all'istante.
+2. **Tutti i Buff Nascosti se > 5 Minuti (Molten Armor, Intellect e Focus Magic)**:
+   - **Invisibili > 5 min**: Quando Molten Armor, Arcane Intellect (*Arcane Brilliance*, *Dalaran Brilliance*, ecc.) o Focus Magic hanno più di 5 minuti residui, sono **completamente nascosti** per pulizia visiva totale durante i boss fight e in raid.
+   - **Conto alla Rovescia <= 5 min**: Appena un buff scende sotto i 5 minuti (300 secondi), l'icona appare automaticamente con conto alla rovescia in giallo (`4:59`, `3:20`, `45s`) e animazione swipe a orologio per preparare il refresh.
+   - **Allerta OFF se Mancante/Scaduto**: Se il buff non è attivo sul giocatore o è scaduto (o Focus Magic non è assegnato a nessuno), compare l'icona desaturata grigia con avviso rosso **`OFF`**.
 
-3. **Molten Armor e Arcane Intellect Nascosti se > 5 Minuti**:
-   - **Nessun Ingombro Visivo**: Se Molten Armor o Intellect (*Arcane Intellect*, *Arcane Brilliance*, *Dalaran Brilliance*, ecc.) hanno più di 5 minuti di durata residua, le icone rimangono **completamente nascoste**.
-   - **Comparsa Automatica <= 5 Minuti**: Appaiono solo quando mancano 5 minuti o meno alla scadenza, mostrando il timer preciso di countdown (`4:30`, `45s`) e l'animazione a orologio.
-   - **Allerta OFF**: Se il buff scade o manca del tutto, compare l'icona desaturata con la scritta rossa **`OFF`**.
+3. **Entrambi i Trinket Funzionanti (Slot 13 e 14) & Mantello (Slot 15)**:
+   - **Supporto Completo per Entrambi gli Slot**: Monitoraggio affidabile sia su Slot 13 che su Slot 14 con riconoscimento per ID e per nome buff, e slot Mantello (Slot 15).
+   - **Caricamento Stile Orologio Blizzard (Swipe Radiale)**: Abilitato nativamente (`cooldownSwipe: true`) sia durante la durata del proc attivo sia durante il countdown dell'ICD (Internal Cooldown per il prossimo riproc).
+   - **Pixel Glow Dorato**: Evidenziazione visiva immediata quando il proc si attiva.
 
 4. **Tracciamento Debuff Scorch / Improved Scorch**:
-   - Integrato nel gruppo dinamico `01 - Procs` con icona, swipe circolare e secondi residui.
-   - Allerta colorazione rossa quando il debuff scende sotto i 5 secondi.
+   - Integrato nel gruppo dinamico `01 - Procs` con swipe circolare e secondi residui (con allerta rossa sotto i 5 secondi).
 
-5. **Scala Aumentata del +20% e Posizionamento Perfetto**:
-   - Master scale impostato a **`1.2`** (+20% di grandezza complessiva).
-   - Coordinata verticale impostata a **`yOffset = -190`**, posizionando l'intero HUD subito sopra le barre delle abilità di gioco senza coprire il personaggio o il combattimento.
+5. **Mana Bar e Scala Generale**:
+   - Barra del Mana con visualizzazione percentuale fino alla seconda cifra decimale (es. `85.24%`).
+   - Master scale **`1.2`** (+20% di grandezza) con coordinata `yOffset = -190` (sopra le action bar).
 
 ---
 
@@ -57,21 +60,21 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 │   ├── Living Bomb (Icona 34x34 + Timer debuff sul Target)
 │   ├── Ignite (Icona 34x34 + Timer debuff sul Target)
 │   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer + Avviso <= 5s)
-│   ├── Combustion (Icona 34x34 attiva-only + Stacks centrati grandezza 18 + Glow dorato)
 │   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
-├── Ala Sinistra (Colonna Utility Personali - x = -160, 34px di spazio dalla Castbar)
+├── Ala Sinistra (Colonna Buff Personali - x = -160, 34px dalla Castbar)
 │   ├── 03 - Arcane Intellect (y = +22, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
 │   └── 02 - Molten Armor     (y = -16, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
 │
-├── Ala Destra (Colonna Supporto Raid - x = +160, 33px di spazio dalla Castbar)
-│   └── 04 - Focus Magic      (y = -7, size 34x34: Timer attivo o OFF grigio se non assegnato)
+├── Ala Destra (Colonna Buff Supporto - x = +160, 33px dalla Castbar)
+│   └── 04 - Focus Magic      (y =  -7, size 34x34: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
 │
-├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar)
-│   ├── 05 - Trinket 1 (x = -60, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2 (x = -20, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak     (x = +20, size 28x28: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   └── 06 - Mana Gem  (x = +60, size 28x28: Cooldown al centro + Cariche in alto a destra)
+├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 5 icone 28x28 centrate)
+│   ├── 05 - Trinket 1    (x = -72: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 05 - Trinket 2    (x = -36: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Cloak        (x =   0: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Combustion   (x = +36: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   └── 06 - Mana Gem     (x = +72: Cooldown al centro + Cariche in alto a destra)
 │
 ├── Cluster Centrale
 │   ├── 08 - Castbar  (y =   0, w = 220, h = 20: Testo spell a sx, tempo a dx, no icona)
@@ -86,6 +89,6 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 
 ## Controllo Versione (Git)
 
-Il progetto è versionato con Git ed è sincronizzato sulla repository remota privata di GitHub:
+Il progetto è versionato con Git ed è sincronizzato sulla repository remota di GitHub:
 - **Repository Remota**: [Glacyal/FireMageHUD-335](https://github.com/Glacyal/FireMageHUD-335)
 - **Branch**: `main`

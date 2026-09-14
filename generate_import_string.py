@@ -336,6 +336,285 @@ def make_slot_custom_icon(slot, default_icon):
     return GetInventoryItemTexture("player", {slot}) or "{default_icon}"
 end"""
 
+SHARED_FM_CHECK_LUA = """function(event, ...)
+    FMHUD_State = FMHUD_State or {}
+    local now = GetTime()
+
+    if event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unit, spell = ...
+        if unit == "player" and spell == "Focus Magic" then
+            FMHUD_State.FMTarget = UnitName("target") or "Ally"
+            FMHUD_State.FMExpires = now + 1800
+            FMHUD_State.FMDur = 1800
+        end
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
+        if sourceGUID == UnitGUID("player") and (spellName == "Focus Magic" or spellId == 54646) then
+            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
+                FMHUD_State.FMTarget = destName or "Ally"
+                FMHUD_State.FMExpires = now + 1800
+                FMHUD_State.FMDur = 1800
+            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
+                FMHUD_State.FMExpires = 0
+                FMHUD_State.FMTarget = nil
+            end
+        elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
+            FMHUD_State.FMExpires = 0
+            FMHUD_State.FMTarget = nil
+        end
+    end
+
+    local b = "Focus Magic"
+    local found = false
+
+    if UnitExists("target") and UnitIsFriend("player", "target") then
+        for i = 1, 40 do
+            local n, _, _, _, _, dur, exp, c = UnitBuff("target", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then
+                if exp and exp > 0 then
+                    FMHUD_State.FMExpires = exp
+                    FMHUD_State.FMDur = dur or 1800
+                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                end
+                FMHUD_State.FMTarget = UnitName("target")
+                found = true
+                break
+            end
+        end
+    end
+
+    if not found and UnitExists("focus") and UnitIsFriend("player", "focus") then
+        for i = 1, 40 do
+            local n, _, _, _, _, dur, exp, c = UnitBuff("focus", i)
+            if not n then break end
+            if n == b and (c == "player" or not c) then
+                if exp and exp > 0 then
+                    FMHUD_State.FMExpires = exp
+                    FMHUD_State.FMDur = dur or 1800
+                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                end
+                FMHUD_State.FMTarget = UnitName("focus")
+                found = true
+                break
+            end
+        end
+    end
+
+    if not found then
+        local nr = GetNumRaidMembers()
+        if nr and nr > 0 then
+            for r = 1, nr do
+                local u = "raid"..r
+                for i = 1, 40 do
+                    local n, _, _, _, _, dur, exp, c = UnitBuff(u, i)
+                    if not n then break end
+                    if n == b and (c == "player" or not c) then
+                        if exp and exp > 0 then
+                            FMHUD_State.FMExpires = exp
+                            FMHUD_State.FMDur = dur or 1800
+                        elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                            FMHUD_State.FMExpires = now + 1800
+                            FMHUD_State.FMDur = 1800
+                        end
+                        FMHUD_State.FMTarget = UnitName(u)
+                        found = true
+                        break
+                    end
+                end
+                if found then break end
+            end
+        else
+            local np = GetNumPartyMembers()
+            if np and np > 0 then
+                for p = 1, np do
+                    local u = "party"..p
+                    for i = 1, 40 do
+                        local n, _, _, _, _, dur, exp, c = UnitBuff(u, i)
+                        if not n then break end
+                        if n == b and (c == "player" or not c) then
+                            if exp and exp > 0 then
+                                FMHUD_State.FMExpires = exp
+                                FMHUD_State.FMDur = dur or 1800
+                            elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                                FMHUD_State.FMExpires = now + 1800
+                                FMHUD_State.FMDur = 1800
+                            end
+                            FMHUD_State.FMTarget = UnitName(u)
+                            found = true
+                            break
+                        end
+                    end
+                    if found then break end
+                end
+            end
+        end
+    end
+
+    if not found then
+        for i = 1, 40 do
+            local n, _, _, _, _, dur, exp = UnitBuff("player", i)
+            if not n then break end
+            if n == b then
+                if exp and exp > 0 then
+                    FMHUD_State.FMExpires = exp
+                    FMHUD_State.FMDur = dur or 1800
+                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                end
+                found = true
+                break
+            end
+        end
+    end
+
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    local dur = FMHUD_State.FMDur or 1800
+    local exp = FMHUD_State.FMExpires or 0
+    return rem, dur, exp
+end"""
+
+def make_fm_trigger():
+    return f"""function(event, ...)
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
+    if rem > 0 and rem <= 300 then
+        return true
+    end
+    return false
+end"""
+
+def make_fm_untrigger():
+    return f"""function(event, ...)
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
+    if rem > 0 and rem <= 300 then
+        return false
+    end
+    return true
+end"""
+
+def make_fm_custom_duration():
+    return f"""function()
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem, dur, exp = _G.FMHUD_CheckFM()
+    if rem > 0 and rem <= 300 then
+        return dur, exp
+    end
+    return 0, 0
+end"""
+
+def make_fm_custom_text():
+    return f"""function()
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem = _G.FMHUD_CheckFM()
+    if rem > 60 then
+        local m = math.floor(rem / 60)
+        local s = math.floor(rem % 60)
+        return string.format("|cFFFFFF00%d:%02d|r", m, s)
+    elseif rem > 0 then
+        return string.format("|cFFFF4444%.0fs|r", rem)
+    end
+    return ""
+end"""
+
+def make_fm_off_trigger():
+    return f"""function(event, ...)
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem = _G.FMHUD_CheckFM(event, ...)
+    if rem <= 0 then
+        return true
+    end
+    return false
+end"""
+
+def make_fm_off_untrigger():
+    return f"""function(event, ...)
+    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
+    local rem = _G.FMHUD_CheckFM(event, ...)
+    if rem <= 0 then
+        return false
+    end
+    return true
+end"""
+
+SHARED_COMBUSTION_CHECK_LUA = """function()
+    local now = GetTime()
+    
+    -- 1. Check if Combustion buff is ACTIVE on player
+    for i = 1, 40 do
+        local name, _, icon, count, _, duration, expirationTime = UnitBuff("player", i)
+        if not name then break end
+        if name == "Combustion" then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local dur = duration and duration > 0 and duration or 0
+            return "ACTIVE", rem, dur, count or 1, icon or "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
+        end
+    end
+    
+    -- 2. Check if Combustion spell is on COOLDOWN (Spell ID 11129)
+    local start, duration = GetSpellCooldown(11129)
+    if not start or duration == 0 then
+        start, duration = GetSpellCooldown("Combustion")
+    end
+    if start and duration and start > 0 and duration > 1.5 then
+        local remCD = (start + duration) - now
+        if remCD > 0.1 then
+            return "COOLDOWN", remCD, duration, 0, "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
+        end
+    end
+    
+    -- 3. READY
+    return "READY", 0, 0, 0, "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
+end"""
+
+def make_combustion_custom_text():
+    return f"""function()
+    _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
+    local state, rem, dur, count = _G.FMHUD_CheckCombustion()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {{1, 0.85, 0.1, 1}}, 8, 0.25, 10, 2)
+        end
+        if count and count > 0 then
+            return string.format("|cFFFFFF00x%d|r", count)
+        elseif rem > 0 then
+            return string.format("|cFFFFFF00%.1fs|r", rem)
+        end
+        return "|cFFFFFF00ON|r"
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        if state == "COOLDOWN" and rem > 0.1 then
+            if rem >= 60 then
+                local m = math.floor(rem / 60)
+                local s = math.floor(rem % 60)
+                return string.format("%d:%02d", m, s)
+            else
+                return string.format("%.0f", rem)
+            end
+        end
+        return ""
+    end
+end"""
+
+def make_combustion_custom_duration():
+    return f"""function()
+    _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
+    local state, rem, dur = _G.FMHUD_CheckCombustion()
+    if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end"""
+
 def build_wa_tree():
     data = {
         "m": "d",
@@ -359,6 +638,7 @@ def build_wa_tree():
                 "05 - Trinket 1",
                 "05 - Trinket 2",
                 "06 - Cloak",
+                "06 - Combustion",
                 "06 - Mana Gem",
                 "07 - Mana Bar",
                 "08 - Castbar",
@@ -390,7 +670,6 @@ def build_wa_tree():
                     "Living Bomb",
                     "Ignite",
                     "Scorch",
-                    "Combustion",
                     "Molten Fury"
                 ],
             },
@@ -577,53 +856,6 @@ def build_wa_tree():
                 "subRegions": [
                     { "type": "subbackground" },
                     make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
-                ],
-            },
-            # Combustion (Active Only - Shows Stacks Inside Icon)
-            {
-                "id": "Combustion",
-                "uid": "FMHUD_COMBUSTION",
-                "parent": "01 - Procs",
-                "regionType": "icon",
-                "internalVersion": 52,
-                "width": 34,
-                "height": 34,
-                "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
-                "auto": True,
-                "color": [1, 1, 1, 1],
-                "cooldown": True,
-                "cooldownSwipe": True,
-                "cooldownEdge": True,
-                "cooldownTextDisabled": True,
-                "inverse": False,
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "aura2",
-                            "unit": "player",
-                            "auranames": ["Combustion"],
-                            "auraspellids": [11129, 28682, 29977],
-                            "useName": True,
-                            "debuffType": "HELPFUL",
-                            "matchesShowOn": "showOnActive",
-                            "ownOnly": True,
-                        },
-                        "untrigger": {}
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    make_subtext("%s", justify="CENTER", anchor_point="CENTER", font_size=18),
-                    {
-                        "type": "subglow",
-                        "glow": True,
-                        "glowType": "Pixel",
-                        "glowLines": 8,
-                        "glowFrequency": 0.25,
-                        "glowLength": 10,
-                        "glowThickness": 2,
-                    }
                 ],
             },
             # Molten Fury (Target <= 35% HP)
@@ -989,7 +1221,7 @@ end"""
                     "Focus Magic - OFF"
                 ],
             },
-            # Focus Magic Active (Remaining Time / Proc)
+            # Focus Magic Active (Appears ONLY when <= 5 minutes! Otherwise HIDDEN)
             {
                 "id": "Focus Magic - Active",
                 "uid": "FMHUD_FOCUS_ACTIVE",
@@ -1006,26 +1238,33 @@ end"""
                 "cooldownEdge": True,
                 "cooldownTextDisabled": True,
                 "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_fm_custom_text(),
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "aura2",
-                            "unit": "player",
-                            "auranames": ["Focus Magic"],
-                            "useName": True,
-                            "debuffType": "HELPFUL",
-                            "matchesShowOn": "showOnActive",
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "custom": make_fm_trigger(),
+                            "customDuration": make_fm_custom_duration(),
+                            "customIcon": """function()
+    return "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
+end""",
                         },
-                        "untrigger": {}
+                        "untrigger": {
+                            "custom": make_fm_untrigger(),
+                        }
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
                 ],
             },
-            # Focus Magic OFF (Gray Icon when not applied to anyone)
+            # Focus Magic OFF (Warning when not cast on anyone or expired)
             {
                 "id": "Focus Magic - OFF",
                 "uid": "FMHUD_FOCUS_OFF",
@@ -1043,166 +1282,18 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD",
-                            "custom": """function(event, ...)
-    FMHUD_State = FMHUD_State or {}
-    local now = GetTime()
-
-    if event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, spell = ...
-        if unit == "player" and spell == "Focus Magic" then
-            FMHUD_State.FMTarget = UnitName("target") or "Ally"
-            FMHUD_State.FMExpires = now + 1800
-        end
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-        if sourceGUID == UnitGUID("player") and (spellName == "Focus Magic" or spellId == 54646) then
-            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
-                FMHUD_State.FMTarget = destName or "Ally"
-                FMHUD_State.FMExpires = now + 1800
-            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                FMHUD_State.FMExpires = 0
-                FMHUD_State.FMTarget = nil
-            end
-        elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
-            FMHUD_State.FMExpires = 0
-            FMHUD_State.FMTarget = nil
-        end
-    end
-
-    if FMHUD_State.FMExpires and FMHUD_State.FMExpires > now then
-        return false
-    end
-
-    local b = "Focus Magic"
-    for i = 1, 40 do
-        local n = UnitBuff("player", i)
-        if not n then break end
-        if n == b then return false end
-    end
-
-    if UnitExists("target") and UnitIsFriend("player", "target") then
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, c = UnitBuff("target", i)
-            if not n then break end
-            if n == b and (c == "player" or not c) then
-                FMHUD_State.FMExpires = now + 1800
-                FMHUD_State.FMTarget = UnitName("target")
-                return false
-            end
-        end
-    end
-
-    if UnitExists("focus") and UnitIsFriend("player", "focus") then
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
-            if not n then break end
-            if n == b and (c == "player" or not c) then
-                FMHUD_State.FMExpires = now + 1800
-                FMHUD_State.FMTarget = UnitName("focus")
-                return false
-            end
-        end
-    end
-
-    local nr = GetNumRaidMembers()
-    if nr and nr > 0 then
-        for r = 1, nr do
-            local u = "raid"..r
-            for i = 1, 40 do
-                local n, _, _, _, _, _, _, c = UnitBuff(u, i)
-                if not n then break end
-                if n == b and (c == "player" or not c) then
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMTarget = UnitName(u)
-                    return false
-                end
-            end
-        end
-    else
-        local np = GetNumPartyMembers()
-        if np and np > 0 then
-            for p = 1, np do
-                local u = "party"..p
-                for i = 1, 40 do
-                    local n, _, _, _, _, _, _, c = UnitBuff(u, i)
-                    if not n then break end
-                    if n == b and (c == "player" or not c) then
-                        FMHUD_State.FMExpires = now + 1800
-                        FMHUD_State.FMTarget = UnitName(u)
-                        return false
-                    end
-                end
-            end
-        end
-    end
-
-    return true
-end""",
+                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "custom": make_fm_off_trigger(),
                         },
                         "untrigger": {
-                            "custom": """function(event, ...)
-    local now = GetTime()
-    if FMHUD_State and FMHUD_State.FMExpires and FMHUD_State.FMExpires > now then
-        return true
-    end
-
-    local b = "Focus Magic"
-    for i = 1, 40 do
-        local n = UnitBuff("player", i)
-        if not n then break end
-        if n == b then return true end
-    end
-
-    if UnitExists("target") and UnitIsFriend("player", "target") then
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, c = UnitBuff("target", i)
-            if not n then break end
-            if n == b and (c == "player" or not c) then return true end
-        end
-    end
-
-    if UnitExists("focus") and UnitIsFriend("player", "focus") then
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, c = UnitBuff("focus", i)
-            if not n then break end
-            if n == b and (c == "player" or not c) then return true end
-        end
-    end
-
-    local nr = GetNumRaidMembers()
-    if nr and nr > 0 then
-        for r = 1, nr do
-            local u = "raid"..r
-            for i = 1, 40 do
-                local n, _, _, _, _, _, _, c = UnitBuff(u, i)
-                if not n then break end
-                if n == b and (c == "player" or not c) then return true end
-            end
-        end
-    else
-        local np = GetNumPartyMembers()
-        if np and np > 0 then
-            for p = 1, np do
-                local u = "party"..p
-                for i = 1, 40 do
-                    local n, _, _, _, _, _, _, c = UnitBuff(u, i)
-                    if not n then break end
-                    if n == b and (c == "player" or not c) then return true end
-                end
-            end
-        end
-    end
-
-    return false
-end"""
+                            "custom": make_fm_off_untrigger(),
                         }
                     },
                     "activeTriggerMode": -10,
                 },
                 "subRegions": [
                     { "type": "subbackground" },
-                    make_subtext("|cFF888888OFF|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    make_subtext("|cFFFF4444OFF|r", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=10),
                 ],
             },
 
@@ -1215,7 +1306,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -60,
+                "xOffset": -72,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1262,7 +1353,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -20,
+                "xOffset": -36,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1309,7 +1400,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 20,
+                "xOffset": 0,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1348,6 +1439,56 @@ end"""
             },
 
             # =================================================================
+            # 06 - COMBUSTION (To the left of Mana Gem - Works like Trinkets/Cloak)
+            # =================================================================
+            {
+                "id": "06 - Combustion",
+                "uid": "FMHUD_COMBUSTION",
+                "parent": "Fire Mage HUD",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 36,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_combustion_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "SPELL_UPDATE_COOLDOWN,UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": make_combustion_custom_duration(),
+                            "customIcon": """function()
+    return "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
+end""",
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+                ],
+            },
+
+            # =================================================================
             # 06 - MANA GEM (Item 33312 / 22044 - Centered row under Mana Bar)
             # =================================================================
             {
@@ -1356,7 +1497,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 60,
+                "xOffset": 72,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,

@@ -19,33 +19,31 @@ ISTRUZIONI DI AGGIORNAMENTO IN GIOCO (MOLTO IMPORTANTE):
 --------------------------------------------------------------------------------
 NOVITA' PRINCIPALI:
 --------------------------------------------------------------------------------
-1. ENTRAMBI I TRINKET FUNZIONANTI (SLOT 13 E 14) & SWIPE AD OROLOGIO:
-   - Risolto il proc mancato sul secondo trinket (Dying Curse + Sundial of the Exiled).
-     I trinket sono tracciati in modo 100% indipendente con gestione case-insensitive
-     e matching su Spell ID, Item ID e nomi buff 3.3.5a.
-   - Caricamento stile orologio Blizzard nativo ("radial clock swipe") abilitato su tutti
-     i cooldown, sia durante i procs attivi sia durante il countdown dell'ICD prima del riproc.
-   - Fasi del tracciamento:
-     * FASE 1 - PROC ATTIVO: Pixel Glow dorato animato, swipe a orologio e secondi residui (9.8s).
-     * FASE 2 - ICD (RIPROC COUNTDOWN): Glow spento, swipe a orologio e secondi rimanenti (35, 34...).
-     * FASE 3 - READY: Icona pulita, luminosa e pronta al prossimo proc.
+1. COMBUSTION A SINISTRA DI MANA GEM (STILE TRINKET/MANTELLO):
+   - Posizionata nella fila inferiore subito a sinistra di Mana Gem (x = +36, y = -54).
+   - Comportamento a 3 stati coerente con Trinket e Mantello:
+     * PRONTA: Icona visibile a colori pieni, pronta al cast, senza scritte.
+     * ATTIVA: Pixel Glow dorato animato, contatore stack x%d al centro.
+     * IN COOLDOWN: Animazione a orologio (radial clock swipe Blizzard) con conto alla rovescia (m:ss o secondi).
+     * RITORNO PRONTA: Lo swipe si completa, il glow si spegne e l'icona torna pulita.
 
-2. COMBUSTION ATTIVA-ONLY CON NUMERO DI STACK CENTRATO:
-   - L'icona compare SOLO quando Combustion e' attiva. Quando e' in CD o inattiva rimane nascosta.
-   - Mostra il numero di cariche/stack rimanenti (3, 2, 1) grande (dim. 18) al centro dell'icona
-     con Pixel Glow dorato animato. Si nasconde all'istante al consumo dell'ultima carica.
+2. TUTTI I BUFF NASCOSTI SE > 5 MINUTI (MOLTEN ARMOR, INTELLECT, FOCUS MAGIC):
+   - Schermo pulito in raid: se Molten Armor, Arcane Intellect o Focus Magic durano piu' di 5 minuti,
+     rimangono COMPLETAMENTE NASCOSTI.
+   - Compaiono con countdown a orologio e minuti:secondi (m:ss o %.0fs) SOLO quando mancano <= 5 minuti (300 sec).
+   - Se il buff scade o manca del tutto (o Focus Magic non e' stato assegnato a nessuno),
+     mostrano l'icona desaturata grigia con avviso rosso "OFF".
 
-3. MOLTEN ARMOR E ARCANE INTELLECT NASCOSTI SE > 5 MINUTI:
-   - Schermo pulito in raid: se Molten Armor o Intellect durano piu' di 5 minuti, le icone
-     rimangono COMPLETAMENTE NASCOSTE.
-   - Compaiono con countdown a orologio e minuti:secondi SOLO quando mancano <= 5 minuti.
-   - Se il buff scade o manca del tutto, mostrano l'icona grigia con scritta rossa "OFF".
+3. ENTRAMBI I TRINKET FUNZIONANTI (SLOT 13 E 14) & MANTELLO (SLOT 15):
+   - Tracciamento affidabile su entrambi i trinket con riconoscimento automatico proc, ICD (tempo prima del riproc)
+     e animazione swipe stile orologio radiale Blizzard.
+   - Pixel Glow dorato animato durante il proc attivo.
 
 4. SCORCH / IMPROVED SCORCH:
    - Debuff monitorato nel gruppo procs con swipe a orologio e secondi residui (%p).
-   - Colora l'icona in rosso quando mancano <= 5s per rinfrescarlo tempestivamente.
+   - Allerta con colore rosso quando mancano <= 5s per rinfrescarlo tempestivamente.
 
-5. SCALA AUMENTATA DEL 20% E POSIZIONAMENTO SOPRA LE BARRE:
+5. SCALA AUMENTATA DEL 20% E POSIZIONAMENTO:
    - Master scale impostato a 1.2 (+20% di dimensione).
    - Posizionato a y = -190 (subito sopra le barre delle abilita' del giocatore).
 ================================================================================

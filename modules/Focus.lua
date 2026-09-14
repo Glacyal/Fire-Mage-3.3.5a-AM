@@ -2,17 +2,17 @@
 -- Fire Mage HUD 3.3.5a — Modulo 04: Focus Magic Monitor
 -- =========================================================================
 -- Monitora in tempo reale lo stato di "Focus Magic" per il Mago:
--- - Posizionato sull'ala destra della HUD (xOffset = +155, yOffset = 0),
---   in perfetto equilibrio simmetrico con Molten Armor (xOffset = -155).
--- - Se Focus Magic NON E' STATO MESSO A NESSUNO:
---   mostra l'icona desaturata grigia con indicazione sobria "OFF" come promemoria.
--- - Non appena Focus Magic viene APPLICATO ad un alleato (in raid, party, o target):
---   l'avviso "OFF" scompare immediatamente e rimane nascosto per tutti i 30 minuti!
--- - Riconosce automaticamente il cast via COMBAT_LOG e UNIT_SPELLCAST_SUCCEEDED,
---   quindi l'avviso OFF rimane nascosto anche se deselezioni il bersaglio o sei solo.
--- - Se l'alleato muore o il buff scade/viene rimosso: "OFF" ricompare per avvisarti.
--- - Se l'alleato esegue un critico e il Mago riceve il proc (10s, +3% crit):
---   si attiva l'icona colorata "Focus Magic - Active" con timer %p.
+-- - Posizionato sull'ala destra della HUD (xOffset = +160, yOffset = -7).
+-- - REGOLE DI VISIBILITA':
+--   1. Se Focus Magic ha una durata > 5 minuti:
+--      Rimane COMPLETAMENTE NASCOSTO per non occupare spazio durante il raid.
+--   2. Se mancano <= 5 minuti (300s) alla scadenza:
+--      Compare automaticamente con conto alla rovescia (m:ss o %.0fs),
+--      caricamento stile orologio radiale (clock swipe) per preparare il refresh!
+--   3. Se Focus Magic NON E' STATO MESSO A NESSUNO o è SCADUTO:
+--      Mostra l'icona desaturata grigia con avviso rosso "OFF".
+-- - Riconosce l'applicazione via COMBAT_LOG, UNIT_SPELLCAST_SUCCEEDED,
+--   target, focus, raid e party members.
 -- =========================================================================
 
 local FOCUS_MAGIC_BUFF = "Focus Magic"
@@ -132,24 +132,50 @@ function FireMageHUD_HasFocusMagicApplied()
 end
 
 -- =========================================================================
--- TRIGGER FOCUS MAGIC - OFF (Mostra icona grigia solo se NON applicato)
+-- TRIGGER FOCUS MAGIC - ACTIVE (Mostra con conto alla rovescia SOLO se <= 5 min)
+-- =========================================================================
+function FireMageHUD_FocusMagic_Active_Trigger(event, ...)
+    FireMageHUD_FocusMagic_OnEvent(event, ...)
+    local now = GetTime()
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    return rem > 0 and rem <= 300
+end
+
+function FireMageHUD_FocusMagic_Active_Duration()
+    local now = GetTime()
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    if rem > 0 and rem <= 300 then
+        return FMHUD_State.FMDur or 1800, FMHUD_State.FMExpires
+    end
+    return 0, 0
+end
+
+function FireMageHUD_FocusMagic_Active_CustomText()
+    local now = GetTime()
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    if rem > 60 then
+        local m = math.floor(rem / 60)
+        local s = math.floor(rem % 60)
+        return string.format("|cFFFFFF00%d:%02d|r", m, s)
+    elseif rem > 0 then
+        return string.format("|cFFFF4444%.0fs|r", rem)
+    end
+    return ""
+end
+
+-- =========================================================================
+-- TRIGGER FOCUS MAGIC - OFF (Mostra icona grigia se NON applicato o scaduto)
 -- =========================================================================
 function FireMageHUD_FocusMagic_OFF_Trigger(event, ...)
     FireMageHUD_FocusMagic_OnEvent(event, ...)
-    return not FireMageHUD_HasFocusMagicApplied()
+    local now = GetTime()
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    return rem <= 0
 end
 
 function FireMageHUD_FocusMagic_OFF_Untrigger(event, ...)
-    return FireMageHUD_HasFocusMagicApplied()
-end
-
--- =========================================================================
--- TRIGGER FOCUS MAGIC - ACTIVE (Mostra icona a colori se attivo su player)
--- =========================================================================
-function FireMageHUD_FocusMagic_Active_Trigger()
-    local name, _, icon, count, debuffType, duration, expirationTime = UnitBuff("player", FOCUS_MAGIC_BUFF)
-    if name then
-        return true, duration, expirationTime
-    end
-    return false
+    FireMageHUD_FocusMagic_OnEvent(event, ...)
+    local now = GetTime()
+    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
+    return rem > 0
 end
