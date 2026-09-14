@@ -93,6 +93,10 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
         HS.hasBuff = false
         HS.expirationTime = 0
         SyncHotStreakBuff()
+    elseif event == "PLAYER_DEAD" or event == "PLAYER_UNGHOST" then
+        HS.streak = 0
+        HS.hasBuff = false
+        HS.expirationTime = 0
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- All'uscita dal combattimento, azzera solo se non si ha il buff Hot Streak attivo
         if not HS.hasBuff then
@@ -116,19 +120,21 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
             end
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local timestamp, subEvent, sourceGUID, sourceName, sourceFlags,
-              destGUID, destName, destFlags,
-              spellId, spellName, spellSchool,
-              amount, overkill, school, resisted, blocked, absorbed, critical = ...
+        local subEvent = select(2, ...)
+        local sourceGUID = select(4, ...)
 
         -- Solo colpi eseguiti dal giocatore
         if sourceGUID == UnitGUID("player") and subEvent == "SPELL_DAMAGE" then
             -- RIGOROSO: Solo SPELL_DAMAGE diretto! SPELL_PERIODIC_DAMAGE (DoT) viene ignorato!
+            local spellId = select(10, ...)
+            local spellName = select(11, ...)
             if IsQualifyingSpell(spellId, spellName) then
-                if critical == true then
+                local critical = select(19, ...)
+                local isCrit = (critical and critical ~= 0 and critical ~= false)
+                if isCrit then
                     if not HS.hasBuff then
                         if HS.streak == 0 then
-                            -- 1° Critico: persiste nel tempo
+                            -- 1° Critico: persiste nel tempo, illumina metà barretta
                             HS.streak = 1
                         else
                             -- 2° Critico: entra in Hot Streak

@@ -1612,6 +1612,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         hasBuff = false,
         duration = 10,
         expirationTime = 0,
+        lastEventKey = nil,
     }
     local hs = _G.FMHUD_HS
 
@@ -1641,6 +1642,10 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         hs.hasBuff = false
         hs.expirationTime = 0
         syncBuff()
+    elseif event == "PLAYER_DEAD" or event == "PLAYER_UNGHOST" then
+        hs.streak = 0
+        hs.hasBuff = false
+        hs.expirationTime = 0
     elseif event == "PLAYER_REGEN_ENABLED" then
         if not hs.hasBuff then
             hs.streak = 0
@@ -1662,52 +1667,62 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
             end
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local timestamp, subEvent, sourceGUID, sourceName, sourceFlags,
-              destGUID, destName, destFlags,
-              spellId, spellName, spellSchool,
-              amount, overkill, school, resisted, blocked, absorbed, critical = ...
+        local timestamp = select(1, ...)
+        local subEvent = select(2, ...)
+        local sourceGUID = select(4, ...)
 
         if sourceGUID == UnitGUID("player") and subEvent == "SPELL_DAMAGE" then
-            -- Solo SPELL_DAMAGE diretto (non periodico). I DoT (SPELL_PERIODIC_DAMAGE) non azzerano!
-            local isEligible = false
-            if spellId then
-                if spellId == 133 or spellId == 143 or spellId == 145 or spellId == 3140 or spellId == 8400 or
-                   spellId == 8401 or spellId == 8402 or spellId == 10148 or spellId == 10149 or spellId == 10150 or
-                   spellId == 10151 or spellId == 25306 or spellId == 27070 or spellId == 38692 or spellId == 42832 or
-                   spellId == 42833 or -- Fireball
-                   spellId == 2136 or spellId == 2137 or spellId == 2138 or spellId == 8412 or spellId == 8413 or
-                   spellId == 10197 or spellId == 10199 or spellId == 27078 or spellId == 27079 or spellId == 42872 or
-                   spellId == 42873 or -- Fire Blast
-                   spellId == 2948 or spellId == 8444 or spellId == 8445 or spellId == 8446 or spellId == 10205 or
-                   spellId == 10206 or spellId == 10207 or spellId == 27073 or spellId == 27074 or spellId == 42858 or
-                   spellId == 42859 or -- Scorch
-                   spellId == 44614 or spellId == 47610 or -- Frostfire Bolt
-                   spellId == 44461 or spellId == 55361 or spellId == 55362 then -- Living Bomb Explosion
-                    isEligible = true
-                end
-            end
-            if not isEligible and spellName then
-                if spellName == "Fireball" or spellName == "Palla di Fuoco" or
-                   spellName == "Fire Blast" or spellName == "Deflagrazione di Fuoco" or
-                   spellName == "Scorch" or spellName == "Bruciatura" or
-                   spellName == "Frostfire Bolt" or spellName == "Dardo di Fuocogelo" then
-                    isEligible = true
-                end
-            end
+            local destGUID = select(7, ...)
+            local spellId = select(10, ...)
+            local spellName = select(11, ...)
+            local critical = select(19, ...)
 
-            if isEligible then
-                if critical == true then
-                    if not hs.hasBuff then
-                        if hs.streak == 0 then
-                            hs.streak = 1 -- 1° critico persistente!
-                        else
-                            hs.streak = 2
-                        end
+            local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
+            if hs.lastEventKey ~= eventKey then
+                hs.lastEventKey = eventKey
+
+                -- Solo SPELL_DAMAGE diretto (non periodico). I DoT (SPELL_PERIODIC_DAMAGE) non azzerano!
+                local isEligible = false
+                if spellId then
+                    if spellId == 133 or spellId == 143 or spellId == 145 or spellId == 3140 or spellId == 8400 or
+                       spellId == 8401 or spellId == 8402 or spellId == 10148 or spellId == 10149 or spellId == 10150 or
+                       spellId == 10151 or spellId == 25306 or spellId == 27070 or spellId == 38692 or spellId == 42832 or
+                       spellId == 42833 or -- Fireball
+                       spellId == 2136 or spellId == 2137 or spellId == 2138 or spellId == 8412 or spellId == 8413 or
+                       spellId == 10197 or spellId == 10199 or spellId == 27078 or spellId == 27079 or spellId == 42872 or
+                       spellId == 42873 or -- Fire Blast
+                       spellId == 2948 or spellId == 8444 or spellId == 8445 or spellId == 8446 or spellId == 10205 or
+                       spellId == 10206 or spellId == 10207 or spellId == 27073 or spellId == 27074 or spellId == 42858 or
+                       spellId == 42859 or -- Scorch
+                       spellId == 44614 or spellId == 47610 or -- Frostfire Bolt
+                       spellId == 44461 or spellId == 55361 or spellId == 55362 then -- Living Bomb Explosion
+                        isEligible = true
                     end
-                else
-                    -- Colpo non-critico diretto: azzera la serie
-                    if not hs.hasBuff then
-                        hs.streak = 0
+                end
+                if not isEligible and spellName then
+                    if spellName == "Fireball" or spellName == "Palla di Fuoco" or
+                       spellName == "Fire Blast" or spellName == "Deflagrazione di Fuoco" or
+                       spellName == "Scorch" or spellName == "Bruciatura" or
+                       spellName == "Frostfire Bolt" or spellName == "Dardo di Fuocogelo" then
+                        isEligible = true
+                    end
+                end
+
+                if isEligible then
+                    local isCrit = (critical and critical ~= 0 and critical ~= false)
+                    if isCrit then
+                        if not hs.hasBuff then
+                            if hs.streak == 0 then
+                                hs.streak = 1 -- 1° critico persistente: illumina metà barretta!
+                            else
+                                hs.streak = 2
+                            end
+                        end
+                    else
+                        -- Colpo non-critico diretto: azzera la serie se non c'e' gia' Hot Streak attivo
+                        if not hs.hasBuff then
+                            hs.streak = 0
+                        end
                     end
                 end
             end
@@ -1739,34 +1754,6 @@ def make_hotstreak_seg1_untrigger() -> str:
     _G.FMHUD_UpdateHotStreakState = _G.FMHUD_UpdateHotStreakState or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
     local hs = _G.FMHUD_UpdateHotStreakState(event, ...)
     return not (hs.streak >= 1 or hs.hasBuff)
-end"""
-
-def make_hotstreak_seg1_duration() -> str:
-    return """function()
-    return 1, 1, true
-end"""
-
-def make_hotstreak_seg2_trigger() -> str:
-    return """function(event, ...)
-    _G.FMHUD_UpdateHotStreakState = _G.FMHUD_UpdateHotStreakState or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    local hs = _G.FMHUD_UpdateHotStreakState(event, ...)
-    return hs.hasBuff and hs.expirationTime and (hs.expirationTime > GetTime())
-end"""
-
-def make_hotstreak_seg2_untrigger() -> str:
-    return """function(event, ...)
-    _G.FMHUD_UpdateHotStreakState = _G.FMHUD_UpdateHotStreakState or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    local hs = _G.FMHUD_UpdateHotStreakState(event, ...)
-    return not (hs.hasBuff and hs.expirationTime and (hs.expirationTime > GetTime()))
-end"""
-
-def make_hotstreak_seg2_duration() -> str:
-    return """function()
-    local hs = _G.FMHUD_HS
-    if hs and hs.hasBuff and hs.expirationTime and hs.expirationTime > 0 then
-        return hs.duration or 10.0, hs.expirationTime
-    end
-    return 0, 0
 end"""
 
 import copy
@@ -3086,29 +3073,29 @@ end"""
                     "activeTriggerMode": -10,
                 },
             },
-            # Hot Streak Bar - Segment 1 (Left Half: 1° Crit, Persistent, No Text)
+            # Hot Streak Bar - Segment 1 (Left Half: 1° Crit, Metà Barretta Illuminata, Persistente)
             {
                 "id": "Hot Streak Bar - Segment 1",
                 "uid": "FMHUD_HSBAR_SEG1",
                 "parent": "10 - Hot Streak Bar",
-                "regionType": "aurabar",
+                "regionType": "texture",
                 "internalVersion": 52,
                 "width": 130,
                 "height": 5,
                 "xOffset": -66,
                 "yOffset": 0,
-                "barColor": [1.0, 0.55, 0.0, 1.0],
-                "backgroundColor": [0.1, 0.1, 0.1, 0.8],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
+                "color": [1.0, 0.55, 0.0, 1.0],
+                "selfPoint": "CENTER",
+                "anchorPoint": "CENTER",
                 "triggers": {
                     1: {
                         "trigger": {
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_ENTERING_WORLD,PLAYER_DEAD",
                             "custom": make_hotstreak_seg1_trigger(),
-                            "customDuration": make_hotstreak_seg1_duration(),
                         },
                         "untrigger": {
                             "custom": make_hotstreak_seg1_untrigger(),
@@ -3116,12 +3103,8 @@ end"""
                     },
                     "activeTriggerMode": -10,
                 },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    { "type": "subforeground" },
-                ],
             },
-            # Hot Streak Bar - Segment 2 (Right Half: 2° Crit Hot Streak Proc 10s Countdown, No Text)
+            # Hot Streak Bar - Segment 2 (Right Half: Proc Hot Streak 10s Countdown, Pixel Glow)
             {
                 "id": "Hot Streak Bar - Segment 2",
                 "uid": "FMHUD_HSBAR_SEG2",
@@ -3138,16 +3121,19 @@ end"""
                 "triggers": {
                     1: {
                         "trigger": {
-                            "type": "custom",
-                            "custom_type": "status",
-                            "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
-                            "custom": make_hotstreak_seg2_trigger(),
-                            "customDuration": make_hotstreak_seg2_duration(),
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": [
+                                "Hot Streak",
+                                "48108",
+                                "Buona sorte"
+                            ],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": True,
                         },
-                        "untrigger": {
-                            "custom": make_hotstreak_seg2_untrigger(),
-                        }
+                        "untrigger": {}
                     },
                     "activeTriggerMode": -10,
                 },
