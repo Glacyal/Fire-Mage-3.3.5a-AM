@@ -720,6 +720,94 @@ def make_combustion_custom_duration():
     return 0, 0
 end"""
 
+SHARED_MIRRORIMAGE_CHECK_LUA = """function()
+    local now = GetTime()
+    local icon = GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
+    
+    -- 1. Check if Mirror Image buff is ACTIVE on player (e.g. T10 4pc proc 70753 or buff "Mirror Image")
+    for i = 1, 40 do
+        local name, _, buffIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if name == "Mirror Image" or name == "Immagine Speculare" or spellId == 70753 or spellId == 55342 then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local dur = duration and duration > 0 and duration or 30
+            return "ACTIVE", rem, dur, icon
+        end
+    end
+    
+    -- 2. Check spell cooldown
+    local start, duration = GetSpellCooldown(55342)
+    if not start or duration == 0 then
+        start, duration = GetSpellCooldown("Mirror Image")
+    end
+    if not start or duration == 0 then
+        start, duration = GetSpellCooldown("Immagine Speculare")
+    end
+    
+    if start and duration and start > 0 and duration > 1.5 then
+        local elapsed = now - start
+        -- Mirror Images stay active for 30 seconds after cast!
+        if elapsed >= 0 and elapsed < 30 then
+            local remActive = 30 - elapsed
+            return "ACTIVE", remActive, 30, icon
+        else
+            local remCD = (start + duration) - now
+            if remCD > 0.1 then
+                return "COOLDOWN", remCD, duration, icon
+            end
+        end
+    end
+    
+    -- 3. READY
+    return "READY", 0, 0, icon
+end"""
+
+def make_mirrorimage_custom_text():
+    return f"""function()
+    _G.FMHUD_CheckMirrorImage = _G.FMHUD_CheckMirrorImage or {SHARED_MIRRORIMAGE_CHECK_LUA}
+    local state, rem, dur = _G.FMHUD_CheckMirrorImage()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {{0.2, 0.8, 1.0, 1}}, 8, 0.25, 10, 2)
+        end
+        if rem > 0 then
+            return string.format("|cFF33FFFF%.1fs|r", rem)
+        end
+        return "|cFF33FFFFON|r"
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+        if state == "COOLDOWN" and rem > 0.1 then
+            if rem >= 60 then
+                local m = math.floor(rem / 60)
+                local s = math.floor(rem % 60)
+                return string.format("%d:%02d", m, s)
+            else
+                return string.format("%.0f", rem)
+            end
+        end
+        return ""
+    end
+end"""
+
+def make_mirrorimage_custom_duration():
+    return f"""function()
+    _G.FMHUD_CheckMirrorImage = _G.FMHUD_CheckMirrorImage or {SHARED_MIRRORIMAGE_CHECK_LUA}
+    local state, rem, dur = _G.FMHUD_CheckMirrorImage()
+    if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end"""
+
+def make_mirrorimage_custom_icon():
+    return """function()
+    local icon = GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
+    return icon
+end"""
+
 def build_wa_tree():
     data = {
         "m": "d",
@@ -744,6 +832,7 @@ def build_wa_tree():
                 "05 - Trinket 2",
                 "06 - Cloak",
                 "06 - Combustion",
+                "06 - Mirror Image",
                 "06 - Mana Gem",
                 "07 - Mana Bar",
                 "08 - Castbar",
@@ -1500,7 +1589,7 @@ end""",
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -72,
+                "xOffset": -90,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1547,7 +1636,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": -36,
+                "xOffset": -54,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1594,7 +1683,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 0,
+                "xOffset": -18,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1633,7 +1722,7 @@ end"""
             },
 
             # =================================================================
-            # 06 - COMBUSTION (To the left of Mana Gem - Works like Trinkets/Cloak)
+            # 06 - COMBUSTION (To the left of Mirror Image - Works like Trinkets/Cloak)
             # =================================================================
             {
                 "id": "06 - Combustion",
@@ -1641,7 +1730,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 36,
+                "xOffset": 18,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1683,6 +1772,54 @@ end"""
             },
 
             # =================================================================
+            # 06 - MIRROR IMAGE (Between Combustion and Mana Gem)
+            # =================================================================
+            {
+                "id": "06 - Mirror Image",
+                "uid": "FMHUD_MIRRORIMAGE",
+                "parent": "Fire Mage HUD",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 54,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\Spell_Magic_LesserInvisibilty",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_mirrorimage_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": make_mirrorimage_custom_duration(),
+                            "customIcon": make_mirrorimage_custom_icon(),
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+                ],
+            },
+
+            # =================================================================
             # 06 - MANA GEM (Item 33312 / 22044 - Centered row under Mana Bar)
             # =================================================================
             {
@@ -1691,7 +1828,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 72,
+                "xOffset": 90,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,

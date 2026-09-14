@@ -47,12 +47,13 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 - Testo 2: `%c` in basso a destra per le cariche residue in borsa (`GetItemCount(33312, nil, true)`). Se le cariche sono 0 o la gemma manca, compare uno `"0"` rosso di avvertimento.
 
 ### 4. Layout Orizzontale Utility (Sotto la Mana Bar a `y = -54`)
-- 5 icone da 28x28 perfettamente simmetriche centrate sotto la Mana Bar:
-  - `05 - Trinket 1`: `x = -72` (Slot 13, supporto 40+ trinket WotLK, On-Use e ICD passivi, Pixel Glow su proc)
-  - `05 - Trinket 2`: `x = -36` (Slot 14, 100% simmetrico a Trinket 1 con database identico e fallback)
-  - `06 - Cloak`: `x = 0` (Slot 15, Lightweave/Darkglow/Swordguard con countdown ICD e swipe)
-  - `06 - Combustion`: `x = +36` (A sinistra della Gemma, Pixel Glow e conteggio stack `xN` quando attiva, swipe su CD)
-  - `06 - Mana Gem`: `x = +72` (Item 33312 / 22044 con cariche e swipe)
+- 6 icone da 28x28 perfettamente simmetriche centrate sotto la Mana Bar:
+  - `05 - Trinket 1`: `x = -90` (Slot 13, supporto 40+ trinket WotLK, On-Use e ICD passivi, Pixel Glow su proc)
+  - `05 - Trinket 2`: `x = -54` (Slot 14, 100% simmetrico a Trinket 1 con database identico e fallback)
+  - `06 - Cloak`: `x = -18` (Slot 15, Lightweave/Darkglow/Swordguard con countdown ICD e swipe)
+  - `06 - Combustion`: `x = +18` (A sinistra di Mirror Image, Pixel Glow e stack `xN` quando attiva, swipe su CD)
+  - `06 - Mirror Image`: `x = +54` (Tra Combustion e Gemma: 30s attivo con Pixel Glow cyan e swipe, CD 3 min)
+  - `06 - Mana Gem`: `x = +90` (Item 33312 / 22044 con cariche e swipe)
 
 ---
 
@@ -80,11 +81,12 @@ Fire Mage HUD (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scal
 │   ├── Focus Magic - Active (icon: compare SOLO se <= 5 min con countdown scadenza se applicato)
 │   └── Focus Magic - OFF (custom status trigger: scansione raid/party/target/focus, sparisce se applicato)
 │
-├── 05 - Trinket 1 (icon: Slot 13, On-Use CD + ICD passivi, swipe Blizzlike, golden glow, xOffset: -72, yOffset: -54)
-├── 05 - Trinket 2 (icon: Slot 14, 100% simmetrico a Trinket 1, xOffset: -36, yOffset: -54)
-├── 06 - Cloak (icon: Slot 15 ricamo mantello con ICD, xOffset: 0, yOffset: -54)
-├── 06 - Combustion (icon: a sinistra della Gemma, stack quando attiva, swipe CD, xOffset: +36, yOffset: -54)
-├── 06 - Mana Gem (icon: cariche + swipe CD, xOffset: +72, yOffset: -54)
+├── 05 - Trinket 1 (icon: Slot 13, On-Use CD + ICD passivi, swipe Blizzlike, golden glow, xOffset: -90, yOffset: -54)
+├── 05 - Trinket 2 (icon: Slot 14, 100% simmetrico a Trinket 1, xOffset: -54, yOffset: -54)
+├── 06 - Cloak (icon: Slot 15 ricamo mantello con ICD, xOffset: -18, yOffset: -54)
+├── 06 - Combustion (icon: a sinistra di Mirror Image, stack quando attiva, swipe CD, xOffset: +18, yOffset: -54)
+├── 06 - Mirror Image (icon: copie tra Combustion e Gemma, 30s attivo con glow, swipe CD, xOffset: +54, yOffset: -54)
+├── 06 - Mana Gem (icon: cariche + swipe CD, xOffset: +90, yOffset: -54)
 │
 ├── 07 - Mana Bar (aurabar: unit Power player, yOffset: -23, width: 220, height: 14, solo % a 2 decimali)
 ├── 08 - Castbar (aurabar: unit Cast player, yOffset: 0, width: 220, height: 20)
