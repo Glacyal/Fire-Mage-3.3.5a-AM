@@ -161,11 +161,11 @@
         .icon-gem { background-image: url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg'); }
         .icon-gem span { color: #00e5ff; }
         .icon-t10 {
-            background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_frost_frostward.jpg');
-            border-color: #00d9ff;
-            box-shadow: 0 0 8px rgba(0, 217, 255, 0.45);
+            background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_fire_elementaldevastation.jpg');
+            border-color: #ff7700;
+            box-shadow: 0 0 8px rgba(255, 119, 0, 0.45);
         }
-        .icon-t10 span { color: #00d9ff; }
+        .icon-t10 span { color: #ff9933; }
         .icon-comb { background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_fire_sealoffire.jpg'); }
         .icon-comb span { color: #ff5500; }
         .icon-mirror { background-image: url('https://wow.zamimg.com/images/wow/icons/large/spell_magic_lesserinvisibilty.jpg'); }
@@ -197,7 +197,7 @@
             margin-right: 6px;
         }
         .badge-t8 { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid #ffd700; }
-        .badge-t10 { background: rgba(0, 217, 255, 0.15); color: #00d9ff; border: 1px solid #00d9ff; }
+        .badge-t10 { background: rgba(255, 119, 0, 0.15); color: #ff9933; border: 1px solid #ff7700; }
         .badge-compact { background: rgba(187, 134, 252, 0.15); color: #bb86fc; border: 1px solid #bb86fc; }
     </style>
 </head>
@@ -238,7 +238,7 @@
         <h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
         <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
         <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio occupato:</strong> 256px (4px di margine per lato).<br>
-        <strong>Ordine:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>
+        <strong>Ordine:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>
     </div>
 
     <script>
@@ -291,7 +291,7 @@
                 desc.innerHTML = `<h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
                 <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
                 <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio totale:</strong> 256px.<br>
-                <strong>Disposizione:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>`;
+                <strong>Disposizione:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>`;
             } else if (mode === '7-t8') {
                 // 7 icons (T8 only): size 28px
                 setIcon(t1, -114, 28, true);
@@ -321,7 +321,7 @@
                 desc.innerHTML = `<h3><span class="badge badge-t10">7 ICONE T10</span> Scenario C: Solo Tier 10 (2P) equipaggiato</h3>
                 <p>Nessun pezzo T8 rilevato. Il buff T8 non viene visualizzato. La Gemma di Mana è centrata a x = 0 e il T10 si trova immediatamente a destra a x = +38:<br>
                 <strong>Dimensione:</strong> 28x28 px | <strong>Passo:</strong> 38px | <strong>Spazio totale:</strong> 256px.<br>
-                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong>Gemma Mana (0)</strong> | <strong style="color:#00d9ff;">T10 Frostforged (+38)</strong> | Combustion (+76) | Mirror Image (+114).</p>`;
+                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong>Gemma Mana (0)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+38)</strong> | Combustion (+76) | Mirror Image (+114).</p>`;
             } else if (mode === '6') {
                 // 6 icons (standard): size 28px
                 setIcon(t1, -110, 28, true);
@@ -345,3 +345,4 @@
     </script>
 </body>
 </html>
+

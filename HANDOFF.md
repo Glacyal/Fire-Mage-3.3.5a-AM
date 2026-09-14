@@ -74,21 +74,23 @@ Lancio di Pyroblast (o scadenza 10s):
 
 ---
 
-### 3.2 Moduli Tier 8 (`06 - Tier 8` — Praxis) & Tier 10 (`06 - Tier 10` — Frostforged Sage / Limit)
+### 3.2 Moduli Tier 8 (`06 - Tier 8` — Praxis) & Tier 10 (`06 - Tier 10` — Pushing the Limit)
 
 Monitorano i bonus set 2P Tier 8 e Tier 10 nella fila utility a `y = -54`:
-- **Auto-Rilevamento Intelligente Multi-Stadio**:
+- **Auto-Rilevamento Intelligente Multi-Stadio Resiliente**:
   - Scansiona i 10 pezzi T8 Kirin Tor (10m: 45365-45369, 25m: 45355-45359).
-  - Scansiona i 15 pezzi T10 Bloodmage (251: 50275-50279, 264: 51280-51284, 277: 51300-51304).
-  - Scansione tooltip e verifica buff attivo.
+  - Scansiona i 20 pezzi T10 Bloodmage (251 Normal: 50275-50279, 264 Sanctified: 51155-51159, 277 Heroic Sanctified: 51280-51284, fallback: 51300-51304).
+  - Scansione diretta su Item Link, nome oggetto (`Bloodmage`, `Mago del Sangue`, `Blutmagier`, `Sangriento`, `Mage de sang`), tooltip (`12% haste / celerità`) e stato persistente non-volatile.
+  - La memoria di equipaggiamento rimane attiva stabilmente durante tutta la sessione e viene invalidata unicamente a un effettivo cambio di gear (`PLAYER_EQUIPMENT_CHANGED` / `UNIT_INVENTORY_CHANGED`).
+  - Registrazione garantita nell'albero WeakAuras: `06 - Tier 10` è regolarmente incluso in `controlledChildren` del gruppo radice `Fire Mage 3.3.5a AM`.
 - **Adattamento Dinamico del Layout (`_G.FMHUD_UpdateUtilityRowPositions`)**:
-  - T8 + T10 contemporaneamente: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`).
-  - Solo T8: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T8 tra Mantello e Gemma.
-  - Solo T10: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), Gemma al centro e T10 a destra della Gemma.
-  - Né T8 né T10: 6 icone a 28px (`[-110, -66, -22, +22, +66, +110]`), entrambi nascosti.
+  - **Scenario A (T8 + T10 contemporaneamente)**: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`). T8 a sinistra della Gemma (-16), T10 a destra della Gemma (+49).
+  - **Scenario B (Solo T8)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T8 tra Mantello e Gemma a `x = 0`, T10 nascosto.
+  - **Scenario C (Solo T10)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), Gemma al centro a `x = 0` e T10 a destra della Gemma a `x = +38`, T8 nascosto.
+  - **Scenario D (Né T8 né T10)**: 6 icone standard a 28px (`[-110, -66, -22, +22, +66, +110]`), entrambi i moduli nascosti.
 - **Tracciamento Proc & Glow**:
   - **T8 Praxis (64868)**: +350 SP per 15s con Pixel Glow dorato e timer `|cFFFFFF00%.1fs|r`, poi ricarica ICD 30s.
-  - **T10 Frostforged/Limit (70753/72416)**: +12% Haste per 5s o +285 SP per 10s con Pixel Glow ciano/ghiaccio `|cFFFFFF00%.1fs|r`.
+  - **T10 Pushing the Limit (70753/70752/70747)**: +12% Spell Haste per 5s con Pixel Glow arancio-fuoco vivo `|cFFFFFF00%.1fs|r`, icona `Spell_Fire_ElementalDevastation` e swipe radiale dinamico. In stato idle (senza proc attivo) mostra l'icona pulita pronta al prossimo proc.
 
 ---
 

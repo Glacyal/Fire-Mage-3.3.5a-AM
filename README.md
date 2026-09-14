@@ -58,7 +58,7 @@ Collocato a sinistra sotto i tre buff (`x = -180, y = -54`), monitora in tempo r
     - Ordine: `Trinket 1 (-110) | Trinket 2 (-66) | Mantello (-22) | Gemma Mana (+22) | Combustion (+66) | Mirror Image (+110)`.
 - **Meccanica Completa Proc & Glow**:
   - **Tier 8 (Praxis - Spell ID 64868)**: +350 Spell Power per 15s con Pixel Glow dorato (`|cFFFFFF00%.1fs|r`), seguito da ricarica ICD radiale di 30s.
-  - **Tier 10 (Pushing the Limit - Spell ID 70753 / Frostforged Sage - Spell ID 72416)**: +12% Haste per 5s o +285 SP per 10s con Pixel Glow ciano/ghiaccio (`|cFFFFFF00%.1fs|r`) e swipe a orologio in tempo reale.
+  - **Tier 10 (Pushing the Limit - Spell ID 70753/70752/70747)**: +12% Spell Haste per 5s con Pixel Glow arancio-fuoco (`|cFFFFFF00%.1fs|r`), icona `Spell_Fire_ElementalDevastation` e swipe a orologio in tempo reale.
 
 ### 5. Engine Universale per Monili & Mantello (Slot 13, 14 e 15)
 - **Database con oltre 40 Monili WotLK**: Riconoscimento automatico di oggetti On-Use e proc passivi con Internal Cooldown (ICD, es. 45s per *Dislodged Foreign Object / Charred Twilight Scale*, 90s per *Phylactery of the Nameless Lich*).
@@ -128,7 +128,7 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD)
 │   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
 │   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│   │   ├── 06 - Tier 10      (x =  +49: Frostforged Sage / Haste 12% con Glow ciano)
+│   │   ├── 06 - Tier 10      (x =  +49: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
 │   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
 │   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
@@ -140,7 +140,7 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │   ├── SCENARIO C: 7 ICONE T10 (Solo T10 >= 2P, T8 < 2P - 28x28px, passo 38px, T8 nascosto):
 │   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
 │   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
-│   │   ├── 06 - Tier 10      (x =  +38: A destra della Gemma di Mana)
+│   │   ├── 06 - Tier 10      (x =  +38: Pushing the Limit, a destra della Gemma di Mana)
 │   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
 │   │
 │   └── SCENARIO D: 6 ICONE STANDARD (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):

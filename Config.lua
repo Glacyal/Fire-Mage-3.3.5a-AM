@@ -265,33 +265,35 @@ FireMageHUD_Config = {
     },
 
     -- ---------------------------------------------------------------------
-    -- 10. TIER 10 2-PIECE BONUS / FROSTFORGED SAGE
+    -- 10. TIER 10 2-PIECE BONUS (Pushing the Limit: +12% Spell Haste per 5s)
     -- ---------------------------------------------------------------------
     Tier10 = {
-        BuffID     = 70753, -- Pushing the Limit (+12% Haste per 5s) / Frostforged Sage
-        AltBuffID  = 72416, -- Frostforged Sage (+285 SP, 10s durata, 60s ICD)
-        Duration   = 5.0,   -- Durata buff base (5s T10 2P, 10s ring)
-        InternalCD = 0,     -- 0s per T10 2P (60s se proc anello ICC)
-        Icon       = "Interface\\Icons\\Spell_Frost_FrostWard",
+        BuffID     = 70753, -- Pushing the Limit (+12% Haste per 5s)
+        AltBuffID  = 70752, -- Alternative PTL SpellID
+        Duration   = 5.0,   -- Durata buff base (5s)
+        InternalCD = 0,     -- 0s ICD (procca al consumo di Hot Streak / Brain Freeze)
+        Icon       = "Interface\\Icons\\Spell_Fire_ElementalDevastation",
         SetPieces  = {
             -- 251 Normal (Regalia del Mago del Sangue)
-            [50278] = true, -- Elmo
-            [50279] = true, -- Spalle
-            [50275] = true, -- Torso
+            [50275] = true, -- Guanti
+            [50276] = true, -- Elmo / Guanti
             [50277] = true, -- Gambe
-            [50276] = true, -- Guanti
+            [50278] = true, -- Torso / Elmo
+            [50279] = true, -- Spalle
             -- 264 Santificato (Regalia Santificata del Mago del Sangue)
-            [51283] = true, -- Elmo
-            [51284] = true, -- Spalle
-            [51280] = true, -- Torso
-            [51282] = true, -- Gambe
-            [51281] = true, -- Guanti
+            [51155] = true, -- Torso
+            [51156] = true, -- Guanti
+            [51157] = true, -- Elmo
+            [51158] = true, -- Gambe
+            [51159] = true, -- Spalle
             -- 277 Eroico Santificato (Regalia Santificata del Mago del Sangue)
-            [51303] = true, -- Elmo
-            [51304] = true, -- Spalle
-            [51300] = true, -- Torso
-            [51302] = true, -- Gambe
-            [51301] = true, -- Guanti
+            [51280] = true, -- Guanti
+            [51281] = true, -- Elmo
+            [51282] = true, -- Gambe
+            [51283] = true, -- Torso
+            [51284] = true, -- Spalle
+            -- Private server / alternate item IDs
+            [51300] = true, [51301] = true, [51302] = true, [51303] = true, [51304] = true,
         },
     },
 }
