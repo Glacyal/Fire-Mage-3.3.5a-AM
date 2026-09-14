@@ -33,27 +33,31 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
 
 ### 2. Focus Magic Monitor (`04 - Focus Magic`)
 - In WoW 3.3.5a, lanciare Focus Magic su un alleato posiziona il buff di 30 min sull'alleato (`caster == "player"`), mentre il Mago riceve il buff di 10s solo quando l'alleato esegue un critico.
-- **Focus Magic - Active**: Trigger nativo `aura2` su `unit = "player"`. Quando il Mago ottiene il buff/proc di 10s, compare l'icona attiva con lo swipe di ricarica e il countdown `%p`.
-- **Focus Magic - OFF**: Custom Status Trigger registrato su eventi `COMBAT_LOG_EVENT_UNFILTERED, UNIT_SPELLCAST_SUCCEEDED, UNIT_AURA, PLAYER_TARGET_CHANGED, PLAYER_FOCUS_CHANGED, RAID_ROSTER_UPDATE, PARTY_MEMBERS_CHANGED, PLAYER_ENTERING_WORLD`.
-  - Traccia in tempo reale l'applicazione tramite Combat Log (`SPELL_AURA_APPLIED`, `SPELL_CAST_SUCCESS`) e `UNIT_SPELLCAST_SUCCEEDED`, memorizzando target ed expiration (1800s).
-  - Scansiona attivamente: `player`, `target`, `focus`, `raid1..40`, `party1..4` cercando l'aura `"Focus Magic"` con `caster == "player"`.
-  - Se il buff è stato applicato a qualcuno (in raid, party o target): l'untrigger si attiva e l'avviso grigio "OFF" **scompare completamente** e resta nascosto per tutti i 30 minuti anche se deselezioni il bersaglio.
-  - Se il buff non è stato messo a nessuno (o il bersaglio muore/scade): il trigger si attiva e mostra l'icona grigia sobria `"OFF"`.
+- **Focus Magic - Active**: Compare esclusivamente se la durata residua è $\le 5$ minuti (300s) con swipe circolare e conto alla rovescia (giallo $> 60$s, rosso $\le 60$s). Se $> 5$m resta completamente nascosta.
+- **Focus Magic - OFF**: Mostra l'icona desaturata con scritta rossa "OFF" solo se il buff non è assegnato a nessun alleato o è scaduto.
+  - Intercetta in tempo reale Combat Log e `UNIT_SPELLCAST_SUCCEEDED`.
+  - Scansiona `player`, `target`, `focus`, `raid1..40`, `party1..4`.
+  - **Fix Proc Giocatore**: Quando il Mago riceve il proc da critico di 10s (Spell ID 54648), questo costituisce conferma diretta del buff attivo sull'alleato. La scadenza viene mantenuta a 30 minuti senza essere troncata a 10s, prevenendo la comparsa dello stato "OFF" ed evitando la necessità di ritarghettare l'alleato.
 
 ### 3. Gemma del Mana (`06 - Mana Gem`)
-- Item: `33312` (Mana Sapphire - Livello 80) e `22044` (Mana Emerald).
-- Trigger: `item` -> `Cooldown Progress (Item)` (`genericShowOn = "showAlways"`).
-- Testo 1: `%p` per il countdown del cooldown (2 min).
-- Testo 2: `%c` in basso a destra per le cariche residue in borsa (`GetItemCount(33312, nil, true)`). Se le cariche sono 0 o la gemma manca, compare uno `"0"` rosso di avvertimento.
+- Collocata a `x = +22, y = -54` tra Mantello (`-22`) e Combustion (`+66`).
+- **Bonus Set T7 (2 pezzi)**:
+  - All'utilizzo della gemma, attiva il buff "Improved Mana Gems" / "Gemme di Mana Migliorate" (+225 Spell Power per 15s).
+  - Mostra il Pixel Glow dorato intorno all'icona (come per i monili) e il countdown a 1 decimale (`%.1fs`).
+- **Cooldown Oggetto (2 min)**:
+  - Al termine del buff T7, interrompe il glow e commuta automaticamente lo swipe e il timer sul cooldown residuo della gemma (Item `33312` Mana Sapphire, `22044` Mana Emerald).
+- **Layout Anti-Sovrapposizione**:
+  - Timer di scorrimento (`%p`): Ancorato in zona SUD (`INNER_BOTTOM`, giallo durante il proc T7, bianco durante il cooldown).
+  - Conteggio cariche (`%c`): Ancorato in ALTO A DESTRA (`INNER_TOPRIGHT`). Mostra uno `"0"` rosso se le cariche sono esaurite o la gemma non è presente in borsa.
 
 ### 4. Layout Orizzontale Utility (Sotto la Mana Bar a `y = -54`)
-- 6 icone da 28x28 perfettamente simmetriche centrate sotto la Mana Bar:
-  - `05 - Trinket 1`: `x = -90` (Slot 13, supporto 40+ trinket WotLK, On-Use e ICD passivi, Pixel Glow su proc)
-  - `05 - Trinket 2`: `x = -54` (Slot 14, 100% simmetrico a Trinket 1 con database identico e fallback)
-  - `06 - Cloak`: `x = -18` (Slot 15, Lightweave/Darkglow/Swordguard con countdown ICD e swipe)
-  - `06 - Combustion`: `x = +18` (A sinistra di Mirror Image, Pixel Glow e stack `xN` quando attiva, swipe su CD)
-  - `06 - Mirror Image`: `x = +54` (Tra Combustion e Gemma: 30s attivo con Pixel Glow cyan e swipe, CD 3 min)
-  - `06 - Mana Gem`: `x = +90` (Item 33312 / 22044 con cariche e swipe)
+- 6 icone da 28x28 perfettamente simmetriche centrate sotto la Mana Bar (intervallo di 44px):
+  - `05 - Trinket 1`: `x = -110` (Slot 13, supporto 40+ trinket WotLK, On-Use e ICD passivi, Pixel Glow su proc)
+  - `05 - Trinket 2`: `x =  -66` (Slot 14, 100% simmetrico a Trinket 1 con database identico e fallback)
+  - `06 - Cloak`:     `x =  -22` (Slot 15, Lightweave/Darkglow/Swordguard con countdown ICD e swipe)
+  - `06 - Mana Gem`:  `x =  +22` (Tra Mantello e Combustion: T7 2pc Glow dorato, timer a sud, cariche in alto a dx)
+  - `06 - Combustion`: `x =  +66` (Pixel Glow e stack `xN` quando attiva, swipe su CD)
+  - `06 - Mirror Image`: `x = +110` (Copie: 30s attivo con Pixel Glow cyan e swipe, CD 3 min)
 
 ### 5. Regola di Caricamento Spec Fire (Load Conditions)
 - Nel backport WeakAuras 4.0.0 per 3.3.5a (`WeakAuras.lua` riga 1263), il motore calcola `loadFunc` **esclusivamente sui nodi foglia** (`if data and not data.controlledChildren`). Impostare `load` solo sul gruppo genitore non impediva alle aure figlie prive di `load` di caricarsi.

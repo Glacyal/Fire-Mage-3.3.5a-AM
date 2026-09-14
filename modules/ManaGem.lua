@@ -1,19 +1,111 @@
 --- =========================================================================
 --- Fire Mage HUD 3.3.5a — Modulo 06: Mana Gem (Gemma del Mana)
 --- =========================================================================
---- Monitora la Gemma del Mana (Mana Sapphire / Mana Emerald, x = +110, y = -54):
---- - Visualizza il cooldown residuo (2 min) con swipe circolare al centro dell'icona.
---- - Conta in tempo reale le cariche disponibili (3, 2, 1) mostrate in basso a destra.
---- - Se le cariche sono esaurite o la gemma non è in borsa, mostra uno "0" rosso
----   per avvisare immediatamente di ri-evocare la gemma prima del fight.
+--- Monitora la Gemma del Mana (Mana Sapphire / Mana Emerald, x = +22, y = -54):
+--- Collocata nella riga utility tra Mantello (x = -22) e Combustion (x = +66).
+--- 
+--- Funzionalità e layout:
+--- 1. Bonus Set T7 (2 pezzi):
+---    - All'uso della gemma, attiva il buff "Improved Mana Gems" (+225 SP per 15s).
+---    - Mostra il Pixel Glow dorato intorno all'icona (come per i monili) e
+---      il conto alla rovescia attivo con 1 decimale a sud (%p).
+--- 2. Cooldown Oggetto (2 min):
+---    - Al termine del buff T7, interrompe il glow e commuta automaticamente
+---      lo swipe e il timer a sud sul cooldown residuo della gemma (m:ss o secondi).
+--- 3. Posizionamento e Anti-Sovrapposizione:
+---    - Timer di scorrimento (%p): Ancorato in zona SUD (INNER_BOTTOM).
+---    - Conteggio cariche (%c): Ancorato in ALTO A DESTRA (INNER_TOPRIGHT).
+---    - Se le cariche sono esaurite o la gemma manca dalla borsa, mostra "0" rosso.
 --- =========================================================================
 
 local MANA_SAPPHIRE_ID = 33312 -- Rank 6 (Livello 80)
 local MANA_EMERALD_ID  = 22044 -- Rank 5 (Livello 70)
 
---- Restituisce il conteggio delle cariche disponibili in borsa (%c).
----@return string cariche (es. "3", "2", "1", oppure "|cFFFF22220|r")
-function FireMageHUD_ManaGem_Charges_CustomText()
+--- Nomi e Spell ID associati al bonus 2 pezzi T7 del Mago (+225 Spell Power)
+local T7_MANAGEM_BUFFS = {
+    ["Improved Mana Gems"]        = true,
+    ["Gemme di Mana Migliorate"]  = true,
+    ["Gemme del Mana Migliorate"] = true,
+    ["Gemma del Mana Migliorata"] = true,
+}
+
+--- Determina lo stato operativo corrente della Gemma del Mana (ACTIVE, COOLDOWN, READY).
+---@return string state "ACTIVE" (buff T7 attivo), "COOLDOWN" (ricarica oggetto), "READY" (pronta)
+---@return number rem Tempo residuo in secondi
+---@return number dur Durata totale associata
+function FireMageHUD_ManaGem_CheckState()
+    local now = GetTime()
+
+    -- 1. Controllo buff bonus 2 pezzi T7 attivo sul giocatore
+    for i = 1, 40 do
+        local n, _, _, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
+        if not n then break end
+        if spellId == 61062 or spellId == 37445 or spellId == 37446 or T7_MANAGEM_BUFFS[n] then
+            if exp and exp > now then
+                local rem = exp - now
+                local totalDur = (dur and dur > 0) and dur or 15
+                return "ACTIVE", rem, totalDur
+            end
+        end
+    end
+
+    -- 2. Controllo cooldown dell'oggetto (Zaffiro o Smeraldo)
+    local start, duration = GetItemCooldown(MANA_SAPPHIRE_ID)
+    if not start or duration == 0 then
+        start, duration = GetItemCooldown(MANA_EMERALD_ID)
+    end
+    if start and duration and duration > 1.5 and (start + duration) > now then
+        local remCD = (start + duration) - now
+        if remCD > 0.1 then
+            return "COOLDOWN", remCD, duration
+        end
+    end
+
+    -- 3. Pronta all'uso
+    return "READY", 0, 0
+end
+
+--- Calcola durata e scadenza per lo swipe circolare e il progress timer (%p).
+---@return number duration Durata totale dell'effetto o del cooldown
+---@return number expirationTime Timestamp GetTime() di scadenza
+function FireMageHUD_ManaGem_CustomDuration()
+    local state, rem, dur = FireMageHUD_ManaGem_CheckState()
+    if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end
+
+--- Gestisce il Pixel Glow del proc T7, colora il timer a sud e restituisce le cariche (%c).
+---@return string chargesText Numero cariche disponibili in borsa (es. "3", "2", "1", "|cFFFF22220|r")
+function FireMageHUD_ManaGem_CustomText()
+    local state, rem, dur = FireMageHUD_ManaGem_CheckState()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+
+    -- Gestione Pixel Glow dorato sul riquadro durante il proc attivo
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {1, 0.85, 0.1, 1}, 8, 0.25, 10, 2)
+        end
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+    end
+
+    -- Aggiornamento colore dinamico del timer a sud (%p): Giallo su proc, Bianco su cooldown
+    if aura_env and aura_env.region and aura_env.region.subRegions then
+        local timerSub = aura_env.region.subRegions[2]
+        if timerSub and timerSub.text and timerSub.text.SetTextColor then
+            if state == "ACTIVE" then
+                timerSub.text:SetTextColor(1, 0.9, 0.1, 1)
+            else
+                timerSub.text:SetTextColor(1, 1, 1, 1)
+            end
+        end
+    end
+
+    -- Conteggio cariche per la subRegion in alto a destra (%c)
     local c = GetItemCount(MANA_SAPPHIRE_ID, nil, true) or 0
     if c == 0 then
         c = GetItemCount(MANA_EMERALD_ID, nil, true) or 0
@@ -24,7 +116,7 @@ function FireMageHUD_ManaGem_Charges_CustomText()
     return "|cFFFF22220|r"
 end
 
---- Recupera i parametri di cooldown dell'oggetto per la barra/icona WeakAuras.
+--- Restituisce i parametri di cooldown base dell'oggetto per compatibilità legacy.
 ---@return number startTime Inizio del cooldown
 ---@return number duration Durata totale (120 secondi)
 ---@return number enable 1 se abilitato

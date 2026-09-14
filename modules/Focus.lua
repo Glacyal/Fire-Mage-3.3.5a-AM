@@ -5,17 +5,25 @@
 --- - Durata > 5 minuti: Completamente NASCOSTA per pulizia visiva in combattimento.
 --- - Durata <= 5 minuti: COMPARE automaticamente con countdown e swipe per il rinnovo.
 --- - NON applicato / Scaduto / Bersaglio morto: Icona grigia con avviso rosso "OFF".
---- Riconosce l'applicazione tramite COMBAT_LOG, UNIT_SPELLCAST_SUCCEEDED e
---- scansione attiva delle unità amiche (target, focus, raid1..40, party1..4).
+--- 
+--- Riconoscimento intelligente dello stato attivo:
+--- 1. Intercettazione eventi: UNIT_SPELLCAST_SUCCEEDED e COMBAT_LOG_EVENT_UNFILTERED.
+--- 2. Scansione alleati: target, focus, raid1..40, party1..4.
+--- 3. Proc critico sul mago (Spell ID 54648, 10s):
+---    Se il mago riceve il proc da critico del compagno, questo costituisce la prova
+---    matematica che il buff da 30 minuti è attivo sull'alleato. Lo stato non
+---    commuta MAI su "OFF" e non richiede di ritarghettare manualmente l'alleato.
 --- =========================================================================
 
-local FOCUS_MAGIC_BUFF = "Focus Magic"
-local FOCUS_MAGIC_SPELL_ID = 54646
+local FOCUS_MAGIC_BUFF_EN = "Focus Magic"
+local FOCUS_MAGIC_BUFF_IT = "Focalizzazione Magica"
+local FOCUS_MAGIC_SPELL_ID = 54646 -- Buff 30 min applicato all'alleato
+local FOCUS_MAGIC_PROC_ID  = 54648 -- Buff proc 10s attivo sul mago al critico dell'alleato
 
 --- Tabella di stato condivisa per memorizzare l'applicazione e la scadenza
 FMHUD_State = FMHUD_State or {}
 
---- Gestisce gli eventi di Combat Log e Spellcast Succeeded per intercettare l'assegnazione.
+--- Gestisce gli eventi di Combat Log e Spellcast Succeeded per intercettare l'assegnazione e i proc.
 ---@param event string Nome evento
 ---@param ... any Argomenti dell'evento
 function FireMageHUD_FocusMagic_OnEvent(event, ...)
@@ -23,21 +31,32 @@ function FireMageHUD_FocusMagic_OnEvent(event, ...)
 
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spell = ...
-        if unit == "player" and spell == FOCUS_MAGIC_BUFF then
+        if unit == "player" and (spell == FOCUS_MAGIC_BUFF_EN or spell == FOCUS_MAGIC_BUFF_IT) then
             FMHUD_State.FMTarget = UnitName("target") or "Ally"
             FMHUD_State.FMExpires = now + 1800
             FMHUD_State.FMDur = 1800
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-        if sourceGUID == UnitGUID("player") and (spellName == FOCUS_MAGIC_BUFF or spellId == FOCUS_MAGIC_SPELL_ID) then
-            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
-                FMHUD_State.FMTarget = destName or "Ally"
-                FMHUD_State.FMExpires = now + 1800
-                FMHUD_State.FMDur = 1800
-            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                FMHUD_State.FMExpires = 0
-                FMHUD_State.FMTarget = nil
+        local isFM = (spellName == FOCUS_MAGIC_BUFF_EN or spellName == FOCUS_MAGIC_BUFF_IT or spellId == FOCUS_MAGIC_SPELL_ID or spellId == FOCUS_MAGIC_PROC_ID)
+
+        if isFM then
+            -- 1. Assegnazione sull'alleato da parte del mago (spellId 54646, durata 30 minuti)
+            if sourceGUID == UnitGUID("player") and spellId ~= FOCUS_MAGIC_PROC_ID then
+                if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
+                    FMHUD_State.FMTarget = destName or "Ally"
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
+                    FMHUD_State.FMExpires = 0
+                    FMHUD_State.FMTarget = nil
+                end
+            -- 2. Attivazione proc critico sul mago (spellId 54648, 10s): conferma buff attivo sull'alleato!
+            elseif destGUID == UnitGUID("player") and (subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH") then
+                if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                end
             end
         elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
             FMHUD_State.FMExpires = 0
@@ -52,9 +71,9 @@ end
 local function CheckUnitFocusMagic(unit)
     if not UnitExists(unit) then return false end
     for i = 1, 40 do
-        local n, _, _, _, _, dur, exp, c = UnitBuff(unit, i)
+        local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(unit, i)
         if not n then break end
-        if n == FOCUS_MAGIC_BUFF and (c == "player" or not c) then
+        if (n == FOCUS_MAGIC_BUFF_EN or n == FOCUS_MAGIC_BUFF_IT or spellId == FOCUS_MAGIC_SPELL_ID) and (c == "player" or not c) then
             local now = GetTime()
             FMHUD_State.FMExpires = (exp and exp > 0) and exp or (now + 1800)
             FMHUD_State.FMDur = dur or 1800
@@ -65,22 +84,44 @@ local function CheckUnitFocusMagic(unit)
     return false
 end
 
---- Scansiona l'intero gruppo/raid, il target e il focus alla ricerca del buff applicato.
+--- Verifica se il giocatore possiede attualmente il buff proc di 10 secondi (Spell ID 54648).
+---@return boolean isProcActive
+local function CheckPlayerProcActive()
+    for i = 1, 40 do
+        local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        if not n then break end
+        if spellId == FOCUS_MAGIC_PROC_ID or n == FOCUS_MAGIC_BUFF_EN or n == FOCUS_MAGIC_BUFF_IT then
+            return true
+        end
+    end
+    return false
+end
+
+--- Scansiona l'intero gruppo/raid, il target, il focus e il player alla ricerca del buff applicato.
 ---@return boolean isApplied
 function FireMageHUD_HasFocusMagicApplied()
     local now = GetTime()
 
-    -- 1. Controllo cache da eventi recenti
+    -- 1. Controllo proc attivo di 10 secondi sul player (prova assoluta di buff attivo sull'alleato)
+    if CheckPlayerProcActive() then
+        if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+            FMHUD_State.FMExpires = now + 1800
+            FMHUD_State.FMDur = 1800
+        end
+        return true
+    end
+
+    -- 2. Controllo cache da eventi recenti ancora validi
     if FMHUD_State.FMExpires and FMHUD_State.FMExpires > now then
         return true
     end
 
-    -- 2. Target e Focus amici
+    -- 3. Target e Focus amici
     if CheckUnitFocusMagic("target") or CheckUnitFocusMagic("focus") then
         return true
     end
 
-    -- 3. Membri del Raid o Party
+    -- 4. Membri del Raid o Party
     local nr = GetNumRaidMembers()
     if nr and nr > 0 then
         for r = 1, nr do
@@ -104,6 +145,7 @@ end
 ---@return boolean shouldDisplay
 function FireMageHUD_FocusMagic_Active_Trigger(event, ...)
     FireMageHUD_FocusMagic_OnEvent(event, ...)
+    FireMageHUD_HasFocusMagicApplied()
     local now = GetTime()
     local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
     return rem > 0 and rem <= 300
@@ -141,9 +183,18 @@ end
 ---@return boolean isMissing
 function FireMageHUD_FocusMagic_OFF_Trigger(event, ...)
     FireMageHUD_FocusMagic_OnEvent(event, ...)
+    if FireMageHUD_HasFocusMagicApplied() then
+        return false
+    end
     local now = GetTime()
     local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
-    return rem <= 0
+    if rem <= 0 then
+        if CheckPlayerProcActive() then
+            return false
+        end
+        return true
+    end
+    return false
 end
 
 --- Disattiva lo stato OFF non appena il buff risulta applicato a un alleato.

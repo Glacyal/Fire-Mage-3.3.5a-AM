@@ -463,21 +463,31 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
 
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spell = ...
-        if unit == "player" and spell == "Focus Magic" then
+        if unit == "player" and (spell == "Focus Magic" or spell == "Focalizzazione Magica") then
             FMHUD_State.FMTarget = UnitName("target") or "Ally"
             FMHUD_State.FMExpires = now + 1800
             FMHUD_State.FMDur = 1800
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-        if sourceGUID == UnitGUID("player") and (spellName == "Focus Magic" or spellId == 54646) then
-            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
-                FMHUD_State.FMTarget = destName or "Ally"
-                FMHUD_State.FMExpires = now + 1800
-                FMHUD_State.FMDur = 1800
-            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                FMHUD_State.FMExpires = 0
-                FMHUD_State.FMTarget = nil
+        local isFM = (spellName == "Focus Magic" or spellName == "Focalizzazione Magica" or spellId == 54646 or spellId == 54648)
+        if isFM then
+            -- Assegnazione sull'alleato da parte del mago (spellId 54646, buff 30 minuti)
+            if sourceGUID == UnitGUID("player") and spellId ~= 54648 then
+                if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
+                    FMHUD_State.FMTarget = destName or "Ally"
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
+                    FMHUD_State.FMExpires = 0
+                    FMHUD_State.FMTarget = nil
+                end
+            -- Attivazione proc critico sul mago (spellId 54648, 10s): conferma assoluta del buff attivo sull'alleato!
+            elseif destGUID == UnitGUID("player") and (subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH") then
+                if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                    FMHUD_State.FMExpires = now + 1800
+                    FMHUD_State.FMDur = 1800
+                end
             end
         elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
             FMHUD_State.FMExpires = 0
@@ -485,14 +495,31 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
         end
     end
 
-    local b = "Focus Magic"
+    local b1 = "Focus Magic"
+    local b2 = "Focalizzazione Magica"
     local found = false
 
-    if UnitExists("target") and UnitIsFriend("player", "target") then
+    -- 1. Controllo proc attivo di 10 secondi sul player (prova diretta che il buff sull'alleato è attivo)
+    for i = 1, 40 do
+        local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        if not n then break end
+        if spellId == 54648 or n == b1 or n == b2 then
+            -- Mantiene viva la durata dell'alleato senza mai sovrascriverla con i 10 secondi del proc
+            if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
+                FMHUD_State.FMExpires = now + 1800
+                FMHUD_State.FMDur = 1800
+            end
+            found = true
+            break
+        end
+    end
+
+    -- 2. Controllo bersaglio alleato (target)
+    if not found and UnitExists("target") and UnitIsFriend("player", "target") then
         for i = 1, 40 do
-            local n, _, _, _, _, dur, exp, c = UnitBuff("target", i)
+            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("target", i)
             if not n then break end
-            if n == b and (c == "player" or not c) then
+            if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
                 if exp and exp > 0 then
                     FMHUD_State.FMExpires = exp
                     FMHUD_State.FMDur = dur or 1800
@@ -507,11 +534,12 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
         end
     end
 
+    -- 3. Controllo focus alleato
     if not found and UnitExists("focus") and UnitIsFriend("player", "focus") then
         for i = 1, 40 do
-            local n, _, _, _, _, dur, exp, c = UnitBuff("focus", i)
+            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("focus", i)
             if not n then break end
-            if n == b and (c == "player" or not c) then
+            if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
                 if exp and exp > 0 then
                     FMHUD_State.FMExpires = exp
                     FMHUD_State.FMDur = dur or 1800
@@ -526,15 +554,16 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
         end
     end
 
+    -- 4. Scansione membri del Raid o del Party
     if not found then
         local nr = GetNumRaidMembers()
         if nr and nr > 0 then
             for r = 1, nr do
                 local u = "raid"..r
                 for i = 1, 40 do
-                    local n, _, _, _, _, dur, exp, c = UnitBuff(u, i)
+                    local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
                     if not n then break end
-                    if n == b and (c == "player" or not c) then
+                    if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
                         if exp and exp > 0 then
                             FMHUD_State.FMExpires = exp
                             FMHUD_State.FMDur = dur or 1800
@@ -555,9 +584,9 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
                 for p = 1, np do
                     local u = "party"..p
                     for i = 1, 40 do
-                        local n, _, _, _, _, dur, exp, c = UnitBuff(u, i)
+                        local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
                         if not n then break end
-                        if n == b and (c == "player" or not c) then
+                        if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
                             if exp and exp > 0 then
                                 FMHUD_State.FMExpires = exp
                                 FMHUD_State.FMDur = dur or 1800
@@ -572,24 +601,6 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
                     end
                     if found then break end
                 end
-            end
-        end
-    end
-
-    if not found then
-        for i = 1, 40 do
-            local n, _, _, _, _, dur, exp = UnitBuff("player", i)
-            if not n then break end
-            if n == b then
-                if exp and exp > 0 then
-                    FMHUD_State.FMExpires = exp
-                    FMHUD_State.FMDur = dur or 1800
-                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMDur = 1800
-                end
-                found = true
-                break
             end
         end
     end
@@ -654,6 +665,14 @@ def make_fm_off_trigger() -> str:
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem = _G.FMHUD_CheckFM(event, ...)
     if rem <= 0 then
+        -- Verifica di sicurezza: se il proc da 10s è attivo sul player, non mostrare mai OFF
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+            if not n then break end
+            if spellId == 54648 or n == "Focus Magic" or n == "Focalizzazione Magica" then
+                return false
+            end
+        end
         return true
     end
     return false
@@ -665,6 +684,13 @@ def make_fm_off_untrigger() -> str:
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
     local rem = _G.FMHUD_CheckFM(event, ...)
     if rem <= 0 then
+        for i = 1, 40 do
+            local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+            if not n then break end
+            if spellId == 54648 or n == "Focus Magic" or n == "Focalizzazione Magica" then
+                return true
+            end
+        end
         return false
     end
     return true
@@ -835,6 +861,106 @@ def make_mirrorimage_custom_icon() -> str:
     return icon
 end"""
 
+SHARED_MANAGEM_CHECK_LUA = """function()
+    local now = GetTime()
+    local isT7Active = false
+    local remT7 = 0
+    local durT7 = 15
+
+    -- 1. Controllo buff bonus 2 pezzi T7 Mago (+225 Spell Power per 15s dopo l'uso della gemma)
+    for i = 1, 40 do
+        local n, _, icon, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
+        if not n then break end
+        if spellId == 61062 or spellId == 37445 or spellId == 37446 or n == "Improved Mana Gems" or n == "Gemme di Mana Migliorate" or n == "Gemme del Mana Migliorate" or n == "Gemma del Mana Migliorata" then
+            if exp and exp > now then
+                isT7Active = true
+                remT7 = exp - now
+                durT7 = (dur and dur > 0) and dur or 15
+                break
+            end
+        end
+    end
+
+    -- 2. Controllo cooldown oggetto Gemma del Mana (Mana Sapphire 33312, Mana Emerald 22044)
+    local start, duration = GetItemCooldown(33312)
+    if not start or duration == 0 then
+        start, duration = GetItemCooldown(22044)
+    end
+    local isCD = false
+    local remCD = 0
+    if start and duration and duration > 1.5 and (start + duration) > now then
+        remCD = (start + duration) - now
+        if remCD > 0.1 then
+            isCD = true
+        end
+    end
+
+    if isT7Active then
+        return "ACTIVE", remT7, durT7
+    elseif isCD then
+        return "COOLDOWN", remCD, duration
+    else
+        return "READY", 0, 0
+    end
+end"""
+
+def make_managem_custom_text() -> str:
+    """Genera il testo descrittivo (%c) delle cariche della Gemma del Mana, gestendo il Pixel Glow durante il proc T7."""
+    return f"""function()
+    _G.FMHUD_CheckManaGem = _G.FMHUD_CheckManaGem or {SHARED_MANAGEM_CHECK_LUA}
+    local state, rem, dur = _G.FMHUD_CheckManaGem()
+    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
+
+    if state == "ACTIVE" then
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Start(aura_env.region, {{1, 0.85, 0.1, 1}}, 8, 0.25, 10, 2)
+        end
+    else
+        if LCG and aura_env and aura_env.region then
+            LCG.PixelGlow_Stop(aura_env.region)
+        end
+    end
+
+    -- Imposta il colore del timer a sud (%p): Giallo durante il proc T7, Bianco durante il cooldown
+    if aura_env and aura_env.region and aura_env.region.subRegions then
+        local timerSub = aura_env.region.subRegions[2]
+        if timerSub and timerSub.text and timerSub.text.SetTextColor then
+            if state == "ACTIVE" then
+                timerSub.text:SetTextColor(1, 0.9, 0.1, 1)
+            else
+                timerSub.text:SetTextColor(1, 1, 1, 1)
+            end
+        end
+    end
+
+    -- Conteggio cariche disponibili in borsa per la subRegion in alto a destra (%c)
+    local c = GetItemCount(33312, nil, true) or 0
+    if c == 0 then
+        c = GetItemCount(22044, nil, true) or 0
+    end
+    if c > 0 then
+        return tostring(c)
+    end
+    return "|cFFFF22220|r"
+end"""
+
+def make_managem_custom_duration() -> str:
+    """Genera la durata e scadenza per lo swipe di ricarica della Gemma del Mana (durata T7 o CD oggetto)."""
+    return f"""function()
+    _G.FMHUD_CheckManaGem = _G.FMHUD_CheckManaGem or {SHARED_MANAGEM_CHECK_LUA}
+    local state, rem, dur = _G.FMHUD_CheckManaGem()
+    if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
+        return dur, GetTime() + rem
+    end
+    return 0, 0
+end"""
+
+def make_managem_custom_icon() -> str:
+    """Restituisce la texture predefinita della Gemma del Mana (Mana Sapphire 33312)."""
+    return """function()
+    return "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
+end"""
+
 import copy
 
 FIRE_MAGE_LOAD = {
@@ -868,9 +994,9 @@ def build_wa_tree() -> dict:
                 "05 - Trinket 1",
                 "05 - Trinket 2",
                 "06 - Cloak",
+                "06 - Mana Gem",
                 "06 - Combustion",
                 "06 - Mirror Image",
-                "06 - Mana Gem",
                 "07 - Mana Bar",
                 "08 - Castbar",
                 "09 - GCD",
@@ -1843,7 +1969,76 @@ end"""
             },
 
             # =================================================================
-            # 06 - COMBUSTION (To the left of Mirror Image - Works like Trinkets/Cloak)
+            # 06 - MANA GEM (Between Cloak and Combustion - T7 Proc + CD + Charges)
+            # =================================================================
+            {
+                "id": "06 - Mana Gem",
+                "uid": "FMHUD_MANAGEM",
+                "parent": "Fire Mage HUD",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 22,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_managem_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "event",
+                            "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,BAG_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,BAG_UPDATE,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                            "custom": """function(event, ...)
+    return true
+end""",
+                            "customDuration": make_managem_custom_duration(),
+                            "customIcon": make_managem_custom_icon(),
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    return false
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext(
+                        "%p",
+                        justify="CENTER",
+                        anchor_point="INNER_BOTTOM",
+                        font_size=10,
+                        y_offset=1,
+                        extra_props={
+                            "text_text_format_p_format": "timed",
+                            "text_text_format_p_time_precision": 1,
+                            "text_text_format_p_time_dynamic_threshold": 60,
+                        }
+                    ),
+                    make_subtext(
+                        "%c",
+                        justify="RIGHT",
+                        anchor_point="INNER_TOPRIGHT",
+                        font_size=9,
+                        extra_props={
+                            "anchorXOffset": -1,
+                            "anchorYOffset": -1,
+                        }
+                    ),
+                ],
+            },
+
+            # =================================================================
+            # 06 - COMBUSTION (Between Mana Gem and Mirror Image)
             # =================================================================
             {
                 "id": "06 - Combustion",
@@ -1851,7 +2046,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 22,
+                "xOffset": 66,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1893,7 +2088,7 @@ end"""
             },
 
             # =================================================================
-            # 06 - MIRROR IMAGE (Between Combustion and Mana Gem)
+            # 06 - MIRROR IMAGE (Rightmost icon in utility row)
             # =================================================================
             {
                 "id": "06 - Mirror Image",
@@ -1901,7 +2096,7 @@ end"""
                 "parent": "Fire Mage HUD",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 66,
+                "xOffset": 110,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -1937,66 +2132,6 @@ end"""
                 "subRegions": [
                     { "type": "subbackground" },
                     make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
-                ],
-            },
-
-            # =================================================================
-            # 06 - MANA GEM (Item 33312 / 22044 - Centered row under Mana Bar)
-            # =================================================================
-            {
-                "id": "06 - Mana Gem",
-                "uid": "FMHUD_MANAGEM",
-                "parent": "Fire Mage HUD",
-                "regionType": "icon",
-                "internalVersion": 52,
-                "xOffset": 110,
-                "yOffset": -54,
-                "width": 28,
-                "height": 28,
-                "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
-                "cooldown": True,
-                "cooldownSwipe": True,
-                "cooldownEdge": True,
-                "cooldownTextDisabled": True,
-                "inverse": False,
-                "customTextUpdate": "update",
-                "customText": """function()
-    local c = GetItemCount(33312, nil, true) or 0
-    if c == 0 then
-        c = GetItemCount(22044, nil, true) or 0
-    end
-    if c > 0 then
-        return tostring(c)
-    end
-    return "|cFFFF22220|r"
-end""",
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "item",
-                            "event": "Cooldown Progress (Item)",
-                            "itemName": 33312,
-                            "use_itemName": True,
-                            "genericShowOn": "showAlways",
-                            "use_genericShowOn": True,
-                        },
-                        "untrigger": {}
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    make_subtext("%p", justify="CENTER", anchor_point="CENTER", font_size=10),
-                    make_subtext(
-                        "%c",
-                        justify="RIGHT",
-                        anchor_point="INNER_TOPRIGHT",
-                        font_size=9,
-                        extra_props={
-                            "anchorXOffset": -1,
-                            "anchorYOffset": -1,
-                        }
-                    ),
                 ],
             },
 
