@@ -39,6 +39,21 @@ FireMageHUD_Config = {
     },
 
     -- ---------------------------------------------------------------------
+    -- 1B. BARRA HOT STREAK (Sotto Mana Bar, 2 Segmenti, no testo)
+    -- ---------------------------------------------------------------------
+    HotStreakBar = {
+        Width = 264,
+        Height = 7,
+        SegmentWidth = 130,
+        SegmentHeight = 5,
+        Colors = {
+            Segment1   = { r = 1.00, g = 0.55, b = 0.00, a = 1.0 }, -- Ambra / Arancione vivo (Persistente)
+            Segment2   = { r = 1.00, g = 0.35, b = 0.00, a = 1.0 }, -- Rosso fuoco (Proc 10s)
+            Background = { r = 0.05, g = 0.05, b = 0.05, a = 0.85 },
+        },
+    },
+
+    -- ---------------------------------------------------------------------
     -- 2. SPELL ID E RIFERIMENTI FIRE MAGE (WotLK 3.3.5a)
     -- ---------------------------------------------------------------------
     Spells = {
@@ -92,6 +107,17 @@ FireMageHUD_Config = {
             BuffID   = 28682,
             Name     = "Combustion",
             Cooldown = 120,
+        },
+
+        -- Copie (Mirror Image / Proc 4P T10)
+        MirrorImage = {
+            SpellID     = 55342,
+            Name        = "Mirror Image",
+            AltName     = "Immagine Speculare",
+            Cooldown    = 180,
+            Duration    = 30.0,
+            T10BuffID   = 70747,
+            T10BuffName = "Quad Core",
         },
 
         -- Furia Incandescente (Molten Fury, talento execute <= 35% HP bersaglio)
@@ -186,5 +212,30 @@ FireMageHUD_Config = {
         ShowPercentage   = true,
         NoFocusText      = "NO FOCUS",
         DeadFocusText    = "FOCUS DEAD",
+    },
+
+    -- ---------------------------------------------------------------------
+    -- 7. SMART LIVING BOMB TARGET ASSISTANT (Modulo Destro Indipendente)
+    -- ---------------------------------------------------------------------
+    SmartLivingBomb = {
+        Enabled      = true,
+        MedMin       = 40,   -- Soglia minima HP Medi (%) - Fascia 1: Priorità Massima
+        MedMax       = 70,   -- Soglia massima HP Medi (%) - Fascia 1: Priorità Massima
+        HighMax      = 100,  -- Soglia massima HP Alti (%) - Fascia 2: Seconda Scelta
+        LowMin       = 0,    -- Soglia minima HP Bassi (%) - Fascia 3: Terza Scelta
+        MaxEntries   = 5,    -- Numero massimo di bersagli visualizzati nell'elenco
+        OnlyInCombat = false -- Se true, mostra il pannello solo durante il combattimento
+    },
+
+    -- ---------------------------------------------------------------------
+    -- 8. REAL-TIME STATS PANEL (Modulo 12: SP, Crit, Haste, Hit)
+    -- ---------------------------------------------------------------------
+    Stats = {
+        Enabled          = true,
+        IncludeTargetHit = true,  -- Se true, include il debuff +3% Hit sul target (Misery / Faerie Fire)
+        XOffset          = -180,  -- Offset X relativo al centro dell'HUD
+        YOffset          = -54,   -- Offset Y relativo al centro dell'HUD
+        Width            = 88,
+        Height           = 48,
     },
 }

@@ -8,14 +8,16 @@
 Config.lua
 Core.lua
 modules\Mana.lua
+modules\HotStreakBar.lua
 modules\Castbar.lua
 modules\MoltenArmor.lua
 modules\Intellect.lua
 modules\Focus.lua
 modules\ManaGem.lua
+modules\MirrorImage.lua
 modules\Procs.lua
 modules\Trinkets.lua
 modules\Cloak.lua
 modules\GCD.lua
 modules\Alerts.lua
-
+modules\Stats.lua

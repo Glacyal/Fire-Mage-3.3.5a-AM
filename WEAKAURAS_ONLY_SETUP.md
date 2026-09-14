@@ -5,7 +5,7 @@
 ```text
 Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
 │
-├── 01 - Procs (Dynamic Group orizzontale, y = +44 - centrato sopra la Castbar)
+├── 01 - Procs (Dynamic Group orizzontale, y = +52 - centrato sopra la Castbar)
 │   ├── Hot Streak (Icona 34x34 + Timer rosso <= 3s + Pixel Glow dorato)
 │   ├── Clearcasting (Icona 34x34 + Timer rosso <= 4s + Pixel Glow dorato)
 │   ├── Living Bomb (Icona 34x34 + Timer rosso <= 3s per refresh senza clippare)
@@ -13,17 +13,26 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
 │   ├── Scorch (Icona 34x34 + Timer rosso <= 5s)
 │   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
-├── Colonna Buff a Sinistra (x = -182, 34px dalla Castbar - 3 icone 32x32 impilate verticalmente)
-│   ├── 03 - Arcane Intellect (y = +18: Nascosta > 5m, Timer <= 5m, OFF rosso)
-│   ├── 02 - Molten Armor     (y = -18: Nascosta > 5m, Timer <= 5m, OFF rosso)
-│   └── 04 - Focus Magic      (y = -54: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
+├── Colonna Buff a Sinistra (3 icone 28x28 in riga orizzontale sopra Stats Panel a y = -14)
+│   ├── 03 - Arcane Intellect (x = -210, y = -14: Nascosta > 5m, Timer <= 5m, OFF rosso)
+│   ├── 02 - Molten Armor     (x = -180, y = -14: Nascosta > 5m, Timer <= 5m, OFF rosso)
+│   └── 04 - Focus Magic      (x = -150, y = -14: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
 │
-├── Cluster Centrale (Allungato del +20% a larghezza 264px, impilato verticalmente)
-│   ├── 08 - Castbar  (y =   0, w = 264, h = 20: Icona spell a sx, nome a sx, tempo a dx)
-│   ├── 09 - GCD      (y = -12, w = 264, h =  3: Barra bianca sottile)
-│   └── 07 - Mana Bar (y = -23, w = 264, h = 14: % con 2 decimali, rossa se <= 20%)
+├── 12 - Stats Panel (x = -180, y = -54, sotto i 3 buff - Box 88x48 con 4 righe stats real-time)
+│   ├── SP:    Fire Spell Power (rosso, include proc/buff/gear in tempo reale)
+│   ├── Crit:  Fire Spell Crit (arancione, include Molten Armor + glifo, talenti, Combustion, debuff boss: Scorch/Winter's Chill +5%, Heart of the Crusader/Master Poisoner +3%, supporto 3 cifre es. 110.99%)
+│   ├── Haste: Spell Haste (viola, include rating + moltiplicatori Bloodlust/Totem/Moonkin, supporto 3 cifre es. 110.99%)
+│   └── Hit:   Spell Hit (giallo, rating + Precision + Draenei + debuff boss: Misery/Faerie Fire +3%, indicatore verde (Cap) a >= 17%)
 │
-├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 6 icone 28x28 centrate)
+├── Cluster Centrale (Larghezza 264px, impilato verticalmente con Hot Streak Bar)
+│   ├── 08 - Castbar         (y =  +8, w = 264, h = 20: Icona spell a sx, nome a sx, tempo a dx)
+│   ├── 09 - GCD             (y =  -4, w = 264, h =  3: Barra bianca sottile)
+│   ├── 07 - Mana Bar        (y = -15, w = 264, h = 14: % con 2 decimali, rossa se <= 20%)
+│   └── 10 - Hot Streak Bar  (y = -25, w = 264, h =  7: Barretta dual-segment pulita, no testo)
+│       ├── Segmento 1 (sx: 130x5px, 1° critico non-periodico persistente nel tempo)
+│       └── Segmento 2 (dx: 130x5px, Hot Streak proc countdown 10s con glow, reset istantaneo su Pyroblast)
+│
+├── Fila Utility Inferiore (y = -54, margine di 11.5px sotto la Hot Streak Bar - 6 icone 28x28 centrate)
 │   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
 │   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
 │   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
@@ -31,7 +40,7 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190)
 │   ├── 06 - Combustion   (x =  +66: Glow attivo + Stacks x%d + Swipe orologio CD)
 │   └── 06 - Mirror Image (x = +110: Glow attivo 30s + Swipe orologio CD 3m)
 │
-└── 10 - Alerts (y = +105, 24px sopra i Proc)
+└── 10 - Alerts (y = +105, sopra i Proc)
     └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!")
 ```
 

@@ -23,28 +23,44 @@ local MANA_EMERALD_ID  = 22044 -- Rank 5 (Livello 70)
 
 --- Nomi e Spell ID associati al bonus 2 pezzi T7 del Mago (+225 Spell Power)
 local T7_MANAGEM_BUFFS = {
+    ["Mana Surge"]                = true,
     ["Improved Mana Gems"]        = true,
     ["Gemme di Mana Migliorate"]  = true,
     ["Gemme del Mana Migliorate"] = true,
     ["Gemma del Mana Migliorata"] = true,
+    ["Ondata di Mana"]            = true,
+}
+
+local T7_MANAGEM_SPELLS = {
+    [61062] = true,
+    [37445] = true,
+    [37446] = true,
+    [37447] = true,
+    [54043] = true,
 }
 
 --- Determina lo stato operativo corrente della Gemma del Mana (ACTIVE, COOLDOWN, READY).
 ---@return string state "ACTIVE" (buff T7 attivo), "COOLDOWN" (ricarica oggetto), "READY" (pronta)
 ---@return number rem Tempo residuo in secondi
 ---@return number dur Durata totale associata
+---@return string icon Percorso della texture appropriata (Mana Surge o Gemma)
 function FireMageHUD_ManaGem_CheckState()
     local now = GetTime()
+    local baseIcon = "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
 
     -- 1. Controllo buff bonus 2 pezzi T7 attivo sul giocatore
     for i = 1, 40 do
-        local n, _, _, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
+        local n, _, icon, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
         if not n then break end
-        if spellId == 61062 or spellId == 37445 or spellId == 37446 or T7_MANAGEM_BUFFS[n] then
-            if exp and exp > now then
-                local rem = exp - now
+        if (spellId and T7_MANAGEM_SPELLS[spellId]) or (n and T7_MANAGEM_BUFFS[n]) then
+            local rem = (exp and exp > now) and (exp - now) or 0
+            if exp == 0 or exp == nil then
+                rem = (dur and dur > 0) and dur or 15
+            end
+            if rem > 0.05 or exp == 0 or exp == nil then
                 local totalDur = (dur and dur > 0) and dur or 15
-                return "ACTIVE", rem, totalDur
+                local procIcon = icon or GetSpellTexture(61062) or GetSpellTexture(37447) or "Interface\\Icons\\Spell_Arcane_ManaSurge" or "Interface\\Icons\\Spell_Holy_MagicalSentry"
+                return "ACTIVE", rem, totalDur, procIcon
             end
         end
     end
@@ -57,19 +73,29 @@ function FireMageHUD_ManaGem_CheckState()
     if start and duration and duration > 1.5 and (start + duration) > now then
         local remCD = (start + duration) - now
         if remCD > 0.1 then
-            return "COOLDOWN", remCD, duration
+            return "COOLDOWN", remCD, duration, baseIcon
         end
     end
 
     -- 3. Pronta all'uso
-    return "READY", 0, 0
+    return "READY", 0, 0, baseIcon
+end
+
+--- Restituisce la texture appropriata per l'icona: Mana Surge durante il proc T7, Gemma del Mana altrimenti.
+---@return string texturePath Percorso texture Blizzard Interface
+function FireMageHUD_ManaGem_CustomIcon()
+    local state, rem, dur, icon = FireMageHUD_ManaGem_CheckState()
+    if state == "ACTIVE" and icon then
+        return icon
+    end
+    return "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
 end
 
 --- Calcola durata e scadenza per lo swipe circolare e il progress timer (%p).
 ---@return number duration Durata totale dell'effetto o del cooldown
 ---@return number expirationTime Timestamp GetTime() di scadenza
 function FireMageHUD_ManaGem_CustomDuration()
-    local state, rem, dur = FireMageHUD_ManaGem_CheckState()
+    local state, rem, dur, icon = FireMageHUD_ManaGem_CheckState()
     if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
         return dur, GetTime() + rem
     end
@@ -79,7 +105,7 @@ end
 --- Gestisce il Pixel Glow del proc T7, colora il timer a sud e restituisce le cariche (%c).
 ---@return string chargesText Numero cariche disponibili in borsa (es. "3", "2", "1", "|cFFFF22220|r")
 function FireMageHUD_ManaGem_CustomText()
-    local state, rem, dur = FireMageHUD_ManaGem_CheckState()
+    local state, rem, dur, icon = FireMageHUD_ManaGem_CheckState()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
 
     -- Gestione Pixel Glow dorato sul riquadro durante il proc attivo
@@ -90,6 +116,21 @@ function FireMageHUD_ManaGem_CustomText()
     else
         if LCG and aura_env and aura_env.region then
             LCG.PixelGlow_Stop(aura_env.region)
+        end
+    end
+
+    -- Aggiornamento immediato texture dell'icona: Mana Surge SOLO durante proc T7 attivo, altrimenti SEMPRE Gemma standard
+    if aura_env and aura_env.region then
+        local defIcon = "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
+        local targetIcon = (state == "ACTIVE" and icon) and icon or defIcon
+        if aura_env.region.icon and aura_env.region.icon.SetTexture then
+            aura_env.region.icon:SetTexture(targetIcon)
+        end
+        if aura_env.region.SetIcon then
+            aura_env.region:SetIcon(targetIcon)
+        end
+        if aura_env.state then
+            aura_env.state.icon = targetIcon
         end
     end
 
