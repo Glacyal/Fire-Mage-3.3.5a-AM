@@ -400,22 +400,17 @@ end"""
 
 def make_slot_custom_text(slot: int) -> str:
     """Genera la closure Lua per il testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo e riposizionamento dinamico."""
-    x6_map = {13: -110, 14: -66, 15: -22}
-    x7_map = {13: -114, 14: -76, 15: -38}
-    x6 = x6_map.get(slot, -110)
-    x7 = x7_map.get(slot, -114)
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
         _G.FMHUD_CheckSlot_v5 = true
     end
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_SetUtilityPos then
-        _G.FMHUD_SetUtilityPos(aura_env, {x6}, {x7})
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
     local state, rem, dur, icon = _G.FMHUD_CheckSlot({slot})
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -470,8 +465,10 @@ def make_slot_custom_icon(slot: int, default_icon: str) -> str:
 end"""
 
 
-SHARED_T8_CHECK_LUA = """function()
-    _G.FMHUD_T8_SetIDs = _G.FMHUD_T8_SetIDs or {
+SHARED_T8_INIT_LUA = """function()
+    if _G.FMHUD_T8_InitDone then return end
+
+    _G.FMHUD_T8_SetIDs = {
         -- 10-Man Valorous Kirin Tor
         [45367] = true, -- Head
         [45369] = true, -- Shoulder
@@ -485,11 +482,27 @@ SHARED_T8_CHECK_LUA = """function()
         [45356] = true, -- Legs
         [45358] = true, -- Hands
     }
+
+    _G.FMHUD_T8_State = _G.FMHUD_T8_State or { lastStart = 0, lastEnd = 0, isProc = false }
+
     _G.FMHUD_CheckT8Equipped = function()
         local now = GetTime()
-        if _G.FMHUD_T8_EquipCache and (now - _G.FMHUD_T8_EquipCache.time < 0.2) then
-            return _G.FMHUD_T8_EquipCache.count >= 2
+        if _G.FMHUD_T8_EquipCache and (now - _G.FMHUD_T8_EquipCache.time < 0.3) then
+            return _G.FMHUD_T8_EquipCache.isEquipped
         end
+
+        -- Check 1: Buff Praxis is currently active on player (Spell ID 64868, "Praxis", "Prassi")
+        for i = 1, 40 do
+            local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+            if not name then break end
+            if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+                _G.FMHUD_T8_LastSeen = now
+                _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+                return true
+            end
+        end
+
+        -- Check 2: Known Item IDs
         local count = 0
         local slots = { 1, 3, 5, 7, 10 }
         for _, s in ipairs(slots) do
@@ -498,92 +511,188 @@ SHARED_T8_CHECK_LUA = """function()
                 count = count + 1
             end
         end
-        _G.FMHUD_T8_EquipCache = { time = now, count = count }
-        return count >= 2
+        if count >= 2 then
+            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        -- Check 3: Tooltip scan for "Kirin Tor" or "Praxis" on equipped armor
+        local ttCount = 0
+        local tt = _G.FMHUD_ScanTT
+        if not tt then
+            tt = CreateFrame("GameTooltip", "FMHUD_ScanTT", nil, "GameTooltipTemplate")
+            tt:SetOwner(WorldFrame, "ANCHOR_NONE")
+            _G.FMHUD_ScanTT = tt
+        end
+        for _, s in ipairs(slots) do
+            local id = GetInventoryItemID("player", s)
+            if id then
+                tt:ClearLines()
+                tt:SetInventoryItem("player", s)
+                for j = 1, tt:NumLines() do
+                    local line = _G["FMHUD_ScanTTTextLeft"..j]
+                    local text = line and line:GetText()
+                    if text then
+                        local lt = text:lower()
+                        if lt:find("kirin tor") or lt:find("praxis") or lt:find("prassi") then
+                            ttCount = ttCount + 1
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        if ttCount >= 2 then
+            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        -- Check 4: Recent buff within 60s
+        if _G.FMHUD_T8_LastSeen and (now - _G.FMHUD_T8_LastSeen < 60) then
+            _G.FMHUD_T8_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+
+        _G.FMHUD_T8_EquipCache = { time = now, isEquipped = false }
+        return false
     end
 
-    _G.FMHUD_T8_State = _G.FMHUD_T8_State or { lastStart = 0, lastEnd = 0, isProc = false }
+    _G.FMHUD_CheckT8 = function()
+        local isEquipped = _G.FMHUD_CheckT8Equipped()
+        local now = GetTime()
+        local state = _G.FMHUD_T8_State
+        local defIcon = GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
+        local icon = defIcon
 
-    local isEquipped = _G.FMHUD_CheckT8Equipped()
-    if not isEquipped then
-        return "NONE", 0, 0, "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+        -- 1. Controllo buff attivo Praxis (SpellID 64868, +350 SP per 15s)
+        local foundBuff = false
+        local remBuff = 0
+        local durBuff = 15
+        for i = 1, 40 do
+            local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+            if not name then break end
+            if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+                foundBuff = true
+                durBuff = (duration and duration > 0) and duration or 15
+                remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
+                if bIcon then icon = bIcon end
+                _G.FMHUD_T8_LastSeen = now
+                break
+            end
+        end
+
+        if foundBuff then
+            if not state.isProc or (now - state.lastStart > durBuff + 2) then
+                state.lastStart = now - (durBuff - remBuff)
+                state.lastEnd = state.lastStart + 45
+                state.isProc = true
+            end
+            return "ACTIVE", remBuff, durBuff, icon, true
+        end
+
+        if state.isProc then
+            state.isProc = false
+        end
+
+        if not isEquipped then
+            return "NONE", 0, 0, defIcon, false
+        end
+
+        -- 2. ICD Stimato (45s totale = 15s proc + 30s ricarica)
+        if state.lastStart > 0 then
+            local elapsed = now - state.lastStart
+            if elapsed < 45 then
+                local remICD = 45 - elapsed
+                return "ICD", remICD, 45, icon, true
+            end
+        end
+
+        -- 3. Pronto
+        return "READY", 0, 0, icon, true
     end
 
-    local now = GetTime()
-    local state = _G.FMHUD_T8_State
-    local icon = "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+    _G.FMHUD_UpdateUtilityRowPositions = function()
+        if not WeakAuras or not WeakAuras.regions then return end
+        local group = WeakAuras.regions["Fire Mage 3.3.5a AM"] and WeakAuras.regions["Fire Mage 3.3.5a AM"].region
+        if not group then return end
 
-    -- 1. Controllo buff attivo Praxis (SpellID 64868, +350 SP per 15s)
-    local foundBuff = false
-    local remBuff = 0
-    local durBuff = 15
-    for i = 1, 40 do
-        local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
-            foundBuff = true
-            durBuff = (duration and duration > 0) and duration or 15
-            remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
-            if bIcon then icon = bIcon end
-            break
+        local is7 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
+
+        local layout = is7 and {
+            ["05 - Trinket 1"]    = -114,
+            ["05 - Trinket 2"]    = -76,
+            ["06 - Cloak"]        = -38,
+            ["06 - Tier 8"]       = 0,
+            ["06 - Mana Gem"]     = 38,
+            ["06 - Combustion"]   = 76,
+            ["06 - Mirror Image"] = 114,
+        } or {
+            ["05 - Trinket 1"]    = -110,
+            ["05 - Trinket 2"]    = -66,
+            ["06 - Cloak"]        = -22,
+            ["06 - Mana Gem"]     = 22,
+            ["06 - Combustion"]   = 66,
+            ["06 - Mirror Image"] = 110,
+        }
+
+        for id, targetX in pairs(layout) do
+            local regObj = WeakAuras.regions[id]
+            local r = regObj and regObj.region
+            if r then
+                local point, relTo, relPoint, curX, curY = r:GetPoint(1)
+                if not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-54)) > 0.5) then
+                    r:ClearAllPoints()
+                    r:SetPoint("CENTER", group, "CENTER", targetX, -54)
+                end
+            end
         end
     end
 
-    if foundBuff then
-        if not state.isProc or (now - state.lastStart > durBuff + 2) then
-            state.lastStart = now - (durBuff - remBuff)
-            state.lastEnd = state.lastStart + 45
-            state.isProc = true
-        end
-        return "ACTIVE", remBuff, durBuff, icon
+    if not _G.FMHUD_LayoutFrame then
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+        f:RegisterEvent("UNIT_INVENTORY_CHANGED")
+        f:RegisterEvent("PLAYER_ENTERING_WORLD")
+        f:RegisterEvent("UNIT_AURA")
+        local elapsed = 0
+        f:SetScript("OnUpdate", function(self, delta)
+            elapsed = elapsed + delta
+            if elapsed >= 0.1 then
+                elapsed = 0
+                _G.FMHUD_UpdateUtilityRowPositions()
+            end
+        end)
+        f:SetScript("OnEvent", function(self, event, unit)
+            if event == "UNIT_AURA" and unit ~= "player" then return end
+            _G.FMHUD_T8_EquipCache = nil
+            _G.FMHUD_UpdateUtilityRowPositions()
+        end)
+        _G.FMHUD_LayoutFrame = f
     end
 
-    if state.isProc then
-        state.isProc = false
-    end
-
-    -- 2. ICD Stimato (45s totale = 15s proc + 30s ricarica)
-    if state.lastStart > 0 then
-        local elapsed = now - state.lastStart
-        if elapsed < 45 then
-            local remICD = 45 - elapsed
-            return "ICD", remICD, 45, icon
-        end
-    end
-
-    -- 3. Pronto
-    return "READY", 0, 0, icon
+    _G.FMHUD_T8_InitDone = true
 end"""
 
 SHARED_UTILITY_POS_LUA = """function(env, x6, x7)
-    if env and env.region then
-        if not _G.FMHUD_CheckT8Equipped then
-            if _G.FMHUD_CheckT8 then _G.FMHUD_CheckT8() end
-        end
-        local is7 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
-        local targetX = is7 and x7 or x6
-        local curPoint, curRelTo, curRelPoint, curX, curY = env.region:GetPoint(1)
-        if env.currentX ~= targetX or (curX and math.abs(curX - targetX) > 0.5) then
-            env.region:ClearAllPoints()
-            local p = env.region:GetParent() or UIParent
-            env.region:SetPoint("CENTER", p, "CENTER", targetX, -54)
-            env.currentX = targetX
-        end
+    if not _G.FMHUD_T8_InitDone then
+        if _G.FMHUD_InitT8 then _G.FMHUD_InitT8() end
+    end
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
 end"""
 
 def make_t8_custom_text() -> str:
     """Genera la closure Lua per il testo descrittivo del Tier 8 2P (%c), con pixel glow su proc attivo e timer ICD."""
     return f"""function()
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_SetUtilityPos then
-        _G.FMHUD_SetUtilityPos(aura_env, 0, 0)
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
-    local state, rem, dur, icon = _G.FMHUD_CheckT8()
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
     if state == "ACTIVE" then
         if LCG and aura_env and aura_env.region then
@@ -610,12 +719,11 @@ end"""
 def make_t8_custom_duration() -> str:
     """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per il Tier 8 2P."""
     return f"""function()
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    local state, rem, dur = _G.FMHUD_CheckT8()
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
     if (state == "ACTIVE" or state == "ICD") and rem > 0 and dur > 0 then
         return dur, GetTime() + rem
     end
@@ -623,11 +731,15 @@ def make_t8_custom_duration() -> str:
 end"""
 
 def make_t8_custom_icon() -> str:
-    """Genera la closure Lua per l'icona del Tier 8 2P (Student of Magic / Kirin Tor)."""
-    return """function()
-    return "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+    """Genera la closure Lua per l'icona del Tier 8 2P (Praxis / Kirin Tor)."""
+    return f"""function()
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
+    return icon or GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
 end"""
-
 
 SHARED_FM_CHECK_LUA = """function(event, ...)
     FMHUD_State = FMHUD_State or {}
@@ -902,13 +1014,12 @@ def make_combustion_custom_text() -> str:
     """Genera il testo descrittivo (%c) di Combustion con conteggio cariche critiche e pixel glow dorato."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_SetUtilityPos then
-        _G.FMHUD_SetUtilityPos(aura_env, 66, 76)
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
     local state, rem, dur, count = _G.FMHUD_CheckCombustion()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -1028,13 +1139,12 @@ def make_mirrorimage_custom_text() -> str:
         _G.FMHUD_CheckMirrorImage = {SHARED_MIRRORIMAGE_CHECK_LUA}
         _G.FMHUD_CheckMirrorImage_v4 = true
     end
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_SetUtilityPos then
-        _G.FMHUD_SetUtilityPos(aura_env, 110, 114)
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
     local state, rem, dur, icon, isT10 = _G.FMHUD_CheckMirrorImage()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -1179,13 +1289,12 @@ def make_managem_custom_text() -> str:
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
         _G.FMHUD_CheckManaGem_v4 = true
     end
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = {SHARED_T8_CHECK_LUA}
-        _G.FMHUD_SetUtilityPos = {SHARED_UTILITY_POS_LUA}
-        _G.FMHUD_CheckT8_v1 = true
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_SetUtilityPos then
-        _G.FMHUD_SetUtilityPos(aura_env, 22, 38)
+    if _G.FMHUD_UpdateUtilityRowPositions then
+        _G.FMHUD_UpdateUtilityRowPositions()
     end
     local state, rem, dur, icon = _G.FMHUD_CheckManaGem()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
@@ -2709,26 +2818,22 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "update",
-                            "custom": """function(event, ...)
-    if not _G.FMHUD_CheckT8_v1 then
-        _G.FMHUD_CheckT8 = """ + SHARED_T8_CHECK_LUA + """
-        _G.FMHUD_SetUtilityPos = """ + SHARED_UTILITY_POS_LUA + """
-        _G.FMHUD_CheckT8_v1 = true
+                            "custom": f"""function(event, ...)
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-    if _G.FMHUD_CheckT8Equipped then
-        return _G.FMHUD_CheckT8Equipped()
-    end
-    return false
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
+    return isEquipped
 end""",
                             "customDuration": make_t8_custom_duration(),
                             "customIcon": make_t8_custom_icon(),
                         },
                         "untrigger": {
                             "custom": """function(event, ...)
-    if _G.FMHUD_CheckT8Equipped then
-        return not _G.FMHUD_CheckT8Equipped()
-    end
-    return true
+    if not _G.FMHUD_T8_InitDone then return true end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
+    return not isEquipped
 end"""
                         }
                     },

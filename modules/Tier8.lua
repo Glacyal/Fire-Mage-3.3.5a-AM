@@ -3,8 +3,8 @@
 --- =========================================================================
 --- Monitora il bonus del set 2P Tier 8 (Kirin Tor):
 --- - Spells: Praxis (ID 64868, +350 Spell Power per 15s, 45s ICD)
---- - Auto-rilevamento pezzi equipaggiati (Elmo, Spalle, Torso, Guanti, Gambe 10m/25m).
---- - Se >= 2 pezzi equipaggiati: attivo nel HUD (x = 0, y = -54 tra Mantello e Gemma).
+--- - Auto-rilevamento multi-stadio: buff attivo, 10 Item ID noti e scansione tooltip.
+--- - Se >= 2 pezzi equipaggiati (o buff Praxis attivo): inserito a x = 0, y = -54 tra Mantello e Gemma.
 --- - Se < 2 pezzi equipaggiati: nascosto, HUD a 6 icone simmetriche.
 --- =========================================================================
 
@@ -23,11 +23,29 @@ local T8_SetIDs = {
     [45358] = true, -- Hands
 }
 
-local T8_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false }
+local T8_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false, lastSeen = 0 }
+local T8_EquipCache = { time = 0, isEquipped = false }
 
---- Calcola il numero di pezzi Tier 8 equipaggiati dal mago.
----@return number count
-function FireMageHUD_Tier8_GetEquippedCount()
+--- Verifica se il bonus 2P Tier 8 e' attivo sul mago con rilevamento multi-stadio.
+---@return boolean isActive
+function FireMageHUD_Tier8_IsActive()
+    local now = GetTime()
+    if (now - T8_EquipCache.time < 0.3) then
+        return T8_EquipCache.isEquipped
+    end
+
+    -- 1. Controllo buff attivo Praxis (64868 / "Praxis" / "Prassi")
+    for i = 1, 40 do
+        local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+            T8_ProcTimer.lastSeen = now
+            T8_EquipCache = { time = now, isEquipped = true }
+            return true
+        end
+    end
+
+    -- 2. Controllo Item ID hardcoded
     local count = 0
     local slots = { 1, 3, 5, 7, 10 }
     for _, slot in ipairs(slots) do
@@ -36,13 +54,50 @@ function FireMageHUD_Tier8_GetEquippedCount()
             count = count + 1
         end
     end
-    return count
-end
+    if count >= 2 then
+        T8_EquipCache = { time = now, isEquipped = true }
+        return true
+    end
 
---- Verifica se il bonus 2P Tier 8 e' attivo.
----@return boolean isActive
-function FireMageHUD_Tier8_IsActive()
-    return FireMageHUD_Tier8_GetEquippedCount() >= 2
+    -- 3. Scansione tooltip su pezzi equipaggiati
+    local ttCount = 0
+    local tt = _G.FMHUD_AddonScanTT
+    if not tt then
+        tt = CreateFrame("GameTooltip", "FMHUD_AddonScanTT", nil, "GameTooltipTemplate")
+        tt:SetOwner(WorldFrame, "ANCHOR_NONE")
+        _G.FMHUD_AddonScanTT = tt
+    end
+    for _, slot in ipairs(slots) do
+        local itemID = GetInventoryItemID("player", slot)
+        if itemID then
+            tt:ClearLines()
+            tt:SetInventoryItem("player", slot)
+            for j = 1, tt:NumLines() do
+                local line = _G["FMHUD_AddonScanTTTextLeft"..j]
+                local text = line and line:GetText()
+                if text then
+                    local lt = text:lower()
+                    if lt:find("kirin tor") or lt:find("praxis") or lt:find("prassi") then
+                        ttCount = ttCount + 1
+                        break
+                    end
+                end
+            end
+        end
+    end
+    if ttCount >= 2 then
+        T8_EquipCache = { time = now, isEquipped = true }
+        return true
+    end
+
+    -- 4. Buff visto di recente (ultimi 60s)
+    if T8_ProcTimer.lastSeen > 0 and (now - T8_ProcTimer.lastSeen < 60) then
+        T8_EquipCache = { time = now, isEquipped = true }
+        return true
+    end
+
+    T8_EquipCache = { time = now, isEquipped = false }
+    return false
 end
 
 --- Genera il testo descrittivo dello stato del Tier 8 (%c).
@@ -67,6 +122,7 @@ function FireMageHUD_Tier8_CustomText()
             local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or dur
             T8_ProcTimer.lastProc = now - (dur - rem)
             T8_ProcTimer.isProc = true
+            T8_ProcTimer.lastSeen = now
             return string.format("|cFFFFFF00%.1fs|r", rem)
         end
     end
@@ -132,5 +188,5 @@ end
 --- Icona dinamica per il Tier 8.
 ---@return string iconPath
 function FireMageHUD_Tier8_CustomIcon()
-    return "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
+    return GetSpellTexture(64868) or "Interface\\Icons\\Spell_Arcane_StudentOfMagic"
 end
