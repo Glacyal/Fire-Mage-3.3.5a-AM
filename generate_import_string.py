@@ -808,6 +808,14 @@ def make_mirrorimage_custom_icon():
     return icon
 end"""
 
+FIRE_MAGE_LOAD = {
+    "use_class": True,
+    "class": { "single": "MAGE", "multi": { "MAGE": True } },
+    "use_spellknown": True,
+    "spellknown": 11129,
+    "use_exact_spellknown": True,
+}
+
 def build_wa_tree():
     data = {
         "m": "d",
@@ -839,12 +847,7 @@ def build_wa_tree():
                 "09 - GCD",
                 "10 - Alerts"
             ],
-            "load": {
-                "use_class": True,
-                "class": { "single": "MAGE", "multi": { "MAGE": True } },
-                "use_spellknown": True,
-                "spellknown": 11129,
-            }
+            "load": dict(FIRE_MAGE_LOAD)
         },
         "c": [
             # =================================================================
@@ -2048,6 +2051,8 @@ end""",
             }
         ]
     }
+    for item in data["c"]:
+        item["load"] = dict(FIRE_MAGE_LOAD)
     return data
 
 if __name__ == "__main__":

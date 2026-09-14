@@ -55,6 +55,14 @@ Questo file descrive l'architettura tecnica, le invarianti, il formato di serial
   - `06 - Mirror Image`: `x = +54` (Tra Combustion e Gemma: 30s attivo con Pixel Glow cyan e swipe, CD 3 min)
   - `06 - Mana Gem`: `x = +90` (Item 33312 / 22044 con cariche e swipe)
 
+### 5. Regola di Caricamento Spec Fire (Load Conditions)
+- Nel backport WeakAuras 4.0.0 per 3.3.5a (`WeakAuras.lua` riga 1263), il motore calcola `loadFunc` **esclusivamente sui nodi foglia** (`if data and not data.controlledChildren`). Impostare `load` solo sul gruppo genitore non impediva alle aure figlie prive di `load` di caricarsi.
+- Inoltre, `use_exact_spellknown = True` è indispensabile per bypassare il fallback di `WeakAuras.IsSpellKnownForLoad` su `GetSpellInfo(name)`, che restituirebbe true anche per spell non apprese.
+- Ora **tutti i 27 elementi** (gruppo radice, sub-gruppi e singole aure foglia) contengono rigorosamente `FIRE_MAGE_LOAD`:
+  - `use_class = True` (`class = { single = "MAGE", multi = { MAGE = True } }`)
+  - `use_spellknown = True` (`spellknown = 11129` - Combustion)
+  - `use_exact_spellknown = True` (controllo C-API esatto su `IsSpellKnown`)
+
 ---
 
 ## Architettura Completa dei Moduli
