@@ -31,9 +31,9 @@ L'interfaccia è progettata secondo i principi di **massima ergonomia e pulizia 
 2. **Cluster Centrale Unificato (Larghezza 264px)**:
    - Castbar, GCD, Mana Bar e Hot Streak Bar condividono la medesima larghezza di 264px, perfettamente impilate l'una sull'altra.
 3. **Fila Utility Dinamica Adattiva (4 Scenari da 6 a 8 Icone)**:
-   - **Scenario A (8 Icone Compattate a 26px)**: Se il mago equipaggia contemporaneamente $\ge 2$ pezzi T8 E $\ge 2$ pezzi T10, tutti gli 8 moduli rientrano compattandosi a 26x26px con passo ~33px (totale 256px). T8 si trova a sinistra della Gemma (-16) e T10 si trova a destra della Gemma (+49).
+   - **Scenario A (8 Icone Compattate a 26px)**: Se il mago equipaggia contemporaneamente $\ge 2$ pezzi T8 E $\ge 2$ pezzi T10, tutti gli 8 moduli rientrano compattandosi a 26x26px con passo ~33px (totale 256px). T8 si trova a `x = -16`, T10 a `x = +16` (sempre a sinistra della Gemma) e la Gemma a `x = +49`.
    - **Scenario B (7 Icone a 28px - Solo T8)**: Se equipaggia solo T8 ($\ge 2$ pezzi), T10 è nascosto e T8 siede al centro tra Mantello e Gemma a `x = 0`.
-   - **Scenario C (7 Icone a 28px - Solo T10)**: Se equipaggia solo T10 ($\ge 2$ pezzi), T8 è nascosto, la Gemma è centrata a `x = 0` e T10 si trova a destra della Gemma a `x = +38`.
+   - **Scenario C (7 Icone a 28px - Solo T10)**: Se equipaggia solo T10 ($\ge 2$ pezzi), T8 è nascosto, T10 siede al centro a `x = 0` (sempre a sinistra della Gemma) e la Gemma si trova a destra a `x = +38`.
    - **Scenario D (6 Icone Standard a 28px - Né T8 né T10)**: Se non indossa T8 né T10 (es. solo T7 o gear misto), entrambi i moduli sono nascosti e la riga adotta la spaziatura simmetrica classica da 44px.
 4. **Timer Intelligenti con Allerta Rossa di Scadenza**:
    - I procs e debuff dinamici (*Scorch $\le$ 5s, Hot Streak $\le$ 3s, Living Bomb $\le$ 3s prima dell'esplosione, Ignite $\le$ 1.5s*) commutano automaticamente il testo in rosso vivo a 1 decimale (`|cFFFF4444%.1fs|r`), avvertendo tempestivamente del momento ottimale per il refresh senza clippare i tick.
@@ -84,9 +84,9 @@ Monitorano i bonus set 2P Tier 8 e Tier 10 nella fila utility a `y = -54`:
   - La memoria di equipaggiamento rimane attiva stabilmente durante tutta la sessione e viene invalidata unicamente a un effettivo cambio di gear (`PLAYER_EQUIPMENT_CHANGED` / `UNIT_INVENTORY_CHANGED`).
   - Registrazione garantita nell'albero WeakAuras: `06 - Tier 10` è regolarmente incluso in `controlledChildren` del gruppo radice `Fire Mage 3.3.5a AM`.
 - **Adattamento Dinamico del Layout (`_G.FMHUD_UpdateUtilityRowPositions`)**:
-  - **Scenario A (T8 + T10 contemporaneamente)**: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`). T8 a sinistra della Gemma (-16), T10 a destra della Gemma (+49).
+  - **Scenario A (T8 + T10 contemporaneamente)**: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`). T8 a `x = -16`, T10 a `x = +16` (sempre a sinistra della Gemma), Gemma a `x = +49`.
   - **Scenario B (Solo T8)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T8 tra Mantello e Gemma a `x = 0`, T10 nascosto.
-  - **Scenario C (Solo T10)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), Gemma al centro a `x = 0` e T10 a destra della Gemma a `x = +38`, T8 nascosto.
+  - **Scenario C (Solo T10)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T10 al centro a `x = 0` (sempre a sinistra della Gemma) e Gemma a destra a `x = +38`, T8 nascosto.
   - **Scenario D (Né T8 né T10)**: 6 icone standard a 28px (`[-110, -66, -22, +22, +66, +110]`), entrambi i moduli nascosti.
 - **Tracciamento Proc & Glow**:
   - **T8 Praxis (64868)**: +350 SP per 15s con Pixel Glow dorato e timer `|cFFFFFF00%.1fs|r`, poi ricarica ICD 30s.
@@ -172,8 +172,8 @@ Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190
 │   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD)
 │   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD)
 │   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
-│   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│   │   ├── 06 - Tier 10      (x =  +49: Frostforged Sage / Haste 12% con Glow ciano)
+│   │   ├── 06 - Tier 10      (x =  +16: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
+│   │   ├── 06 - Mana Gem     (x =  +49: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
 │   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
 │   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
@@ -184,8 +184,8 @@ Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190
 │   │
 │   ├── SCENARIO C: 7 ICONE T10 (Solo T10 >= 2P, T8 < 2P - 28x28px, passo 38px, T8 nascosto):
 │   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
-│   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
-│   │   ├── 06 - Tier 10      (x =  +38: A destra della Gemma di Mana)
+│   │   ├── 06 - Tier 10      (x =    0: Centrato a sinistra della Gemma di Mana)
+│   │   ├── 06 - Mana Gem     (x =  +38: A destra del Tier 10)
 │   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
 │   │
 │   └── SCENARIO D: 6 ICONE STANDARD (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):

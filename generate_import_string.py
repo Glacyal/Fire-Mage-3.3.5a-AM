@@ -801,14 +801,15 @@ SHARED_T8_INIT_LUA = """function()
         if hasT8 and hasT10 then
             -- Scenario A: 8 Componenti (T8 + T10 contemporaneamente)
             -- Compattazione riga a 26px, passo 33px, larghezza totale 256px sotto la barra centrale da 264px
+            -- T8 e T10 convivono proporzionatamente al centro tra Mantello (-49) e Gemma (+49)
             targetW = 26
             layout = {
                 ["05 - Trinket 1"]    = -115,
                 ["05 - Trinket 2"]    = -82,
                 ["06 - Cloak"]        = -49,
                 ["06 - Tier 8"]       = -16,
-                ["06 - Mana Gem"]     = 16,
-                ["06 - Tier 10"]      = 49,
+                ["06 - Tier 10"]      = 16,
+                ["06 - Mana Gem"]     = 49,
                 ["06 - Combustion"]   = 82,
                 ["06 - Mirror Image"] = 115,
             }
@@ -827,14 +828,14 @@ SHARED_T8_INIT_LUA = """function()
             }
         elseif hasT10 then
             -- Scenario C: 7 Componenti (Solo T10)
-            -- Larghezza 28px, passo 38px, Gemma al centro a x = 0 e T10 a destra a x = +38
+            -- Larghezza 28px, passo 38px, T10 a sinistra della Gemma a x = 0 e Gemma a destra a x = +38
             targetW = 28
             layout = {
                 ["05 - Trinket 1"]    = -114,
                 ["05 - Trinket 2"]    = -76,
                 ["06 - Cloak"]        = -38,
-                ["06 - Mana Gem"]     = 0,
-                ["06 - Tier 10"]      = 38,
+                ["06 - Tier 10"]      = 0,
+                ["06 - Mana Gem"]     = 38,
                 ["06 - Combustion"]   = 76,
                 ["06 - Mirror Image"] = 114,
             }
@@ -2074,8 +2075,8 @@ def build_wa_tree() -> dict:
                 "05 - Trinket 2",
                 "06 - Cloak",
                 "06 - Tier 8",
-                "06 - Mana Gem",
                 "06 - Tier 10",
+                "06 - Mana Gem",
                 "06 - Combustion",
                 "06 - Mirror Image",
                 "07 - Mana Bar",
@@ -3132,7 +3133,62 @@ end"""
             },
 
             # =================================================================
-            # 06 - MANA GEM (Between Cloak and Combustion - T7 Proc + CD + Charges)
+            # 06 - TIER 10 (Left of Mana Gem - Pushing the Limit)
+            # Active when >= 2 pieces of T10 equipped (12% Haste for 5s)
+            # =================================================================
+            {
+                "id": "06 - Tier 10",
+                "uid": "FMHUD_TIER10",
+                "parent": "Fire Mage 3.3.5a AM",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "xOffset": 0,
+                "yOffset": -54,
+                "width": 28,
+                "height": 28,
+                "displayIcon": "Interface\\Icons\\Spell_Fire_ElementalDevastation",
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": make_t10_custom_text(),
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "custom",
+                            "custom_type": "status",
+                            "check": "update",
+                            "custom": f"""function(event, ...)
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
+    end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    return isEquipped
+end""",
+                            "customDuration": make_t10_custom_duration(),
+                            "customIcon": make_t10_custom_icon(),
+                        },
+                        "untrigger": {
+                            "custom": """function(event, ...)
+    if not _G.FMHUD_T8_InitDone then return true end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
+    return not isEquipped
+end"""
+                        }
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+                ],
+            },
+
+            # =================================================================
+            # 06 - MANA GEM (Right of T8/T10 - T7 Proc + CD + Charges)
             # =================================================================
             {
                 "id": "06 - Mana Gem",
@@ -3140,7 +3196,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 22,
+                "xOffset": 38,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,
@@ -3196,61 +3252,6 @@ end"""
                             "anchorYOffset": -1,
                         }
                     ),
-                ],
-            },
-
-            # =================================================================
-            # 06 - TIER 10 (Right of Mana Gem - Pushing the Limit)
-            # Active when >= 2 pieces of T10 equipped (12% Haste for 5s)
-            # =================================================================
-            {
-                "id": "06 - Tier 10",
-                "uid": "FMHUD_TIER10",
-                "parent": "Fire Mage 3.3.5a AM",
-                "regionType": "icon",
-                "internalVersion": 52,
-                "xOffset": 38,
-                "yOffset": -54,
-                "width": 28,
-                "height": 28,
-                "displayIcon": "Interface\\Icons\\Spell_Fire_ElementalDevastation",
-                "cooldown": True,
-                "cooldownSwipe": True,
-                "cooldownEdge": True,
-                "cooldownTextDisabled": True,
-                "inverse": False,
-                "customTextUpdate": "update",
-                "customText": make_t10_custom_text(),
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "custom",
-                            "custom_type": "status",
-                            "check": "update",
-                            "custom": f"""function(event, ...)
-    if not _G.FMHUD_T8_InitDone then
-        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
-        _G.FMHUD_InitT8()
-    end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    return isEquipped
-end""",
-                            "customDuration": make_t10_custom_duration(),
-                            "customIcon": make_t10_custom_icon(),
-                        },
-                        "untrigger": {
-                            "custom": """function(event, ...)
-    if not _G.FMHUD_T8_InitDone then return true end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    return not isEquipped
-end"""
-                        }
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
                 ],
             },
 

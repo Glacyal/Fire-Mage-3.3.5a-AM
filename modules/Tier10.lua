@@ -5,9 +5,9 @@
 --- e l'effetto proc Pushing the Limit (Spell ID 70753 / 70752 / 70747):
 --- - Spells: Pushing the Limit (ID 70753, +12% Spell Haste per 5s)
 --- - Auto-rilevamento multi-stadio: buff attivo, 20 Item ID noti (251/264/277), scansione link/nomi e tooltip.
---- - Se >= 2 pezzi equipaggiati: inserito a destra della Gemma di Mana (tra Gemma e Combustion).
----   * In combinazione T8 + T10 (8 componenti): compattato a 26px a x = +49, y = -54.
----   * Con solo T10 (7 componenti): posizionato a 28px a x = +38, y = -54.
+--- - Se >= 2 pezzi equipaggiati: inserito a sinistra della Gemma di Mana.
+---   * In combinazione T8 + T10 (8 componenti): compattato a 26px a x = +16, y = -54 (T8 a x = -16, T10 a x = +16, Gemma a x = +49).
+---   * Con solo T10 (7 componenti): posizionato a 28px a x = 0, y = -54 (Gemma a x = +38).
 --- - Se < 2 pezzi equipaggiati: nascosto dinamicamente, lasciando spazio agli altri elementi.
 --- =========================================================================
 

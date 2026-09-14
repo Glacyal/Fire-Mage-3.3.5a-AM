@@ -39,8 +39,8 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale = 1.2, yOffset = -190)
 │   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD riproc)
 │   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD riproc)
 │   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP per 15s con Glow dorato + Swipe ICD)
-│   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
-│   │   ├── 06 - Tier 10      (x =  +49: Frostforged Sage / Haste 12% con Glow ciano)
+│   │   ├── 06 - Tier 10      (x =  +16: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
+│   │   ├── 06 - Mana Gem     (x =  +49: T7 2pc Glow dorato + Timer a sud %p + CD 2m + Cariche in alto a dx)
 │   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
 │   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
@@ -51,8 +51,8 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale = 1.2, yOffset = -190)
 │   │
 │   ├── Scenario C: 7 Icone T10 (Solo T10 >= 2P, no T8 - 28x28px, passo 38px, T8 nascosto):
 │   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
-│   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
-│   │   ├── 06 - Tier 10      (x =  +38: A destra della Gemma di Mana)
+│   │   ├── 06 - Tier 10      (x =    0: Centrato a sinistra della Gemma di Mana)
+│   │   ├── 06 - Mana Gem     (x =  +38: A destra del Tier 10)
 │   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
 │   │
 │   └── Scenario D: 6 Icone Standard (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):

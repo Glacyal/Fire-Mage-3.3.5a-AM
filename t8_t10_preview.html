@@ -227,8 +227,8 @@
             <div id="t2" class="icon icon-t2"><span>RDY</span></div>
             <div id="cloak" class="icon icon-cloak"><span>RDY</span></div>
             <div id="t8" class="icon icon-t8"><span>15s</span></div>
-            <div id="gem" class="icon icon-gem"><span>3x</span></div>
             <div id="t10" class="icon icon-t10"><span>5s</span></div>
+            <div id="gem" class="icon icon-gem"><span>3x</span></div>
             <div id="comb" class="icon icon-comb"><span>RDY</span></div>
             <div id="mirror" class="icon icon-mirror"><span>RDY</span></div>
         </div>
@@ -238,7 +238,7 @@
         <h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
         <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
         <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio occupato:</strong> 256px (4px di margine per lato).<br>
-        <strong>Ordine:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>
+        <strong>Ordine:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+16)</strong> | <strong>Gemma Mana (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>
     </div>
 
     <script>
@@ -283,15 +283,15 @@
                 setIcon(t2, -82, 26, true);
                 setIcon(cloak, -49, 26, true);
                 setIcon(t8, -16, 26, true);
-                setIcon(gem, 16, 26, true);
-                setIcon(t10, 49, 26, true);
+                setIcon(t10, 16, 26, true);
+                setIcon(gem, 49, 26, true);
                 setIcon(comb, 82, 26, true);
                 setIcon(mirror, 115, 26, true);
 
                 desc.innerHTML = `<h3><span class="badge badge-compact">8 ICONE COMPATTATE</span> Scenario A: Entrambi T8 (2P) e T10 (2P) equipaggiati</h3>
                 <p>Tutti gli 8 elementi rientrano perfettamente nei 264px della barra centrale grazie alla compattazione ergonomica:<br>
                 <strong>Dimensione:</strong> 26x26 px | <strong>Passo:</strong> ~33px | <strong>Spazio totale:</strong> 256px.<br>
-                <strong>Disposizione:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong>Gemma Mana (+16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>`;
+                <strong>Disposizione:</strong> Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | <strong style="color:#ffd700;">T8 Praxis (-16)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+16)</strong> | <strong>Gemma Mana (+49)</strong> | Combustion (+82) | Mirror Image (+115).</p>`;
             } else if (mode === '7-t8') {
                 // 7 icons (T8 only): size 28px
                 setIcon(t1, -114, 28, true);
@@ -313,15 +313,15 @@
                 setIcon(t2, -76, 28, true);
                 setIcon(cloak, -38, 28, true);
                 setIcon(t8, 0, 28, false); // Hidden
-                setIcon(gem, 0, 28, true);
-                setIcon(t10, 38, 28, true);
+                setIcon(t10, 0, 28, true);
+                setIcon(gem, 38, 28, true);
                 setIcon(comb, 76, 28, true);
                 setIcon(mirror, 114, 28, true);
 
                 desc.innerHTML = `<h3><span class="badge badge-t10">7 ICONE T10</span> Scenario C: Solo Tier 10 (2P) equipaggiato</h3>
-                <p>Nessun pezzo T8 rilevato. Il buff T8 non viene visualizzato. La Gemma di Mana è centrata a x = 0 e il T10 si trova immediatamente a destra a x = +38:<br>
+                <p>Nessun pezzo T8 rilevato. Il buff T8 non viene visualizzato. Il T10 siede al centro a x = 0 (a sinistra della Gemma) e la Gemma di Mana si trova a x = +38:<br>
                 <strong>Dimensione:</strong> 28x28 px | <strong>Passo:</strong> 38px | <strong>Spazio totale:</strong> 256px.<br>
-                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong>Gemma Mana (0)</strong> | <strong style="color:#ff9933;">T10 Pushing the Limit (+38)</strong> | Combustion (+76) | Mirror Image (+114).</p>`;
+                <strong>Disposizione:</strong> Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | <strong style="color:#ff9933;">T10 Pushing the Limit (0)</strong> | <strong>Gemma Mana (+38)</strong> | Combustion (+76) | Mirror Image (+114).</p>`;
             } else if (mode === '6') {
                 // 6 icons (standard): size 28px
                 setIcon(t1, -110, 28, true);

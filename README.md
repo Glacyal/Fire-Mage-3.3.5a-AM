@@ -42,16 +42,16 @@ Collocato a sinistra sotto i tre buff (`x = -180, y = -54`), monitora in tempo r
 - **Le 4 Configurazioni Dinamiche della Fila Utility (`y = -54`)**:
   - **Scenario A: T8 (2P) + T10 (2P) Equipaggiati Contemporaneamente [8 Icone Compattate]**:
     - Gli 8 componenti si compattano ergonomicamente a **26x26 px** con passo di **~33px** occupando esattamente 256px sotto la barra centrale da 264px.
-    - Ordine: `Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | T8 Praxis (-16) | Gemma Mana (+16) | T10 Frostforged (+49) | Combustion (+82) | Mirror Image (+115)`.
-    - Il **T8 Praxis** si posiziona a sinistra della Gemma; il **T10 Frostforged** si posiziona a destra della Gemma.
+    - Ordine: `Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | T8 Praxis (-16) | T10 Pushing the Limit (+16) | Gemma Mana (+49) | Combustion (+82) | Mirror Image (+115)`.
+    - Il **T8 Praxis** si posiziona a `x = -16`; il **T10 Pushing the Limit** si posiziona a `x = +16` (sempre a sinistra della Gemma); la **Gemma di Mana** si posiziona a `x = +49`.
   - **Scenario B: Solo Tier 8 (2P) Equipaggiato [7 Icone]**:
     - Icone a **28x28 px**, passo **38px** (larghezza totale 256px).
     - Il T10 è completamente nascosto. Il T8 siede al centro esatto a `x = 0`, tra Mantello e Gemma.
     - Ordine: `Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | T8 Praxis (0) | Gemma Mana (+38) | Combustion (+76) | Mirror Image (+114)`.
   - **Scenario C: Solo Tier 10 (2P) Equipaggiato [7 Icone]**:
     - Icone a **28x28 px**, passo **38px** (larghezza totale 256px).
-    - Il T8 è completamente nascosto. La Gemma di Mana siede al centro a `x = 0` e il T10 si trova immediatamente a destra a `x = +38`.
-    - Ordine: `Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | Gemma Mana (0) | T10 Frostforged (+38) | Combustion (+76) | Mirror Image (+114)`.
+    - Il T8 è completamente nascosto. Il T10 siede al centro esatto a `x = 0` (sempre a sinistra della Gemma) e la Gemma di Mana si trova a destra a `x = +38`.
+    - Ordine: `Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | T10 Pushing the Limit (0) | Gemma Mana (+38) | Combustion (+76) | Mirror Image (+114)`.
   - **Scenario D: Né Tier 8 né Tier 10 Equipaggiati [6 Icone Standard]**:
     - Configurazione simmetrica classica per chi gioca con solo Tier 7 o equipaggiamento misto.
     - Icone a **28x28 px**, passo **44px** (larghezza totale 248px). Entrambi i moduli T8 e T10 restano nascosti.
@@ -127,8 +127,8 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD)
 │   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD)
 │   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
-│   │   ├── 06 - Mana Gem     (x =  +16: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│   │   ├── 06 - Tier 10      (x =  +49: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
+│   │   ├── 06 - Tier 10      (x =  +16: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
+│   │   ├── 06 - Mana Gem     (x =  +49: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
 │   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
 │   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
@@ -139,8 +139,8 @@ Fire Mage 3.3.5a AM (Gruppo Master - Scale: 1.2, xOffset: 0, yOffset: -190)
 │   │
 │   ├── SCENARIO C: 7 ICONE T10 (Solo T10 >= 2P, T8 < 2P - 28x28px, passo 38px, T8 nascosto):
 │   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
-│   │   ├── 06 - Mana Gem     (x =    0: Centrata nella riga)
-│   │   ├── 06 - Tier 10      (x =  +38: Pushing the Limit, a destra della Gemma di Mana)
+│   │   ├── 06 - Tier 10      (x =    0: Centrato a sinistra della Gemma di Mana)
+│   │   ├── 06 - Mana Gem     (x =  +38: A destra del Tier 10)
 │   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
 │   │
 │   └── SCENARIO D: 6 ICONE STANDARD (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):

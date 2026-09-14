@@ -36,12 +36,12 @@ PANORAMICA DELLE FUNZIONALITA' E DEL LAYOUT:
    - Le 4 Modalita' Dinamiche:
      * Scenario A: Entrambi T8 (>= 2P) e T10 (>= 2P) equipaggiati contemporaneamente.
        Tutti gli 8 moduli compattati a 26x26 px con passo ~33px (totale 256px).
-       T8 a sinistra della Gemma (-16), Gemma (+16), T10 a destra della Gemma (+49).
+       T8 a x = -16, T10 a x = +16 (sempre a sinistra della Gemma), Gemma a x = +49.
      * Scenario B: Solo T8 (>= 2P), no T10 (< 2P).
        Icone a 28px con passo 38px (totale 256px). T10 nascosto, T8 al centro a x = 0.
      * Scenario C: Solo T10 (>= 2P), no T8 (< 2P).
-       Icone a 28px con passo 38px (totale 256px). T8 nascosto, Gemma al centro a x = 0,
-       T10 a destra della Gemma a x = +38.
+       Icone a 28px con passo 38px (totale 256px). T8 nascosto, T10 al centro a x = 0
+       (sempre a sinistra della Gemma), Gemma a destra a x = +38.
      * Scenario D: Ne' T8 ne' T10 (< 2P entrambi).
        Icone a 28px con passo 44px (totale 248px). Configurazione simmetrica classica a 6 icone.
    - Meccanica Proc & Glow:
@@ -87,11 +87,11 @@ PANORAMICA DELLE FUNZIONALITA' E DEL LAYOUT:
 
 8. FILA UTILITY INFERIORE DINAMICA (y = -54):
    - Scenario A [8 Icone Compattate a 26px] (T8 >= 2P e T10 >= 2P):
-     Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | T8 Praxis (-16) | Gemma (+16) | T10 Pushing the Limit (+49) | Combustione (+82) | Copie (+115)
+     Trinket 1 (-115) | Trinket 2 (-82) | Mantello (-49) | T8 Praxis (-16) | T10 Pushing the Limit (+16) | Gemma (+49) | Combustione (+82) | Copie (+115)
    - Scenario B [7 Icone a 28px] (Solo T8 >= 2P, no T10):
      Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | Tier 8 (0) | Gemma (+38) | Combustione (+76) | Copie (+114)
    - Scenario C [7 Icone a 28px] (Solo T10 >= 2P, no T8):
-     Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | Gemma (0) | T10 Pushing the Limit (+38) | Combustione (+76) | Copie (+114)
+     Trinket 1 (-114) | Trinket 2 (-76) | Mantello (-38) | T10 Pushing the Limit (0) | Gemma (+38) | Combustione (+76) | Copie (+114)
    - Scenario D [6 Icone Standard a 28px] (Ne' T8 ne' T10):
      Trinket 1 (-110) | Trinket 2 (-66) | Mantello (-22) | Gemma (+22) | Combustione (+66) | Copie (+110)
 
