@@ -42,6 +42,11 @@ Suite WeakAura modulare, professionale e completa per **Mago Fire Livello 80** p
 7. **Condizione di Caricamento (Load Tab)**:
    - Configurato nativamente su **Player Class: Mage** e **Talent: Living Bomb** su tutto l'albero di auras e su ogni singolo elemento, garantendo che l'HUD si carichi esclusivamente per maghi con talento Bomba Vivente (Fire).
 
+8. **Barre Centrali Allungate (+20%) e Buff Impilati a Sinistra**:
+   - **Larghezza Barre a 264px**: Castbar, GCD e Mana Bar allungate del 20% (da 220px a 264px) e perfettamente impilate una sotto l'altra.
+   - **Colonna Buff a Sinistra ("Uno sotto l'altro")**: *Arcane Intellect*, *Molten Armor* e *Focus Magic* sono posizionati verticalmente a sinistra (`x = -182`) mantenendo uno spazio pulito di 34px dalla barra.
+   - **Fila Utility Adattata**: I 6 moduli (Trinket 1, Trinket 2, Mantello, Combustione, Copie, Gemma) sono distribuiti e centrati armoniosamente sotto la barra allungata.
+
 ---
 
 ## Come Aggiornare in Gioco (30 Secondi)
@@ -68,25 +73,23 @@ Fire Mage HUD (Gruppo Master - Scale = 1.2, yOffset = -190, posizionato sopra le
 │   ├── Scorch (Icona 34x34 Scorch/Improved Scorch + Timer + Avviso <= 5s)
 │   └── Molten Fury (Icona 34x34 attiva con Target HP <= 35%)
 │
-├── Ala Sinistra (Colonna Buff Personali - x = -160, 34px dalla Castbar)
-│   ├── 03 - Arcane Intellect (y = +22, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
-│   └── 02 - Molten Armor     (y = -16, size 32x32: Nascosta > 5m, Timer <= 5m, OFF rosso)
+├── Colonna Buff a Sinistra (x = -182, 34px dalla Castbar - 3 icone 32x32 una sotto l'altra)
+│   ├── 03 - Arcane Intellect (y = +18: Nascosta > 5m, Timer <= 5m, OFF rosso)
+│   ├── 02 - Molten Armor     (y = -18: Nascosta > 5m, Timer <= 5m, OFF rosso)
+│   └── 04 - Focus Magic      (y = -54: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
 │
-├── Ala Destra (Colonna Buff Supporto - x = +160, 33px dalla Castbar)
-│   └── 04 - Focus Magic      (y =  -7, size 34x34: Nascosta > 5m, Timer <= 5m, OFF rosso se non assegnato)
+├── Cluster Centrale (Allungato del +20% a larghezza 264px, impilato verticalmente)
+│   ├── 08 - Castbar  (y =   0, w = 264, h = 20: Testo spell a sx, tempo a dx, no icona)
+│   ├── 09 - GCD      (y = -12, w = 264, h =  3: Barra bianca sottile)
+│   └── 07 - Mana Bar (y = -23, w = 264, h = 14: Solo % con 2 decimali, es. 85.24%)
 │
-├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 6 icone 28x28 centrate)
-│   ├── 05 - Trinket 1    (x = -90: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 05 - Trinket 2    (x = -54: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Cloak        (x = -18: Glow attivo + Swipe orologio + Countdown ICD riproc)
-│   ├── 06 - Combustion   (x = +18: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   ├── 06 - Mirror Image (x = +54: Glow attivo 30s + Swipe orologio CD 3m)
-│   └── 06 - Mana Gem     (x = +90: Cooldown al centro + Cariche in alto a destra)
-│
-├── Cluster Centrale
-│   ├── 08 - Castbar  (y =   0, w = 220, h = 20: Testo spell a sx, tempo a dx, no icona)
-│   ├── 09 - GCD      (y = -12, w = 220, h =  3: Barra bianca sottile)
-│   └── 07 - Mana Bar (y = -23, w = 220, h = 14: Solo % con 2 decimali, es. 85.24%)
+├── Fila Utility Inferiore (y = -54, 10px sotto la Mana Bar - 6 icone 28x28 centrate sotto la barra da 264px)
+│   ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD riproc)
+│   ├── 06 - Combustion   (x =  +22: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   ├── 06 - Mirror Image (x =  +66: Glow attivo 30s + Swipe orologio CD 3m)
+│   └── 06 - Mana Gem     (x = +110: Cooldown al centro + Cariche in alto a destra)
 │
 └── 10 - Alerts (y = +105, 24px sopra i Proc)
     └── Alert - Hot Streak ("HOT STREAK! / PYROBLAST READY!")
