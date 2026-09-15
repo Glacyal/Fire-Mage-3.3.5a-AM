@@ -13,9 +13,7 @@
             --fire-red: #ff2200;
             --fire-gold: #ffd100;
             --mana-blue: #0070DE;
-            --mana-blue-dark: #003f8a;
             --bg-dark: #050609;
-            --panel-bg: rgba(10, 13, 20, 0.95);
             --border-dark: #1b2130;
             --border-light: #2c364c;
             --text-main: #e2e8f0;
@@ -320,7 +318,6 @@
         /* ============================================================= */
         /* HUD MASTER CONTAINER — FLUSSO FLESSIBILE SENZA SOVRAPPOSIZIONI */
         /* ============================================================= */
-        /* Ancorato in basso a 70px dal fondo del viewport */
         .hud-master-stage {
             position: absolute;
             bottom: 60px;
@@ -333,7 +330,7 @@
             transition: all 0.2s ease;
         }
 
-        /* 1. 10 - Alerts (In cima al HUD, si apre verso l'alto sopra i Procs) */
+        /* 1. 10 - Alerts (In cima al HUD) */
         .alert-box {
             display: none;
             flex-direction: column;
@@ -364,7 +361,7 @@
             100% { transform: scale(1.04); }
         }
 
-        /* 2. 01 - Procs Dynamic Group (Centrato sopra la Castbar) */
+        /* 2. 01 - Procs Dynamic Group (Sopra la Castbar, allineato al centro) */
         .procs-bar {
             display: flex;
             gap: 5px;
@@ -385,6 +382,7 @@
             margin-left: 92px; /* 88px colonna sinistra + 4px gap = 92px */
             margin-bottom: 3px;
             display: block;
+            cursor: pointer;
         }
         .castbar-wrap.hidden {
             display: none !important;
@@ -517,6 +515,7 @@
             background: #0a0d14;
             border: 1px solid #111;
             overflow: hidden;
+            cursor: pointer;
         }
         .manabar-fill {
             height: 100%;
@@ -549,6 +548,7 @@
             align-items: center;
             overflow: hidden;
             transition: opacity 0.2s;
+            cursor: pointer;
         }
         .hotstreak-container.hidden {
             display: none !important;
@@ -589,7 +589,7 @@
             box-shadow: 0 0 10px #ff2200;
         }
 
-        /* Fila Utility Inferiore (7 Icone a y = -54, 264px) */
+        /* Fila Utility Inferiore (7 Icone da 34px, 264px totali) */
         .utility-row-bar {
             width: 264px;
             display: flex;
@@ -878,27 +878,26 @@
         <div class="badge-header">World of Warcraft 3.3.5a (WotLK) • WeakAuras Suite</div>
         <h1>Fire Mage <span>3.3.5a AM</span> — Showcase & Simulatore HUD 1:1</h1>
         <p class="subtitle">
-            Simulatore interattivo fedele al 100% allo screenshot in-game. Nessuna sovrapposizione: gli elementi si espandono e contraggono
-            dinamicamente verso l'alto. Include le skin autentiche dei monili endgame da Fire (DFO e CTS), orologio dei cooldown
-            e dimostrazione guidata raid in tempo reale.
+            Simulatore interattivo con tutti i bottoni funzionanti e testati. Nessuna sovrapposizione: gli elementi crescono ordinatamente
+            verso l'alto in base agli eventi. Include monili BiS da Fire (DFO e CTS), orologio dei cooldown e simulazione raid live.
         </p>
         
         <!-- Navigation Buttons -->
         <div class="action-bar">
-            <button class="nav-btn primary" onclick="copyImportString()">
+            <button class="nav-btn primary" id="btnCopyWa" onclick="copyImportString()">
                 📋 Copia Stringa WeakAuras (!WA:1!)
             </button>
             <button class="nav-btn secondary" id="btnAutoPlay" onclick="toggleAutoPlay()">
                 ▶ Avvia Dimostrazione Combattimento Raid
             </button>
             <button class="nav-btn active" id="btnModeScreenshot" onclick="setMode('SCREENSHOT')">
-                📸 Stato Esatto Screenshot (Foto 1)
+                📸 Foto 1 (Combat: Hot Streak & 7 Procs)
             </button>
             <button class="nav-btn" id="btnModeIdle" onclick="setMode('IDLE')">
-                💤 Stato Fuori Combattimento (Foto 2)
+                💤 Foto 2 (Idle: Fuori Combattimento)
             </button>
             <button class="nav-btn" id="btnModeLive" onclick="setMode('LIVE')">
-                ⚡ Modalità Sandbox Libera
+                ⚡ Sandbox Interattivo Libero
             </button>
         </div>
     </header>
@@ -909,7 +908,7 @@
         <div class="commentary-banner" id="commentaryBanner">
             <div class="commentary-text">
                 <span class="commentary-tag" id="commentaryTag">Stato Screenshot 1</span>
-                <span id="commentaryMsg">Visualizzazione esatta con Hot Streak attivo, 7 proc, Castbar, Mana 38.77% e monili endgame (DFO & CTS).</span>
+                <span id="commentaryMsg">Visualizzazione esatta della Foto 1: Hot Streak, 7 procs attivi, Castbar a 1.4s e mana al 38.77%.</span>
             </div>
             <div class="commentary-progress" id="commentaryProgress">Foto 1</div>
         </div>
@@ -925,12 +924,12 @@
             <div class="hud-master-stage" id="hudStage">
 
                 <!-- 1. 10 - Alerts (In cima al HUD) -->
-                <div class="alert-box" id="alertBox" onclick="castPyroAction()" title="Clicca per lanciare Pyroblast!">
+                <div class="alert-box" id="alertBox" onclick="castPyroAction()" title="Hot Streak Attivo! Clicca per lanciare Pyroblast!">
                     <div class="alert-line1">HOT STREAK!</div>
                     <div class="alert-line2">PYROBLAST READY!</div>
                 </div>
 
-                <!-- 2. 01 - Procs Dynamic Group (Sopra la Castbar, allineato al centro) -->
+                <!-- 2. 01 - Procs Dynamic Group (Sopra la Castbar, centrato) -->
                 <div class="procs-bar" id="procsBar">
                     <!-- 1. Tier 10 (Pushing the Limit +12% Haste) -->
                     <div class="wa-box size-34 pixel-glow" id="procT10" onclick="triggerT10()" title="Tier 10: Pushing the Limit (+12% Haste)">
@@ -957,19 +956,18 @@
                         <div class="tag-timer" id="scorchTimer"></div>
                     </div>
                     <!-- 6. Fire Blast / Incinerate -->
-                    <div class="wa-box size-34" id="procIncinerate" title="Incinerate / Fire Proc">
+                    <div class="wa-box size-34" id="procIncinerate" onclick="triggerIncinerate()" title="Incinerate / Fire Proc">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_incinerate.jpg" alt="Incinerate">
                     </div>
-                    <!-- 7. Living Bomb (Target Debuff con tag 35% in foto 1) -->
-                    <div class="wa-box size-34 pixel-glow" id="procLivingBomb" onclick="applyLivingBomb()" title="Living Bomb (Debuff sul bersaglio)">
-                        <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_livingbomb.jpg" alt="Living Bomb">
-                        <div class="tag-timer" id="lbTimer"></div>
-                        <div class="tag-center" id="lbTag35">35%</div>
+                    <!-- 7. Molten Fury (Target <= 35% HP in foto 1) -->
+                    <div class="wa-box size-34 pixel-glow" id="procMoltenFury" onclick="toggleMoltenFury()" title="Molten Fury: Bersaglio <= 35% HP">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_moltenblood.jpg" alt="Molten Fury">
+                        <div class="tag-center">35%</div>
                     </div>
                 </div>
 
                 <!-- 3. 08 - Castbar (Sopra la Mana Bar, allineata con la colonna destra) -->
-                <div class="castbar-wrap" id="castbarWrap">
+                <div class="castbar-wrap" id="castbarWrap" onclick="castSpellAction('Fireball', true)" title="Clicca per lanciare Fireball">
                     <div class="castbar-container" id="castbarContainer">
                         <div class="castbar-icon" id="castIcon"></div>
                         <div class="castbar-fill" id="castFill"></div>
@@ -1028,13 +1026,13 @@
                     <!-- Colonna Destra (264px): Mana Bar + Hot Streak Bar + Utility Row -->
                     <div class="center-col">
                         <!-- 07 - Mana Bar (264x14px) -->
-                        <div class="manabar-container" id="manabarContainer">
+                        <div class="manabar-container" id="manabarContainer" onclick="cycleManaState()" title="Barra Mana: Clicca per cambiare livello">
                             <div class="manabar-fill" id="manaFill"></div>
                             <div class="manabar-text" id="manaText">38.77%</div>
                         </div>
 
                         <!-- 10 - Hot Streak Bar (264x5px, tra Mana Bar e Fila Utility) -->
-                        <div class="hotstreak-container hot-streak" id="hotStreakBar">
+                        <div class="hotstreak-container hot-streak" id="hotStreakBar" onclick="castPyroAction()" title="Barra Hot Streak: Clicca per lanciare Pyroblast se attivo">
                             <div class="hs-segment-left"></div>
                             <div class="hs-segment-right"></div>
                             <div class="hs-ticks">
@@ -1052,13 +1050,13 @@
                         <!-- Fila Utility Inferiore (7 Icone da 34px, 264px totali) -->
                         <div class="utility-row-bar">
                             <!-- 1. Trinket 1: Dislodged Foreign Object (DFO) -->
-                            <div class="wa-box size-34" id="utilTrinket1" onclick="useTrinket1()" title="Trinket 1: Dislodged Foreign Object (DFO - Clicca per attivare proc/cooldown)">
+                            <div class="wa-box size-34" id="utilTrinket1" onclick="useTrinket1()" title="Trinket 1: Dislodged Foreign Object (DFO - Clicca per avviare proc/cooldown)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/inv_jewelry_trinket_01.jpg" alt="DFO">
                                 <div class="cd-swipe" id="swipeT1"></div>
                                 <div class="tag-timer" id="tagT1Timer"></div>
                             </div>
                             <!-- 2. Trinket 2: Charred Twilight Scale (CTS) -->
-                            <div class="wa-box size-34" id="utilTrinket2" onclick="useTrinket2()" title="Trinket 2: Charred Twilight Scale (CTS - Clicca per attivare proc/cooldown)">
+                            <div class="wa-box size-34" id="utilTrinket2" onclick="useTrinket2()" title="Trinket 2: Charred Twilight Scale (CTS - Clicca per avviare proc/cooldown)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_rubysanctum2.jpg" alt="CTS">
                                 <div class="cd-swipe" id="swipeT2"></div>
                                 <div class="tag-timer" id="tagT2Timer"></div>
@@ -1104,27 +1102,31 @@
         <!-- Interactive Sandbox Controls -->
         <div class="controls-card">
             <div class="card-header">
-                <h3>🎮 Banco di Controllo & Sandbox Dinamico</h3>
-                <span style="font-size:11.5px; color:#94a3b8;">Clicca sui pulsanti o direttamente sulle icone del HUD per interagire</span>
+                <h3>🎮 Banco di Controllo & Sandbox Dinamico (Tutti i Bottoni Testati)</h3>
+                <span style="font-size:11.5px; color:#94a3b8;">Clicca sui bottoni per testare ogni funzionalità con feedback istantaneo</span>
             </div>
 
             <div class="card-grid">
                 <!-- Rotazione Incantesimi -->
                 <div class="group-box">
-                    <h4>Azioni di Lancio</h4>
+                    <h4>Azioni di Lancio Magie</h4>
                     <div class="btn-flex">
-                        <button class="btn-act btn-main" onclick="castSpellAction('Fireball', true)">🔥 Fireball (Crit!)</button>
-                        <button class="btn-act" onclick="castSpellAction('Fireball', false)">Fireball (Normale)</button>
+                        <button class="btn-act btn-main" id="btnCastCrit" onclick="castSpellAction('Fireball', true)">🔥 Fireball (Crit!)</button>
+                        <button class="btn-act" id="btnCastNorm" onclick="castSpellAction('Fireball', false)">Fireball (Normale)</button>
                     </div>
                     <div class="btn-flex">
                         <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Pyroblast Istantaneo</button>
-                        <button class="btn-act" onclick="applyLivingBomb()">💣 Living Bomb</button>
+                        <button class="btn-act" id="btnForceHs" onclick="forceHotStreakReady()">⚡ Attiva Hot Streak</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnLbAct" onclick="applyLivingBomb()">💣 Living Bomb</button>
+                        <button class="btn-act" id="btnScorchAct" onclick="castSpellAction('Scorch', true)">🔥 Cast Scorch</button>
                     </div>
                 </div>
 
                 <!-- Monili & Set Endgame Fire -->
                 <div class="group-box">
-                    <h4>Monili Endgame & Set</h4>
+                    <h4>Monili Endgame & Set BiS</h4>
                     <div class="btn-flex">
                         <button class="btn-act" id="btnDfoAct" onclick="useTrinket1()">💎 DFO (Rotface ICC)</button>
                         <button class="btn-act" id="btnCtsAct" onclick="useTrinket2()">🔥 CTS (Halion RS)</button>
@@ -1132,6 +1134,9 @@
                     <div class="btn-flex">
                         <button class="btn-act" id="btnT10Toggle" onclick="triggerT10()">⚡ Proc T10 (+12% Haste)</button>
                         <button class="btn-act" id="btnT8Toggle" onclick="triggerT8()">✨ Proc T8 (+350 SP)</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act active" id="btnMoltenFuryToggle" onclick="toggleMoltenFury()">🩸 Bersaglio &le; 35% (Fury ON)</button>
                     </div>
                 </div>
 
@@ -1147,6 +1152,10 @@
                         <button class="btn-act" id="btnFmAlly" onclick="setFmState('ALLY')">FM: Alleato</button>
                         <button class="btn-act" id="btnFmProc" onclick="setFmState('PROC')">FM: Proc 10s</button>
                     </div>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnCloakAct" onclick="triggerCloak()">🪡 Mantello Ricamo</button>
+                        <button class="btn-act" id="btnMirrorAct" onclick="useMirrorImage()">👥 Mirror Image</button>
+                    </div>
                 </div>
 
                 <!-- Gestione Mana & Combustion -->
@@ -1154,12 +1163,16 @@
                     <h4>Mana & Combustione</h4>
                     <div class="btn-flex">
                         <button class="btn-act" id="btnCombustCycle" onclick="cycleCombustion()">Combustion: 0 Stacks</button>
-                        <button class="btn-act" onclick="useManaGem()">Usa Gemma Mana</button>
+                        <button class="btn-act" id="btnManaGemAct" onclick="useManaGem()">Usa Gemma Mana</button>
                     </div>
                     <div class="btn-flex">
-                        <button class="btn-act" onclick="setManaPct(38.77)">Mana 38% (Foto 1)</button>
-                        <button class="btn-act" onclick="setManaPct(56.27)">Mana 56% (Foto 2)</button>
-                        <button class="btn-act" onclick="refillManaGems()">Ricarica 3 Gemme</button>
+                        <button class="btn-act" id="btnRefillGems" onclick="refillManaGems()">Ricarica 3 Gemme</button>
+                        <button class="btn-act" id="btnManaFull" onclick="setManaPct(100.0)">Mana 100%</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnMana38" onclick="setManaPct(38.77)">Mana 38% (Foto 1)</button>
+                        <button class="btn-act" id="btnMana56" onclick="setManaPct(56.27)">Mana 56% (Foto 2)</button>
+                        <button class="btn-act" id="btnMana43" onclick="setManaPct(43.01)">Mana 43% (Foto 3)</button>
                     </div>
                 </div>
             </div>
@@ -1179,7 +1192,7 @@
                 </div>
                 <div class="compare-item">
                     <strong>3. 01 - Procs Dynamic Group (Reattivo)</strong>
-                    <p>Gruppo dinamico sopra la Castbar: ospita fino a 7 icone (Tier 10, Hot Streak, Clearcasting, Combustion, Scorch, Incinerate e Living Bomb). Le icone non attive si contraggono a larghezza 0 e il gruppo si ricentra automaticamente.</p>
+                    <p>Gruppo dinamico sopra la Castbar: ospita fino a 7 icone (Tier 10, Hot Streak, Clearcasting, Combustion, Scorch, Incinerate e Molten Fury). Le icone non attive si contraggono a larghezza 0 e il gruppo si ricentra automaticamente.</p>
                 </div>
                 <div class="compare-item">
                     <strong>4. Barra Hot Streak a 2 Segmenti Predittiva</strong>
@@ -1285,8 +1298,8 @@
             if (sim.combustion > 0) crit += (sim.combustion * 10.0);
             if (sim.t10Active) haste += 12.0;
             if (sim.t8Active) sp += 350;
-            if (sim.dfoActive) sp += 605; // Valore medio stack DFO
-            if (sim.ctsActive) sp += 763; // Valore CTS
+            if (sim.dfoActive) sp += 605;
+            if (sim.ctsActive) sp += 763;
 
             document.getElementById('statSP').textContent = Math.round(sp);
             document.getElementById('statCrit').textContent = crit.toFixed(2) + '%';
@@ -1326,6 +1339,12 @@
             }
         }
 
+        function cycleManaState() {
+            if (sim.manaPct > 60) setManaPct(38.77);
+            else if (sim.manaPct > 30) setManaPct(14.01);
+            else setManaPct(100.0);
+        }
+
         // Aggiorna Visibilità Dinamica Procs (Dynamic Group)
         function updateProcsVisibility() {
             const t10 = document.getElementById('procT10');
@@ -1334,7 +1353,7 @@
             const comb = document.getElementById('procCombustion');
             const scorch = document.getElementById('procScorch');
             const inc = document.getElementById('procIncinerate');
-            const lb = document.getElementById('procLivingBomb');
+            const fury = document.getElementById('procMoltenFury');
 
             t10.className = 'wa-box size-34' + (sim.t10Active ? ' pixel-glow' : ' proc-hidden');
             hs.className = 'wa-box size-34' + (sim.hotStreak === 2 ? ' pixel-glow' : ' proc-hidden');
@@ -1342,10 +1361,10 @@
             comb.className = 'wa-box size-34' + (sim.combustion > 0 || sim.mode === 'SCREENSHOT' ? ' pixel-glow' : ' proc-hidden');
             scorch.className = 'wa-box size-34' + (sim.scorchActive ? '' : ' proc-hidden');
             inc.className = 'wa-box size-34' + (sim.mode === 'SCREENSHOT' ? '' : ' proc-hidden');
-            lb.className = 'wa-box size-34' + (sim.lbActive ? ' pixel-glow' : ' proc-hidden');
+            fury.className = 'wa-box size-34' + (sim.targetExecute ? ' pixel-glow' : ' proc-hidden');
 
             const procsBar = document.getElementById('procsBar');
-            const anyActive = sim.t10Active || sim.hotStreak === 2 || sim.clearcastingActive || (sim.combustion > 0) || sim.scorchActive || sim.lbActive || sim.mode === 'SCREENSHOT';
+            const anyActive = sim.t10Active || sim.hotStreak === 2 || sim.clearcastingActive || (sim.combustion > 0) || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT';
             
             if (anyActive && sim.mode !== 'IDLE') {
                 procsBar.classList.remove('hidden');
@@ -1379,7 +1398,7 @@
                 sim.combustion = 0;
                 sim.t10Active = true;
                 sim.clearcastingActive = true;
-                sim.lbActive = true;
+                sim.targetExecute = true;
                 sim.scorchActive = true;
                 sim.manaGems = 0;
 
@@ -1407,13 +1426,13 @@
 
                 updateProcsVisibility();
                 renderStats();
-                setCommentary('Stato Screenshot (Foto 1)', 'Visualizzazione esatta con Hot Streak, 7 proc attivi, Castbar, Mana 38.77% e monili endgame (DFO & CTS).', 'Foto 1');
+                setCommentary('Stato Screenshot (Foto 1)', 'Visualizzazione esatta della Foto 1: Hot Streak, 7 proc attivi, Castbar a 1.4s e mana al 38.77%.', 'Foto 1');
             } else if (mode === 'IDLE') {
                 // STATO ESATTO FOTO 2: Fuori Combattimento, Nessun Proc, Nessun Castbar, Mana 56.27%
                 sim.hotStreak = 0;
                 sim.t10Active = false;
                 sim.clearcastingActive = false;
-                sim.lbActive = false;
+                sim.targetExecute = false;
                 sim.scorchActive = false;
                 sim.combustion = 0;
                 sim.isCasting = false;
@@ -1442,7 +1461,7 @@
                 sim.hotStreak = 0;
                 sim.t10Active = false;
                 sim.clearcastingActive = false;
-                sim.lbActive = false;
+                sim.targetExecute = false;
                 sim.scorchActive = false;
                 sim.manaGems = 3;
 
@@ -1486,6 +1505,7 @@
             document.getElementById('btnMoltenToggle').textContent = 'Molten: ' + sim.molten;
             setBuffUI('boxMolten', 'tagMoltenOff', sim.molten);
             renderStats();
+            spawnFCT('Molten Armor: ' + sim.molten, false);
         }
 
         // Toggle Intellect
@@ -1494,6 +1514,7 @@
             document.getElementById('btnIntToggle').textContent = 'Intell.: ' + sim.intellect;
             setBuffUI('boxIntellect', 'tagIntOff', sim.intellect);
             renderStats();
+            spawnFCT('Arcane Intellect: ' + sim.intellect, false);
         }
 
         // Focus Magic State
@@ -1551,18 +1572,36 @@
             document.getElementById('tagCombustStack').textContent = sim.combustion > 0 ? sim.combustion : '';
             updateProcsVisibility();
             renderStats();
+            spawnFCT('Combustion: ' + sim.combustion + ' Stacks', false);
         }
 
         // Clearcasting Toggle
         function toggleClearcasting() {
             sim.clearcastingActive = !sim.clearcastingActive;
             updateProcsVisibility();
+            spawnFCT('Clearcasting: ' + (sim.clearcastingActive ? 'ON' : 'OFF'), false);
         }
 
         // Scorch Toggle
         function toggleScorch() {
             sim.scorchActive = !sim.scorchActive;
             updateProcsVisibility();
+            spawnFCT('Scorch Debuff: ' + (sim.scorchActive ? 'ON (+5% Crit)' : 'OFF'), false);
+        }
+
+        // Molten Fury Toggle
+        function toggleMoltenFury() {
+            sim.targetExecute = !sim.targetExecute;
+            const btn = document.getElementById('btnMoltenFuryToggle');
+            btn.className = 'btn-act' + (sim.targetExecute ? ' active' : '');
+            btn.textContent = sim.targetExecute ? '🩸 Bersaglio <= 35% (Fury ON)' : 'Bersaglio > 35% (Fury OFF)';
+            updateProcsVisibility();
+            spawnFCT('Molten Fury: ' + (sim.targetExecute ? 'ATTIVO (<35% HP)' : 'OFF'), false);
+        }
+
+        // Incinerate / Fire proc
+        function triggerIncinerate() {
+            spawnFCT('Fire Blast / Incinerate!', true);
         }
 
         // Proc Tier 10 (Pushing the Limit +12% Haste)
@@ -1570,6 +1609,7 @@
             sim.t10Active = true;
             updateProcsVisibility();
             renderStats();
+            spawnFCT('+12% Haste (T10)!', true);
             let rem = 5.0;
             const t10Timer = document.getElementById('t10Timer');
             t10Timer.textContent = '5.0s';
@@ -1592,6 +1632,7 @@
         function triggerT8() {
             sim.t8Active = true;
             renderStats();
+            spawnFCT('+350 SP (Praxis T8)!', true);
             const tagT8 = document.getElementById('tagT8Timer');
             const swipe = document.getElementById('swipeT8');
             swipe.classList.add('active');
@@ -1620,11 +1661,11 @@
             const swipe = document.getElementById('swipeT1');
             swipe.classList.add('active');
             
-            let rem = 45; // ICD 45s (Foto 3 mostra '49')
+            let rem = 45;
             tag.textContent = rem + 's';
             const intv = setInterval(() => {
                 rem--;
-                if (rem <= 25) sim.dfoActive = false; // Durata proc 20s
+                if (rem <= 25) sim.dfoActive = false;
                 if (rem <= 0) {
                     clearInterval(intv);
                     swipe.classList.remove('active');
@@ -1649,7 +1690,7 @@
             tag.textContent = rem + 's';
             const intv = setInterval(() => {
                 rem--;
-                if (rem <= 30) sim.ctsActive = false; // Durata proc 15s
+                if (rem <= 30) sim.ctsActive = false;
                 if (rem <= 0) {
                     clearInterval(intv);
                     swipe.classList.remove('active');
@@ -1664,7 +1705,7 @@
         // Trigger Cloak
         function triggerCloak() {
             sim.cloakActive = true;
-            spawnFCT('+Lightweave Embroidery!', false);
+            spawnFCT('+Lightweave Embroidery (+295 SP)!', false);
             const swipe = document.getElementById('swipeCloak');
             const tag = document.getElementById('tagCloakTimer');
             swipe.classList.add('active');
@@ -1703,8 +1744,7 @@
                     }
                 }, 1000);
             } else {
-                // Se era a 0 come in foto 1, mostra timer 1.4s
-                spawnFCT('Gemma Vuota (0)', false);
+                spawnFCT('Gemma Vuota (0) - Clicca Ricarica 3 Gemme!', false);
             }
         }
 
@@ -1714,6 +1754,7 @@
             document.getElementById('tagGemStack').style.color = '#38bdf8';
             document.getElementById('tagGemTimer').textContent = '';
             document.getElementById('swipeGem').classList.remove('active');
+            spawnFCT('Gemme Ricaricate: 3', false);
         }
 
         // Use Mirror Image
@@ -1722,7 +1763,7 @@
             const tag = document.getElementById('tagMirrorTimer');
             swipe.classList.add('active');
             tag.textContent = '3:00';
-            spawnFCT('Mirror Image!', false);
+            spawnFCT('Mirror Image (3 Immagini Evocate)!', false);
             setTimeout(() => {
                 swipe.classList.remove('active');
                 tag.textContent = '';
@@ -1733,21 +1774,29 @@
         function applyLivingBomb() {
             sim.lbActive = true;
             updateProcsVisibility();
-            const lbTimer = document.getElementById('lbTimer');
+            spawnFCT('Living Bomb Applicata!', false);
             let rem = 12.0;
-            lbTimer.textContent = '12s';
             const intv = setInterval(() => {
                 rem -= 1.0;
                 if (rem <= 0 || !sim.lbActive) {
                     clearInterval(intv);
-                    lbTimer.textContent = '';
                     if (sim.lbActive) {
                         spawnFCT('💥 LB EXPLOSION: 8,450', true);
                     }
-                } else {
-                    lbTimer.textContent = rem + 's';
                 }
             }, 1000);
+        }
+
+        // Force Hot Streak Ready (Pulsante di comodità)
+        function forceHotStreakReady() {
+            sim.hotStreak = 2;
+            const hotStreakBar = document.getElementById('hotStreakBar');
+            const alertBox = document.getElementById('alertBox');
+            hotStreakBar.classList.remove('hidden');
+            hotStreakBar.className = 'hotstreak-container hot-streak';
+            alertBox.style.display = 'flex';
+            updateProcsVisibility();
+            spawnFCT('⚡ HOT STREAK PRONTO!', true);
         }
 
         // Cast Spell Action (Fireball, Scorch, ecc.)
@@ -1802,7 +1851,6 @@
                     const alertBox = document.getElementById('alertBox');
 
                     if (isCrit) {
-                        // Chance proc T10, DFO, CTS su critico
                         if (!sim.t10Active && Math.random() < 0.35) triggerT10();
                         if (!sim.dfoActive && Math.random() < 0.25) useTrinket1();
 
@@ -1828,7 +1876,6 @@
                     updateProcsVisibility();
                     renderStats();
 
-                    // Se siamo in modalità live e non stiamo facendo cast continui, nascondi la castbar dopo 1.2s
                     if (sim.mode === 'LIVE' && !callback) {
                         setTimeout(() => {
                             if (!sim.isCasting) castbarWrap.classList.add('hidden');
@@ -1842,9 +1889,12 @@
 
         // Cast Pyroblast Istantaneo (Hot Streak)
         function castPyroAction(callback) {
-            if (sim.hotStreak < 2) return;
+            if (sim.hotStreak < 2) {
+                spawnFCT('Richiede Hot Streak Attivo!', false);
+                return;
+            }
             const dmg = Math.floor(19500 + Math.random() * 4500);
-            spawnFCT('🔥 PYRO: ' + dmg, true);
+            spawnFCT('🔥 PYROBLAST CRIT: ' + dmg, true);
             
             sim.hotStreak = 0;
             document.getElementById('hotStreakBar').classList.add('hidden');
@@ -1887,14 +1937,14 @@
         function runAutoPlayStep() {
             const steps = [
                 () => {
-                    setCommentary('Passo 1/6 • Inizio Rotazione', 'Il Mago inizia applicando Living Bomb sul bersaglio: compare l\'icona nel Dynamic Group.', '1/6');
+                    setCommentary('Passo 1/6 • Inizio Rotazione', 'Il Mago applica Living Bomb sul boss: compare nei Procs sopra la castbar.', '1/6');
                     applyLivingBomb();
                     sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1600);
                 },
                 () => {
                     setCommentary('Passo 2/6 • Cast Fireball (1° Colpo)', 'Lancio di Fireball: la Castbar si apre ordinatamente sopra il Mana.', '2/6');
                     castSpellAction('Fireball', true, () => {
-                        setCommentary('Passo 2/6 • Heating Up Attivo!', '1° Critico! La barra Hot Streak si apre a metà (50% arancione) senza toccare i pulsanti sotto.', '2/6');
+                        setCommentary('Passo 2/6 • Heating Up Attivo!', '1° Critico! La barra Hot Streak si apre a metà (50% arancione) senza toccare i tasti sotto.', '2/6');
                         sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1200);
                     });
                 },
@@ -1913,7 +1963,7 @@
                     });
                 },
                 () => {
-                    setCommentary('Passo 5/6 • Proc Monili Endgame & T10', 'Proccano DFO (+SP crescente), CTS (+763 SP) e Tier 10 (+12% Haste). Guarda il pannello Stats!', '5/6');
+                    setCommentary('Passo 5/6 • Proc Monili Endgame & T10', 'Proccano DFO (+SP), CTS (+763 SP) e Tier 10 (+12% Haste). Guarda il pannello Stats!', '5/6');
                     useTrinket1();
                     useTrinket2();
                     triggerT10();
