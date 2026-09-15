@@ -132,9 +132,12 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local subEvent = select(2, ...)
         if subEvent == "SPELL_DAMAGE" then
-            local sourceGUID = select(4, ...)
-            local sourceName = select(5, ...)
-            local sourceFlags = select(6, ...)
+            local sourceGUID = select(3, ...)
+            local sourceName = select(4, ...)
+            local sourceFlags = select(5, ...)
+            local destGUID = select(6, ...)
+            local destName = select(7, ...)
+            local destFlags = select(8, ...)
 
             local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
             if not isPlayer and sourceFlags and bit and bit.band then
@@ -154,7 +157,7 @@ function FireMageHUD_HotStreak_OnEvent(event, ...)
 
                 if IsQualifyingSpell(spellId, spellName) then
                     local timestamp = select(1, ...)
-                    local destGUID = select(7, ...) or select(8, ...) or ""
+                    destGUID = select(6, ...) or destGUID or ""
 
                     if HS.lastTimestamp ~= timestamp or HS.lastSpellId ~= spellId or HS.lastDestGUID ~= destGUID then
                         HS.lastTimestamp = timestamp
