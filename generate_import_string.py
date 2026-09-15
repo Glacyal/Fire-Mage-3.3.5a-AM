@@ -45,6 +45,23 @@ for _n in range(33):
         ACE_ESCAPE_TRANS[_n] = '~' + chr(_n + 64)
 
 def serialize_string(s: str) -> str:
+    """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo."""
+    res = ['^S']
+    for ch in s:
+        n = ord(ch)
+        if n == 30:
+            res.append('~z')
+        elif n <= 32:
+            res.append('~' + chr(n + 64))
+        elif n == 94:
+            res.append('~}')
+        elif n == 126:
+            res.append('~|')
+        elif n == 127:
+            res.append('~{')
+        else:
+            res.append(ch)
+    return ''.join(res)
     """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo via str.translate."""
     return '^S' + s.translate(ACE_ESCAPE_TRANS)
 
@@ -318,45 +335,44 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
         local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         local isMatch = false
+        local cName = string.lower(name):gsub("[%s%p%c]", "")
 
         if slot == 15 then
             if spellId and _G.FMHUD_CloakSpellIds[spellId] then
                 isMatch = true
             else
-                local cName = string.lower(name):gsub("[%s%p%c]", "")
                 for _, kw in ipairs(_G.FMHUD_CloakKeywords) do
                     if cName:find(kw) then isMatch = true break end
                 end
             end
         else
             -- 1. Direct match with this slot's known entry
-            if entry and spellId and entry.spellIds and entry.spellIds[spellId] then
-                isMatch = true
-            else
-                local cName = string.lower(name):gsub("[%s%p%c]", "")
-                if entry and entry.keywords then
+            if entry then
+                if spellId and entry.spellIds and entry.spellIds[spellId] then
+                    isMatch = true
+                elseif entry.keywords then
                     for _, kw in ipairs(entry.keywords) do
                         if cName:find(kw) then isMatch = true break end
                     end
                 end
+            end
 
-                -- 2. Fallback matching if not matched directly
-                if not isMatch then
-                    local isOther = false
-                    if otherEntry then
-                        if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
-                            isOther = true
-                        elseif otherEntry.keywords then
-                            for _, kw in ipairs(otherEntry.keywords) do
-                                if cName:find(kw) then isOther = true break end
-                            end
+            -- 2. Fallback matching if not matched directly
+            if not isMatch then
+                local isOther = false
+                if otherEntry then
+                    if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
+                        isOther = true
+                    elseif otherEntry.keywords then
+                        for _, kw in ipairs(otherEntry.keywords) do
+                            if cName:find(kw) then isOther = true break end
                         end
                     end
+                end
 
-                    if not isOther then
-                        for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
-                            if cName:find(kw) then isMatch = true break end
-                        end
+                if not isOther then
+                    for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
+                        if cName:find(kw) then isMatch = true break end
                     end
                 end
             end
@@ -529,7 +545,8 @@ SHARED_T8_INIT_LUA = """function()
 
         -- Check 2: Known Item IDs
         local count = 0
-        for _, s in ipairs(ARMOR_SLOTS) do
+        local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
+        for _, s in ipairs(slots) do
             local id = GetInventoryItemID("player", s)
             if id and _G.FMHUD_T8_SetIDs[id] then
                 count = count + 1
@@ -550,7 +567,7 @@ SHARED_T8_INIT_LUA = """function()
             tt:SetOwner(WorldFrame, "ANCHOR_NONE")
             _G.FMHUD_ScanTT = tt
         end
-        for _, s in ipairs(ARMOR_SLOTS) do
+        for _, s in ipairs(slots) do
             local id = GetInventoryItemID("player", s)
             if id then
                 tt:ClearLines()
@@ -700,7 +717,8 @@ SHARED_T8_INIT_LUA = """function()
 
         -- Check 2: Controllo Item ID sui 5 slot armatura (1=Head, 3=Shoulder, 5=Chest, 7=Legs, 10=Hands)
         local count = 0
-        for _, s in ipairs(ARMOR_SLOTS) do
+        local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
+        for _, s in ipairs(slots) do
             local id = GetInventoryItemID("player", s)
             if id and _G.FMHUD_T10_SetIDs[id] then
                 count = count + 1
@@ -715,7 +733,7 @@ SHARED_T8_INIT_LUA = """function()
 
         -- Check 3: Scansione stringa Item Link & Nome oggetto (Bloodmage / Mago del Sangue / etc.)
         local nameCount = 0
-        for _, s in ipairs(ARMOR_SLOTS) do
+        for _, s in ipairs(slots) do
             local link = GetInventoryItemLink("player", s)
             if link then
                 local lk = link:lower()
@@ -746,7 +764,7 @@ SHARED_T8_INIT_LUA = """function()
             tt = CreateFrame("GameTooltip", "FMHUD_ScanTT", nil, "GameTooltipTemplate")
             _G.FMHUD_ScanTT = tt
         end
-        for _, s in ipairs(ARMOR_SLOTS) do
+        for _, s in ipairs(slots) do
             local link = GetInventoryItemLink("player", s)
             if link then
                 tt:SetOwner(UIParent, "ANCHOR_NONE")
@@ -1586,25 +1604,24 @@ SHARED_MANAGEM_CHECK_LUA = """function()
     local isT7Active = false
     local remT7 = 0
     local durT7 = 15
-    local baseIcon = "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
+    local baseIcon = (GetItemCount(33312) == 0 and GetItemCount(22044) > 0)
+                     and "Interface\\\\Icons\\\\INV_Misc_Gem_Emerald_01"
+                     or  "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
     local procIcon = nil
 
     -- 1. Controllo buff bonus 2 pezzi T7 Mago (+225 Spell Power per 15s dopo l'uso della gemma)
     for i = 1, 40 do
         local n, _, icon, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
         if not n then break end
-        if spellId == 61062 or spellId == 37445 or spellId == 37446 or spellId == 37447 or spellId == 54043 or
+        if spellId == 61062 or spellId == 37447 or
            n == "Mana Surge" or n == "Improved Mana Gems" or n == "Gemme di Mana Migliorate" or 
            n == "Gemme del Mana Migliorate" or n == "Gemma del Mana Migliorata" or n == "Ondata di Mana" then
             local rem = (exp and exp > now) and (exp - now) or 0
-            if exp == 0 or exp == nil then
-                rem = (dur and dur > 0) and dur or 15
-            end
-            if rem > 0.05 or exp == 0 or exp == nil then
+            if rem > 0.05 then
                 isT7Active = true
                 remT7 = rem
                 durT7 = (dur and dur > 0) and dur or 15
-                procIcon = icon or GetSpellTexture(61062) or GetSpellTexture(37447) or "Interface\\\\Icons\\\\Spell_Arcane_ManaSurge" or "Interface\\\\Icons\\\\Spell_Holy_MagicalSentry"
+                procIcon = icon or GetSpellTexture(61062) or "Interface\\\\Icons\\\\Spell_Arcane_ManaSurge" or "Interface\\\\Icons\\\\Spell_Holy_MagicalSentry"
                 break
             end
         end
@@ -1637,9 +1654,9 @@ end"""
 def make_managem_custom_text() -> str:
     """Genera il testo descrittivo (%c) delle cariche della Gemma del Mana, gestendo il Pixel Glow durante il proc T7 e icon swap."""
     return f"""function()
-    if not _G.FMHUD_CheckManaGem_v4 then
+    if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
-        _G.FMHUD_CheckManaGem_v4 = true
+        _G.FMHUD_CheckManaGem_v5 = true
     end
     if not _G.FMHUD_T8_InitDone then
         _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
@@ -1653,7 +1670,9 @@ def make_managem_custom_text() -> str:
 
     -- Aggiornamento immediato texture dell'icona: Mana Surge SOLO durante proc T7 attivo, altrimenti SEMPRE Gemma standard
     if aura_env and aura_env.region then
-        local defIcon = "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
+        local defIcon = (GetItemCount(33312) == 0 and GetItemCount(22044) > 0)
+                         and "Interface\\\\Icons\\\\INV_Misc_Gem_Emerald_01"
+                         or  "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
         local targetIcon = (state == "ACTIVE" and icon) and icon or defIcon
         if aura_env.region.icon and aura_env.region.icon.SetTexture then
             aura_env.region.icon:SetTexture(targetIcon)
@@ -1702,9 +1721,9 @@ end"""
 def make_managem_custom_duration() -> str:
     """Genera la durata e scadenza per lo swipe di ricarica della Gemma del Mana (durata T7 o CD oggetto)."""
     return f"""function()
-    if not _G.FMHUD_CheckManaGem_v4 then
+    if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
-        _G.FMHUD_CheckManaGem_v4 = true
+        _G.FMHUD_CheckManaGem_v5 = true
     end
     local state, rem, dur, icon = _G.FMHUD_CheckManaGem()
     if (state == "ACTIVE" or state == "COOLDOWN") and rem > 0 and dur > 0 then
@@ -1716,15 +1735,18 @@ end"""
 def make_managem_custom_icon() -> str:
     """Restituisce dinamicamente la texture del proc T7 (Mana Surge) durante il buff attivo, altrimenti Mana Sapphire."""
     return f"""function()
-    if not _G.FMHUD_CheckManaGem_v4 then
+    if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
-        _G.FMHUD_CheckManaGem_v4 = true
+        _G.FMHUD_CheckManaGem_v5 = true
     end
     local state, rem, dur, icon = _G.FMHUD_CheckManaGem()
     if state == "ACTIVE" and icon then
         return icon
     end
-    return "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
+    local defIcon = (GetItemCount(33312) == 0 and GetItemCount(22044) > 0)
+                     and "Interface\\\\Icons\\\\INV_Misc_Gem_Emerald_01"
+                     or  "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
+    return defIcon
 end"""
 
 def make_stats_bg_trigger() -> str:

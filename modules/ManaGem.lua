@@ -32,11 +32,8 @@ local T7_MANAGEM_BUFFS = {
 }
 
 local T7_MANAGEM_SPELLS = {
-    [61062] = true,
-    [37445] = true,
-    [37446] = true,
-    [37447] = true,
-    [54043] = true,
+    [61062] = true, -- Improved Mana Gems (2P T7 bonus +225 SP, 15s)
+    [37447] = true, -- Improved Mana Gems (Serpent-Coil Braid trinket)
 }
 
 --- Determina lo stato operativo corrente della Gemma del Mana (ACTIVE, COOLDOWN, READY).
@@ -46,20 +43,19 @@ local T7_MANAGEM_SPELLS = {
 ---@return string icon Percorso della texture appropriata (Mana Surge o Gemma)
 function FireMageHUD_ManaGem_CheckState()
     local now = GetTime()
-    local baseIcon = "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
+    local baseIcon = (GetItemCount(MANA_SAPPHIRE_ID) == 0 and GetItemCount(MANA_EMERALD_ID) > 0)
+                     and "Interface\\Icons\\INV_Misc_Gem_Emerald_01"
+                     or  "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
 
-    -- 1. Controllo buff bonus 2 pezzi T7 attivo sul giocatore
+    -- 1. Controllo buff bonus 2 pezzi T7 attivo sul giocatore (15s con scadenza reale)
     for i = 1, 40 do
         local n, _, icon, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
         if not n then break end
         if (spellId and T7_MANAGEM_SPELLS[spellId]) or (n and T7_MANAGEM_BUFFS[n]) then
             local rem = (exp and exp > now) and (exp - now) or 0
-            if exp == 0 or exp == nil then
-                rem = (dur and dur > 0) and dur or 15
-            end
-            if rem > 0.05 or exp == 0 or exp == nil then
+            if rem > 0.05 then
                 local totalDur = (dur and dur > 0) and dur or 15
-                local procIcon = icon or GetSpellTexture(61062) or GetSpellTexture(37447) or "Interface\\Icons\\Spell_Arcane_ManaSurge" or "Interface\\Icons\\Spell_Holy_MagicalSentry"
+                local procIcon = icon or GetSpellTexture(61062) or "Interface\\Icons\\Spell_Arcane_ManaSurge" or "Interface\\Icons\\Spell_Holy_MagicalSentry"
                 return "ACTIVE", rem, totalDur, procIcon
             end
         end
@@ -88,7 +84,10 @@ function FireMageHUD_ManaGem_CustomIcon()
     if state == "ACTIVE" and icon then
         return icon
     end
-    return "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
+    local defIcon = (GetItemCount(MANA_SAPPHIRE_ID) == 0 and GetItemCount(MANA_EMERALD_ID) > 0)
+                     and "Interface\\Icons\\INV_Misc_Gem_Emerald_01"
+                     or  "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
+    return defIcon
 end
 
 --- Calcola durata e scadenza per lo swipe circolare e il progress timer (%p).
@@ -121,7 +120,9 @@ function FireMageHUD_ManaGem_CustomText()
 
     -- Aggiornamento immediato texture dell'icona: Mana Surge SOLO durante proc T7 attivo, altrimenti SEMPRE Gemma standard
     if aura_env and aura_env.region then
-        local defIcon = "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
+        local defIcon = (GetItemCount(MANA_SAPPHIRE_ID) == 0 and GetItemCount(MANA_EMERALD_ID) > 0)
+                         and "Interface\\Icons\\INV_Misc_Gem_Emerald_01"
+                         or  "Interface\\Icons\\INV_Misc_Gem_Sapphire_02"
         local targetIcon = (state == "ACTIVE" and icon) and icon or defIcon
         if aura_env.region.icon and aura_env.region.icon.SetTexture then
             aura_env.region.icon:SetTexture(targetIcon)
