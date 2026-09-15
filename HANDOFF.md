@@ -30,11 +30,10 @@ L'interfaccia è progettata secondo i principi di **massima ergonomia e pulizia 
    - Se assenti o scaduti, mostrano l'icona desaturata con avviso rosso **`OFF`**.
 2. **Cluster Centrale Unificato (Larghezza 264px)**:
    - Castbar, GCD, Mana Bar e Hot Streak Bar condividono la medesima larghezza di 264px, perfettamente impilate l'una sull'altra.
-3. **Fila Utility Dinamica Adattiva (4 Scenari da 6 a 8 Icone)**:
-   - **Scenario A (8 Icone Compattate a 26px)**: Se il mago equipaggia contemporaneamente $\ge 2$ pezzi T8 E $\ge 2$ pezzi T10, tutti gli 8 moduli rientrano compattandosi a 26x26px con passo ~33px (totale 256px). T8 si trova a `x = -16`, T10 a `x = +16` (sempre a sinistra della Gemma) e la Gemma a `x = +49`.
-   - **Scenario B (7 Icone a 28px - Solo T8)**: Se equipaggia solo T8 ($\ge 2$ pezzi), T10 è nascosto e T8 siede al centro tra Mantello e Gemma a `x = 0`.
-   - **Scenario C (7 Icone a 28px - Solo T10)**: Se equipaggia solo T10 ($\ge 2$ pezzi), T8 è nascosto, T10 siede al centro a `x = 0` (sempre a sinistra della Gemma) e la Gemma si trova a destra a `x = +38`.
-   - **Scenario D (6 Icone Standard a 28px - Né T8 né T10)**: Se non indossa T8 né T10 (es. solo T7 o gear misto), entrambi i moduli sono nascosti e la riga adotta la spaziatura simmetrica classica da 44px.
+3. **Fila Utility Dinamica Adattiva (2 Scenari: con o senza Tier 8)**:
+   - **Scenario A (7 Icone a 28px - Con Tier 8)**: Se il mago equipaggia $\ge 2$ pezzi T8 (o buff Praxis attivo), T8 siede al centro tra Mantello e Gemma a `x = 0`, e la riga si allarga simmetricamente con passo da 38px (totale 256px, perfettamente sotto la barra centrale da 264px).
+   - **Scenario B (6 Icone Standard a 28px - Senza Tier 8)**: Se non indossa T8 (es. solo T7, solo T10 o gear misto), il Tier 8 è nascosto e la riga adotta la spaziatura simmetrica classica da 44px (Mantello a `-22`, Gemma a `+22`).
+   - *Nota sul Tier 10*: Il buff del Tier 10 (*Pushing the Limit* +12% Haste) è collocato nella riga superiore procs (`01 - Procs`) comparendo direttamente a sinistra di Hot Streak durante il proc.
 4. **Timer Intelligenti con Allerta Rossa di Scadenza**:
    - I procs e debuff dinamici (*Scorch $\le$ 5s, Hot Streak $\le$ 3s, Living Bomb $\le$ 3s prima dell'esplosione, Ignite $\le$ 1.5s*) commutano automaticamente il testo in rosso vivo a 1 decimale (`|cFFFF4444%.1fs|r`), avvertendo tempestivamente del momento ottimale per il refresh senza clippare i tick.
 
@@ -74,31 +73,32 @@ Lancio di Pyroblast (o scadenza 10s):
 
 ---
 
-### 3.2 Moduli Tier 8 (`06 - Tier 8` — Praxis) & Tier 10 (`06 - Tier 10` — Pushing the Limit)
+### 3.2 Moduli Tier 8 (`06 - Tier 8` — Praxis) & Tier 10 (`Tier 10` — Pushing the Limit)
 
-Monitorano i bonus set 2P Tier 8 e Tier 10 nella fila utility a `y = -54`:
-- **Auto-Rilevamento Intelligente Multi-Stadio Resiliente**:
-  - Scansiona i 10 pezzi T8 Kirin Tor (10m: 45365-45369, 25m: 45355-45359).
-  - Scansiona i 20 pezzi T10 Bloodmage (251 Normal: 50275-50279, 264 Sanctified: 51155-51159, 277 Heroic Sanctified: 51280-51284, fallback: 51300-51304).
-  - Scansione diretta su Item Link, nome oggetto (`Bloodmage`, `Mago del Sangue`, `Blutmagier`, `Sangriento`, `Mage de sang`), tooltip (`12% haste / celerità`) e stato persistente non-volatile.
-  - La memoria di equipaggiamento rimane attiva stabilmente durante tutta la sessione e viene invalidata unicamente a un effettivo cambio di gear (`PLAYER_EQUIPMENT_CHANGED` / `UNIT_INVENTORY_CHANGED`).
-  - Registrazione garantita nell'albero WeakAuras: `06 - Tier 10` è regolarmente incluso in `controlledChildren` del gruppo radice `Fire Mage 3.3.5a AM`.
-- **Adattamento Dinamico del Layout (`_G.FMHUD_UpdateUtilityRowPositions`)**:
-  - **Scenario A (T8 + T10 contemporaneamente)**: 8 icone compattate a 26px (`[-115, -82, -49, -16, +16, +49, +82, +115]`). T8 a `x = -16`, T10 a `x = +16` (sempre a sinistra della Gemma), Gemma a `x = +49`.
-  - **Scenario B (Solo T8)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T8 tra Mantello e Gemma a `x = 0`, T10 nascosto.
-  - **Scenario C (Solo T10)**: 7 icone a 28px (`[-114, -76, -38, 0, +38, +76, +114]`), T10 al centro a `x = 0` (sempre a sinistra della Gemma) e Gemma a destra a `x = +38`, T8 nascosto.
-  - **Scenario D (Né T8 né T10)**: 6 icone standard a 28px (`[-110, -66, -22, +22, +66, +110]`), entrambi i moduli nascosti.
-- **Tracciamento Proc & Glow**:
-  - **T8 Praxis (64868)**: +350 SP per 15s con Pixel Glow dorato e timer `|cFFFFFF00%.1fs|r`, poi ricarica ICD 30s.
-  - **T10 Pushing the Limit (70753/70752/70747)**: +12% Spell Haste per 5s con Pixel Glow arancio-fuoco vivo `|cFFFFFF00%.1fs|r`, icona `Spell_Fire_ElementalDevastation` e swipe radiale dinamico. In stato idle (senza proc attivo) mostra l'icona pulita pronta al prossimo proc.
+Monitorano i bonus set 2P Tier 8 e Tier 10 in modo completamente disaccoppiato:
+- **Tier 10 (Pushing the Limit - Spell ID 70753/70752)**:
+  - Posizionato nel gruppo dinamico **`01 - Procs`** (34x34 px), compare **immediatamente a sinistra di Hot Streak** all'attivazione del buff (+12% Haste per 5s).
+  - Dotato di Pixel Glow dorato/arancione e timer swipe. Al termine dei 5 secondi, scompare senza alterare la riga dei proc.
+  - L'icona Copie (`06 - Mirror Image`) integra invece il monitoraggio del 4P T10 (*Quad Core* +18% danni).
+- **Tier 8 (Praxis - Spell ID 64868)**:
+  - Collocato al centro esatto della **fila utility inferiore** a `x = 0, y = -54` (tra Mantello e Gemma di Mana).
+  - Mostra il proc +350 Spell Power per 15s con Pixel Glow dorato e tracciamento radiale dell'ICD di 45s.
+- **Rilevamento Dinamico Istantaneo & Layout Utility (`_G.FMHUD_UpdateUtilityRowPositions`)**:
+  - **Scenario A (Con T8 >= 2P)**: 7 icone a 28px con passo 38px (`x = [-114, -76, -38, 0, +38, +76, +114]`). T8 al centro a `x = 0`.
+    - Attivo per: **Solo T8**, **T7 misto a T8**, **T8 misto a T10**.
+  - **Scenario B (Senza T8)**: 6 icone standard a 28px con passo 44px (`x = [-110, -66, -22, +22, +66, +110]`), T8 forzatamente nascosto (`r:Hide()`).
+    - Attivo per: **Solo T7**, **Solo T10**, o equipaggiamento generico.
+  - Rilevamento in tempo reale a zero persistenza: la cache viene invalidata a ogni cambio di gear (`PLAYER_EQUIPMENT_CHANGED`), commutando istantaneamente la barra a schermo.
 
 ---
 
-### 3.3 Focus Magic Monitor (`04 - Focus Magic`) — Tracking Intelligente
+### 3.3 Focus Magic Monitor (`04 - Focus Magic`) — Nascosto se Attivo, Timer Proc 10s & Allerta OFF
 
-Posizionato a `x = -150, y = -14` (in riga sopra il pannello statistiche).
-- **Back-Propagation del Proc**: Quando il Mago riceve il buff di 10s dall'alleato, il sistema estende la durata del buff alleato a 30 minuti, prevenendo falsi allarmi "OFF" ed evitando la necessità di ritarghettare l'alleato.
-- **Scansione Automatica**: Monitora continuamente `target`, `focus`, `party1..4`, `raid1..40`.
+Posizionato a `x = -150, y = -14` (in riga sopra il pannello statistiche):
+- **Nascosto se Applicato**: Fintanto che il buff di 30 minuti è applicato sull'alleato (e l'alleato è vivo), l'icona è **completamente nascosta** garantendo uno schermo pulito (in stile Molten Armor / Intellect).
+- **Proc Personale 10s (+3% Crit)**: Quando l'alleato critta e il Mago riceve il proc da 10 secondi (Spell ID 54648), l'icona si attiva all'istante mostrando il **conto alla rovescia dei 10 secondi** con swipe del cooldown.
+- **Ritorno a Nascosto**: Al termine dei 10 secondi, l'icona torna **nascosta** se l'alleato ha ancora il buff attivo.
+- **Allerta OFF**: Se Focus Magic non è assegnato ad alcun giocatore, o se l'alleato muore in fight o il buff scade, compare l'icona desaturata grigia con testo rosso **`OFF`**.
 
 ---
 
@@ -138,6 +138,7 @@ Posizionato a `x = -180, y = -54` (box 88x48px con 4 righe real-time):
 Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190, scale: 1.2, load: Mage + Living Bomb)
 │
 ├── 01 - Procs (dynamicgroup: horizontal, center-aligned, space: 6px, yOffset: +52)
+│   ├── Tier 10 (icon: aura2 buff "Pushing the Limit" 70753/70752, compare a SINISTRA di Hot Streak con Pixel Glow)
 │   ├── Hot Streak (icon: aura2 buff "Hot Streak", matchesShowOn: "showOnActive", Pixel Glow dorato)
 │   ├── Clearcasting (icon: aura2 buff "Clearcasting" / "Arcane Concentration" 12536, timer %p)
 │   ├── Living Bomb (icon: aura2 debuff "Living Bomb" su target, allerta rossa <= 3s prima dell'esplosione)
@@ -165,30 +166,18 @@ Fire Mage 3.3.5a AM (root: group, internalVersion: 52, xOffset: 0, yOffset: -190
 │       ├── Hot Streak Bar - Segment 1  (texture: 130x5px a sx, 50% 1° critico persistente)
 │       └── Hot Streak Bar - Proc       (aurabar: 264x5px intera, countdown 10s con Pixel Glow)
 │
-├── Fila Utility Inferiore Dinamica (y = -54, margine di 11.5px sotto la Hot Streak Bar)
+├── Fila Utility Inferiore Dinamica (y = -54, 28x28px, margine di 11.5px sotto la Hot Streak Bar)
 │   │
-│   ├── SCENARIO A: 8 ICONE COMPATTATE (Entrambi T8 >= 2P e T10 >= 2P - 26x26px, passo ~33px):
-│   │   ├── 05 - Trinket 1    (x = -115: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 05 - Trinket 2    (x =  -82: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 06 - Cloak        (x =  -49: Glow attivo + Swipe orologio + Countdown ICD)
-│   │   ├── 06 - Tier 8       (x =  -16: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
-│   │   ├── 06 - Tier 10      (x =  +16: Pushing the Limit / Haste 12% con Glow arancio-fuoco)
-│   │   ├── 06 - Mana Gem     (x =  +49: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
-│   │   ├── 06 - Combustion   (x =  +82: Glow attivo + Stacks x%d + Swipe orologio CD)
-│   │   └── 06 - Mirror Image (x = +115: Glow attivo 30s + Swipe orologio CD 3m)
+│   ├── SCENARIO A: 7 ICONE T8 (Con T8 >= 2P equipaggiato - 28x28px, passo 38px, totale 256px):
+│   │   ├── 05 - Trinket 1    (x = -114: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 05 - Trinket 2    (x =  -76: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Cloak        (x =  -38: Glow attivo + Swipe orologio + Countdown ICD)
+│   │   ├── 06 - Tier 8       (x =    0: Praxis +350 SP 15s con Glow dorato + Swipe ICD)
+│   │   ├── 06 - Mana Gem     (x =  +38: T7 2pc Glow dorato + Timer %p + CD 2m + Cariche)
+│   │   ├── 06 - Combustion   (x =  +76: Glow attivo + Stacks x%d + Swipe orologio CD)
+│   │   └── 06 - Mirror Image (x = +114: Glow attivo 30s + Swipe orologio CD 3m)
 │   │
-│   ├── SCENARIO B: 7 ICONE T8 (Solo T8 >= 2P, T10 < 2P - 28x28px, passo 38px, T10 nascosto):
-│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
-│   │   ├── 06 - Tier 8       (x =    0: Centrato tra Mantello e Gemma di Mana)
-│   │   └── 06 - Mana Gem     (x =  +38) | 06 - Combustion (x = +76) | 06 - Mirror Image (x = +114)
-│   │
-│   ├── SCENARIO C: 7 ICONE T10 (Solo T10 >= 2P, T8 < 2P - 28x28px, passo 38px, T8 nascosto):
-│   │   ├── 05 - Trinket 1    (x = -114) | 05 - Trinket 2 (x = -76) | 06 - Cloak (x = -38)
-│   │   ├── 06 - Tier 10      (x =    0: Centrato a sinistra della Gemma di Mana)
-│   │   ├── 06 - Mana Gem     (x =  +38: A destra del Tier 10)
-│   │   └── 06 - Combustion   (x =  +76) | 06 - Mirror Image (x = +114)
-│   │
-│   └── SCENARIO D: 6 ICONE STANDARD (Né T8 né T10 - 28x28px, passo 44px, T8 e T10 nascosti):
+│   └── SCENARIO B: 6 ICONE STANDARD (Senza T8 - 28x28px, passo 44px, T8 nascosto, totale 248px):
 │       ├── 05 - Trinket 1    (x = -110: Glow attivo + Swipe orologio + Countdown ICD)
 │       ├── 05 - Trinket 2    (x =  -66: Glow attivo + Swipe orologio + Countdown ICD)
 │       ├── 06 - Cloak        (x =  -22: Glow attivo + Swipe orologio + Countdown ICD)

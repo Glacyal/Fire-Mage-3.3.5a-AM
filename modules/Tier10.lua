@@ -3,12 +3,13 @@
 --- =========================================================================
 --- Monitora il bonus del set 2P Tier 10 (Regalia del Mago del Sangue / Bloodmage)
 --- e l'effetto proc Pushing the Limit (Spell ID 70753 / 70752 / 70747):
---- - Spells: Pushing the Limit (ID 70753, +12% Spell Haste per 5s)
---- - Auto-rilevamento multi-stadio: buff attivo, 20 Item ID noti (251/264/277), scansione link/nomi e tooltip.
---- - Se >= 2 pezzi equipaggiati: inserito a sinistra della Gemma di Mana.
----   * In combinazione T8 + T10 (8 componenti): compattato a 26px a x = +16, y = -54 (T8 a x = -16, T10 a x = +16, Gemma a x = +49).
----   * Con solo T10 (7 componenti): posizionato a 28px a x = 0, y = -54 (Gemma a x = +38).
---- - Se < 2 pezzi equipaggiati: nascosto dinamicamente, lasciando spazio agli altri elementi.
+--- - Spells: Pushing the Limit (ID 70753, +12% Spell Haste per 5s su proc di Hot Streak)
+--- - Collocazione: Riga Superiore Procs (01 - Procs, 34x34 px) direttamente a SINISTRA di Hot Streak.
+--- - Meccanica:
+---   * Compare dinamicamente non appena Hot Streak attiva Pushing the Limit (+12% haste).
+---   * Durata 5 secondi con countdown swipe circolare e pixel glow arancione/dorato.
+---   * Al termine del proc, scompare lasciando inalterato l'allineamento della riga superiore.
+---   * La riga utility inferiore è ripristinata al layout pulito a 6 o 7 componenti (con T8).
 --- =========================================================================
 
 local T10_SetIDs = {

@@ -515,7 +515,7 @@ SHARED_T8_INIT_LUA = """function()
     _G.FMHUD_CheckT8Equipped = function()
         local now = GetTime()
         local cache = _G.FMHUD_T8_EquipCache
-        if cache and (now - cache.time < 0.3) then
+        if cache and (now - cache.time < 0.2) then
             return cache.isEquipped
         end
         if not cache then
@@ -523,43 +523,34 @@ SHARED_T8_INIT_LUA = """function()
             _G.FMHUD_T8_EquipCache = cache
         end
 
-        -- Check 0: Stato persistente gia' confermato per questa sessione di equipaggiamento
-        if _G.FMHUD_T8_Equipped then
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 1: Buff Praxis is currently active on player (Spell ID 64868, "Praxis", "Prassi")
+        -- 1. Controllo buff attivo Praxis (Spell ID 64868, "Praxis", "Prassi")
         for i = 1, 40 do
             local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
             if not name then break end
             if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
-                _G.FMHUD_T8_LastSeen = now
-                _G.FMHUD_T8_Equipped = true
                 cache.time = now
                 cache.isEquipped = true
                 return true
             end
         end
 
-        -- Check 2: Known Item IDs
+        -- 2. Controllo Item ID noti Kirin Tor (10m e 25m)
         local count = 0
         local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
+        local setIDs = _G.FMHUD_T8_SetIDs
         for _, s in ipairs(slots) do
             local id = GetInventoryItemID("player", s)
-            if id and _G.FMHUD_T8_SetIDs[id] then
+            if id and setIDs and setIDs[id] then
                 count = count + 1
             end
         end
         if count >= 2 then
-            _G.FMHUD_T8_Equipped = true
             cache.time = now
             cache.isEquipped = true
             return true
         end
 
-        -- Check 3: Tooltip scan for "Kirin Tor" or "Praxis" on equipped armor
+        -- 3. Scansione tooltip su pezzi equipaggiati per "Kirin Tor", "Praxis" o "Prassi"
         local ttCount = 0
         local tt = _G.FMHUD_ScanTT
         if not tt then
@@ -586,15 +577,6 @@ SHARED_T8_INIT_LUA = """function()
             end
         end
         if ttCount >= 2 then
-            _G.FMHUD_T8_Equipped = true
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 4: Recent buff within session
-        if _G.FMHUD_T8_LastSeen and _G.FMHUD_T8_LastSeen > 0 then
-            _G.FMHUD_T8_Equipped = true
             cache.time = now
             cache.isEquipped = true
             return true
@@ -607,10 +589,15 @@ SHARED_T8_INIT_LUA = """function()
 
     _G.FMHUD_CheckT8 = function()
         local isEquipped = _G.FMHUD_CheckT8Equipped()
-        local now = GetTime()
-        local state = _G.FMHUD_T8_State
         local defIcon = GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
         local icon = defIcon
+
+        if not isEquipped then
+            return "NONE", 0, 0, defIcon, false
+        end
+
+        local now = GetTime()
+        local state = _G.FMHUD_T8_State
 
         -- 1. Controllo buff attivo Praxis (SpellID 64868, +350 SP per 15s)
         local foundBuff = false
@@ -624,7 +611,6 @@ SHARED_T8_INIT_LUA = """function()
                 durBuff = (duration and duration > 0) and duration or 15
                 remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
                 if bIcon then icon = bIcon end
-                _G.FMHUD_T8_LastSeen = now
                 break
             end
         end
@@ -642,10 +628,6 @@ SHARED_T8_INIT_LUA = """function()
             state.isProc = false
         end
 
-        if not isEquipped then
-            return "NONE", 0, 0, defIcon, false
-        end
-
         -- 2. ICD Stimato (45s totale = 15s proc + 30s ricarica)
         if state.lastStart > 0 then
             local elapsed = now - state.lastStart
@@ -659,207 +641,8 @@ SHARED_T8_INIT_LUA = """function()
         return "READY", 0, 0, icon, true
     end
 
-    _G.FMHUD_T10_SetIDs = {
-        -- 251 Normal (Bloodmage's Regalia)
-        [50275] = true, -- Gloves
-        [50276] = true, -- Hood / Hands
-        [50277] = true, -- Leggings
-        [50278] = true, -- Robe / Head
-        [50279] = true, -- Shoulderpads
-        -- 264 Sanctified (Sanctified Bloodmage's Regalia)
-        [51155] = true, -- Robe
-        [51156] = true, -- Gloves
-        [51157] = true, -- Hood
-        [51158] = true, -- Leggings
-        [51159] = true, -- Shoulderpads
-        -- 277 Heroic Sanctified (Sanctified Bloodmage's Regalia)
-        [51280] = true, -- Gloves
-        [51281] = true, -- Hood
-        [51282] = true, -- Leggings
-        [51283] = true, -- Robe
-        [51284] = true, -- Shoulderpads
-        -- Private server / alternate item IDs
-        [51300] = true, [51301] = true, [51302] = true, [51303] = true, [51304] = true,
-    }
-
-    _G.FMHUD_T10_State = _G.FMHUD_T10_State or { lastStart = 0, lastEnd = 0, isProc = false }
-
-    _G.FMHUD_CheckT10Equipped = function()
-        local now = GetTime()
-        local cache = _G.FMHUD_T10_EquipCache
-        if cache and (now - cache.time < 0.3) then
-            return cache.isEquipped
-        end
-        if not cache then
-            cache = { time = 0, isEquipped = false }
-            _G.FMHUD_T10_EquipCache = cache
-        end
-
-        -- Check 0: Stato persistente gia' confermato per questa sessione di equipaggiamento
-        if _G.FMHUD_T10_Equipped then
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 1: Buff attivo "Pushing the Limit" / "Oltre il Limite" sul mago (SpellID 70753 / 70752 / 70747)
-        for i = 1, 40 do
-            local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
-            if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
-                _G.FMHUD_T10_LastSeen = now
-                _G.FMHUD_T10_Equipped = true
-                cache.time = now
-                cache.isEquipped = true
-                return true
-            end
-        end
-
-        -- Check 2: Controllo Item ID sui 5 slot armatura (1=Head, 3=Shoulder, 5=Chest, 7=Legs, 10=Hands)
-        local count = 0
-        local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
-        for _, s in ipairs(slots) do
-            local id = GetInventoryItemID("player", s)
-            if id and _G.FMHUD_T10_SetIDs[id] then
-                count = count + 1
-            end
-        end
-        if count >= 2 then
-            _G.FMHUD_T10_Equipped = true
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 3: Scansione stringa Item Link & Nome oggetto (Bloodmage / Mago del Sangue / etc.)
-        local nameCount = 0
-        for _, s in ipairs(slots) do
-            local link = GetInventoryItemLink("player", s)
-            if link then
-                local lk = link:lower()
-                if lk:find("bloodmage") or lk:find("mago del sangue") or lk:find("blutmagier") or lk:find("sangriento") or lk:find("mage de sang") then
-                    nameCount = nameCount + 1
-                else
-                    local itemName = GetItemInfo(link)
-                    if itemName then
-                        local iname = itemName:lower()
-                        if iname:find("bloodmage") or iname:find("mago del sangue") or iname:find("blutmagier") or iname:find("sangriento") or iname:find("mage de sang") then
-                            nameCount = nameCount + 1
-                        end
-                    end
-                end
-            end
-        end
-        if nameCount >= 2 then
-            _G.FMHUD_T10_Equipped = true
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 4: Scansione GameTooltip per set bonus "(2) Set" o "12% haste / celerita'"
-        local ttCount = 0
-        local tt = _G.FMHUD_ScanTT
-        if not tt then
-            tt = CreateFrame("GameTooltip", "FMHUD_ScanTT", nil, "GameTooltipTemplate")
-            _G.FMHUD_ScanTT = tt
-        end
-        for _, s in ipairs(slots) do
-            local link = GetInventoryItemLink("player", s)
-            if link then
-                tt:SetOwner(UIParent, "ANCHOR_NONE")
-                tt:ClearLines()
-                tt:SetInventoryItem("player", s)
-                for j = 1, tt:NumLines() do
-                    local line = _G["FMHUD_ScanTTTextLeft"..j]
-                    local text = line and line:GetText()
-                    if text then
-                        local lt = text:lower()
-                        if lt:find("bloodmage") or lt:find("mago del sangue") or lt:find("pushing the limit") or lt:find("oltre il limite") or (lt:find("12%%") and (lt:find("haste") or lt:find("celerit") or lt:find("speed") or lt:find("tempo") or lt:find("lancio"))) then
-                            ttCount = ttCount + 1
-                            break
-                        end
-                    end
-                end
-            end
-        end
-        if ttCount >= 2 then
-            _G.FMHUD_T10_Equipped = true
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        -- Check 5: Se il proc e' stato visto durante la sessione corrente, mantiene attivo l'equip
-        if _G.FMHUD_T10_LastSeen and _G.FMHUD_T10_LastSeen > 0 then
-            _G.FMHUD_T10_Equipped = true
-            cache.time = now
-            cache.isEquipped = true
-            return true
-        end
-
-        cache.time = now
-        cache.isEquipped = false
-        return false
-    end
-
-    _G.FMHUD_CheckT10 = function()
-        local isEquipped = _G.FMHUD_CheckT10Equipped()
-        local now = GetTime()
-        local state = _G.FMHUD_T10_State
-        local defIcon = GetSpellTexture(70753) or "Interface\\\\Icons\\\\Spell_Fire_ElementalDevastation"
-        local icon = defIcon
-
-        -- 1. Controllo buff attivo T10 2P (SpellID 70753 / 70752 / 70747 "Pushing the Limit" / "Oltre il Limite")
-        local foundBuff = false
-        local remBuff = 0
-        local durBuff = 5
-        for i = 1, 40 do
-            local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
-            if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
-                foundBuff = true
-                durBuff = (duration and duration > 0) and duration or 5
-                remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
-                if bIcon then icon = bIcon end
-                _G.FMHUD_T10_LastSeen = now
-                _G.FMHUD_T10_Equipped = true
-                break
-            end
-        end
-
-        if foundBuff then
-            if not state.isProc or (now - state.lastStart > durBuff + 1) then
-                state.lastStart = now - (durBuff - remBuff)
-                state.isProc = true
-            end
-            return "ACTIVE", remBuff, durBuff, icon, true
-        end
-
-        if state.isProc then
-            state.isProc = false
-        end
-
-        if not isEquipped then
-            return "NONE", 0, 0, defIcon, false
-        end
-
-        -- 3. Pronto
-        return "READY", 0, 0, icon, true
-    end
-
     -- Layout predefiniti statici per evitare allocazioni in combattimento
-    _G.FMHUD_LayoutA = {
-        ["05 - Trinket 1"]    = -115,
-        ["05 - Trinket 2"]    = -82,
-        ["06 - Cloak"]        = -49,
-        ["06 - Tier 8"]       = -16,
-        ["06 - Tier 10"]      = 16,
-        ["06 - Mana Gem"]     = 49,
-        ["06 - Combustion"]   = 82,
-        ["06 - Mirror Image"] = 115,
-    }
-    _G.FMHUD_LayoutB = {
+    _G.FMHUD_LayoutT8 = {
         ["05 - Trinket 1"]    = -114,
         ["05 - Trinket 2"]    = -76,
         ["06 - Cloak"]        = -38,
@@ -868,16 +651,7 @@ SHARED_T8_INIT_LUA = """function()
         ["06 - Combustion"]   = 76,
         ["06 - Mirror Image"] = 114,
     }
-    _G.FMHUD_LayoutC = {
-        ["05 - Trinket 1"]    = -114,
-        ["05 - Trinket 2"]    = -76,
-        ["06 - Cloak"]        = -38,
-        ["06 - Tier 10"]      = 0,
-        ["06 - Mana Gem"]     = 38,
-        ["06 - Combustion"]   = 76,
-        ["06 - Mirror Image"] = 114,
-    }
-    _G.FMHUD_LayoutD = {
+    _G.FMHUD_LayoutStd = {
         ["05 - Trinket 1"]    = -110,
         ["05 - Trinket 2"]    = -66,
         ["06 - Cloak"]        = -22,
@@ -889,7 +663,7 @@ SHARED_T8_INIT_LUA = """function()
     local lastRowUpdate = 0
     _G.FMHUD_UpdateUtilityRowPositions = function(force)
         local now = GetTime()
-        if not force and (now - lastRowUpdate < 0.25) then
+        if not force and (now - lastRowUpdate < 0.15) then
             return
         end
         lastRowUpdate = now
@@ -900,27 +674,9 @@ SHARED_T8_INIT_LUA = """function()
         if not group then return end
 
         local hasT8 = _G.FMHUD_CheckT8Equipped and _G.FMHUD_CheckT8Equipped()
-        local hasT10 = _G.FMHUD_CheckT10Equipped and _G.FMHUD_CheckT10Equipped()
-
-        local mode = (hasT8 and hasT10 and "A") or (hasT8 and "B") or (hasT10 and "C") or "D"
-        if not force and mode == _G.FMHUD_LastLayoutMode then
-            return
-        end
-
-        local layout, targetW
-        if mode == "A" then
-            targetW = 26
-            layout = _G.FMHUD_LayoutA
-        elseif mode == "B" then
-            targetW = 28
-            layout = _G.FMHUD_LayoutB
-        elseif mode == "C" then
-            targetW = 28
-            layout = _G.FMHUD_LayoutC
-        else
-            targetW = 28
-            layout = _G.FMHUD_LayoutD
-        end
+        local mode = hasT8 and "T8" or "STD"
+        local layout = hasT8 and _G.FMHUD_LayoutT8 or _G.FMHUD_LayoutStd
+        local targetW = 28
 
         local allFound = true
         for id, targetX in pairs(layout) do
@@ -928,7 +684,7 @@ SHARED_T8_INIT_LUA = """function()
             local r = regObj and (regObj.region or (regObj.GetPoint and regObj))
             if r then
                 local point, relTo, relPoint, curX, curY = r:GetPoint(1)
-                if not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-54)) > 0.5) then
+                if force or not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-54)) > 0.5) then
                     r:ClearAllPoints()
                     r:SetPoint("CENTER", group, "CENTER", targetX, -54)
                 end
@@ -936,8 +692,27 @@ SHARED_T8_INIT_LUA = """function()
                     r:SetWidth(targetW)
                     r:SetHeight(targetW)
                 end
+                local data = WeakAuras.GetData and WeakAuras.GetData(id)
+                if data and (data.xOffset ~= targetX or data.yOffset ~= -54) then
+                    data.xOffset = targetX
+                    data.yOffset = -54
+                end
             else
                 allFound = false
+            end
+        end
+
+        if not hasT8 then
+            local t8Obj = WeakAuras.regions["06 - Tier 8"]
+            local t8r = t8Obj and (t8Obj.region or (t8Obj.GetPoint and t8Obj))
+            if t8r and t8r.Hide then
+                t8r:Hide()
+            end
+        else
+            local t8Obj = WeakAuras.regions["06 - Tier 8"]
+            local t8r = t8Obj and (t8Obj.region or (t8Obj.GetPoint and t8Obj))
+            if t8r and t8r.Show then
+                t8r:Show()
             end
         end
 
@@ -949,29 +724,20 @@ SHARED_T8_INIT_LUA = """function()
     end
 
     if not _G.FMHUD_LayoutFrame then
-        local f = CreateFrame("Frame")
+        local f = CreateFrame("Frame", "FMHUD_LayoutFrame")
         f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
         f:RegisterEvent("UNIT_INVENTORY_CHANGED")
         f:RegisterEvent("PLAYER_ENTERING_WORLD")
+        f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         f:RegisterEvent("UNIT_AURA")
-        local elapsed = 0
-        f:SetScript("OnUpdate", function(self, delta)
-            elapsed = elapsed + delta
-            if elapsed >= 0.25 then
-                elapsed = 0
-                _G.FMHUD_UpdateUtilityRowPositions()
-            end
-        end)
         f:SetScript("OnEvent", function(self, event, unit)
             if event == "UNIT_AURA" and unit ~= "player" then return end
-            if event == "PLAYER_EQUIPMENT_CHANGED" or event == "UNIT_INVENTORY_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
-                _G.FMHUD_T8_EquipCache = nil
-                _G.FMHUD_T10_EquipCache = nil
-                _G.FMHUD_T8_Equipped = nil
-                _G.FMHUD_T10_Equipped = nil
-                _G.FMHUD_LastLayoutMode = nil
-            end
+            _G.FMHUD_T8_EquipCache = nil
+            _G.FMHUD_LastLayoutMode = nil
             _G.FMHUD_UpdateUtilityRowPositions(true)
+            if WeakAuras and WeakAuras.ScanEvents then
+                WeakAuras.ScanEvents("FMHUD_T8_UPDATE")
+            end
         end)
         _G.FMHUD_LayoutFrame = f
     end
@@ -1047,302 +813,205 @@ def make_t8_custom_icon() -> str:
     return icon or GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
 end"""
 
-def make_t10_custom_text() -> str:
-    """Genera la closure Lua per il testo descrittivo del Tier 10 2P (%c), con pixel glow su proc attivo e timer ICD."""
-    return f"""function()
-    if not _G.FMHUD_T8_InitDone then
-        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
-        _G.FMHUD_InitT8()
-    end
-    if _G.FMHUD_UpdateUtilityRowPositions then
-        _G.FMHUD_UpdateUtilityRowPositions()
-    end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
-    if state == "ACTIVE" then
-        if LCG and aura_env and aura_env.region then
-            LCG.PixelGlow_Start(aura_env.region, {{1, 0.45, 0.1, 1}}, 8, 0.25, 10, 2, 0, 0, false, "FMHUD_T10_GLOW")
-        end
-        return string.format("|cFFFFFF00%.1fs|r", rem)
-    else
-        if LCG and aura_env and aura_env.region then
-            LCG.PixelGlow_Stop(aura_env.region, "FMHUD_T10_GLOW")
-        end
-        if state == "ICD" and rem > 0.1 then
-            if rem >= 60 then
-                local m = math.floor(rem / 60)
-                local s = math.floor(rem % 60)
-                return string.format("%d:%02d", m, s)
-            else
-                return string.format("%.0f", rem)
-            end
-        end
-        return ""
-    end
-end"""
-
-def make_t10_custom_duration() -> str:
-    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per il Tier 10 2P."""
-    return f"""function()
-    if not _G.FMHUD_T8_InitDone then
-        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
-        _G.FMHUD_InitT8()
-    end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    if (state == "ACTIVE" or state == "ICD") and rem > 0 and dur > 0 then
-        return dur, GetTime() + rem
-    end
-    return 0, 0
-end"""
-
-def make_t10_custom_icon() -> str:
-    """Genera la closure Lua per l'icona del Tier 10 2P (Pushing the Limit)."""
-    return f"""function()
-    if not _G.FMHUD_T8_InitDone then
-        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
-        _G.FMHUD_InitT8()
-    end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    return icon or GetSpellTexture(70753) or "Interface\\\\Icons\\\\Spell_Fire_ElementalDevastation"
-end"""
-
 SHARED_FM_CHECK_LUA = """function(event, ...)
-    FMHUD_State = FMHUD_State or {}
+    local state = _G.FMHUD_FMState
+    if not state then
+        state = { targetGUID = nil, targetName = nil, expires = 0 }
+        _G.FMHUD_FMState = state
+    end
+
     local now = GetTime()
 
+    -- 1. Gestione Eventi Assegnazione, Rimozione e Morte
     if event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, spell = ...
         if unit == "player" and (spell == "Focus Magic" or spell == "Focalizzazione Magica") then
-            FMHUD_State.FMTarget = UnitName("target") or "Ally"
-            FMHUD_State.FMExpires = now + 1800
-            FMHUD_State.FMDur = 1800
+            state.targetName = UnitName("target")
+            state.targetGUID = UnitGUID("target")
+            state.expires = now + 1800
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-        local isFM = (spellName == "Focus Magic" or spellName == "Focalizzazione Magica" or spellId == 54646 or spellId == 54648)
-        if isFM then
-            -- Assegnazione sull'alleato da parte del mago (spellId 54646, buff 30 minuti)
-            if sourceGUID == UnitGUID("player") and spellId ~= 54648 then
-                if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
-                    FMHUD_State.FMTarget = destName or "Ally"
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMDur = 1800
-                elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                    FMHUD_State.FMExpires = 0
-                    FMHUD_State.FMTarget = nil
-                end
-            -- Attivazione proc critico sul mago (spellId 54648, 10s): conferma assoluta del buff attivo sull'alleato!
-            elseif destGUID == UnitGUID("player") and (subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH") then
-                if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMDur = 1800
-                end
+        if sourceGUID == UnitGUID("player") and (spellId == 54646 or spellName == "Focus Magic" or spellName == "Focalizzazione Magica") then
+            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
+                state.targetName = destName
+                state.targetGUID = destGUID
+                state.expires = now + 1800
+            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
+                state.targetName = nil
+                state.targetGUID = nil
+                state.expires = 0
             end
-        elseif subEvent == "UNIT_DIED" and FMHUD_State.FMTarget and destName == FMHUD_State.FMTarget then
-            FMHUD_State.FMExpires = 0
-            FMHUD_State.FMTarget = nil
+        elseif subEvent == "UNIT_DIED" then
+            if (state.targetGUID and destGUID == state.targetGUID) or (state.targetName and destName == state.targetName) then
+                state.targetName = nil
+                state.targetGUID = nil
+                state.expires = 0
+            end
         end
     end
 
-    local b1 = "Focus Magic"
-    local b2 = "Focalizzazione Magica"
-    local found = false
-
-    -- 1. Controllo proc attivo di 10 secondi sul player (prova diretta che il buff sull'alleato è attivo)
+    -- 2. Controllo se il player ha il proc di 10 secondi (Spell ID 54648, +3% Crit)
+    local hasProc = false
+    local procRem = 0
+    local procDur = 10
+    local procExp = 0
     for i = 1, 40 do
-        local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        local n, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not n then break end
-        if spellId == 54648 or n == b1 or n == b2 then
-            -- Mantiene viva la durata dell'alleato senza mai sovrascriverla con i 10 secondi del proc
-            if not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                FMHUD_State.FMExpires = now + 1800
-                FMHUD_State.FMDur = 1800
-            end
-            found = true
+        if spellId == 54648 or ((n == "Focus Magic" or n == "Focalizzazione Magica") and duration and duration <= 15) then
+            hasProc = true
+            procDur = (duration and duration > 0) and duration or 10
+            procRem = (expirationTime and expirationTime > 0) and (expirationTime - now) or procDur
+            procExp = (expirationTime and expirationTime > 0) and expirationTime or (now + procRem)
             break
         end
     end
 
-    -- 2. Controllo bersaglio alleato (target)
-    if not found and UnitExists("target") and UnitIsFriend("player", "target") then
+    -- 3. Verifica se l'alleato registrato ha ancora il buff ed e vivo
+    if state.expires and state.expires > now then
+        if state.targetName and UnitExists(state.targetName) and UnitIsDead(state.targetName) then
+            state.targetName = nil
+            state.targetGUID = nil
+            state.expires = 0
+        else
+            return hasProc, true, procRem, procDur, procExp
+        end
+    end
+
+    -- 4. Scansione attiva su target, focus, raid o party (utile al login, reload o cambio zona)
+    local allyActive = false
+    if UnitExists("target") and UnitIsFriend("player", "target") and not UnitIsDead("target") then
         for i = 1, 40 do
             local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("target", i)
             if not n then break end
-            if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
-                if exp and exp > 0 then
-                    FMHUD_State.FMExpires = exp
-                    FMHUD_State.FMDur = dur or 1800
-                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMDur = 1800
-                end
-                FMHUD_State.FMTarget = UnitName("target")
-                found = true
+            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
+                state.targetName = UnitName("target")
+                state.targetGUID = UnitGUID("target")
+                state.expires = (exp and exp > 0) and exp or (now + 1800)
+                allyActive = true
                 break
             end
         end
     end
 
-    -- 3. Controllo focus alleato
-    if not found and UnitExists("focus") and UnitIsFriend("player", "focus") then
+    if not allyActive and UnitExists("focus") and UnitIsFriend("player", "focus") and not UnitIsDead("focus") then
         for i = 1, 40 do
             local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("focus", i)
             if not n then break end
-            if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
-                if exp and exp > 0 then
-                    FMHUD_State.FMExpires = exp
-                    FMHUD_State.FMDur = dur or 1800
-                elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                    FMHUD_State.FMExpires = now + 1800
-                    FMHUD_State.FMDur = 1800
-                end
-                FMHUD_State.FMTarget = UnitName("focus")
-                found = true
+            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
+                state.targetName = UnitName("focus")
+                state.targetGUID = UnitGUID("focus")
+                state.expires = (exp and exp > 0) and exp or (now + 1800)
+                allyActive = true
                 break
             end
         end
     end
 
-    -- 4. Scansione membri del Raid o del Party
-    if not found then
+    if not allyActive then
         local nr = GetNumRaidMembers()
         if nr and nr > 0 then
             for r = 1, nr do
                 local u = "raid"..r
-                for i = 1, 40 do
-                    local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
-                    if not n then break end
-                    if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
-                        if exp and exp > 0 then
-                            FMHUD_State.FMExpires = exp
-                            FMHUD_State.FMDur = dur or 1800
-                        elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                            FMHUD_State.FMExpires = now + 1800
-                            FMHUD_State.FMDur = 1800
+                if not UnitIsDead(u) then
+                    for i = 1, 40 do
+                        local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
+                        if not n then break end
+                        if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
+                            state.targetName = UnitName(u)
+                            state.targetGUID = UnitGUID(u)
+                            state.expires = (exp and exp > 0) and exp or (now + 1800)
+                            allyActive = true
+                            break
                         end
-                        FMHUD_State.FMTarget = UnitName(u)
-                        found = true
-                        break
                     end
+                    if allyActive then break end
                 end
-                if found then break end
             end
         else
             local np = GetNumPartyMembers()
             if np and np > 0 then
                 for p = 1, np do
                     local u = "party"..p
-                    for i = 1, 40 do
-                        local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
-                        if not n then break end
-                        if (n == b1 or n == b2 or spellId == 54646) and (c == "player" or not c) then
-                            if exp and exp > 0 then
-                                FMHUD_State.FMExpires = exp
-                                FMHUD_State.FMDur = dur or 1800
-                            elseif not FMHUD_State.FMExpires or FMHUD_State.FMExpires <= now then
-                                FMHUD_State.FMExpires = now + 1800
-                                FMHUD_State.FMDur = 1800
+                    if not UnitIsDead(u) then
+                        for i = 1, 40 do
+                            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
+                            if not n then break end
+                            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
+                                state.targetName = UnitName(u)
+                                state.targetGUID = UnitGUID(u)
+                                state.expires = (exp and exp > 0) and exp or (now + 1800)
+                                allyActive = true
+                                break
                             end
-                            FMHUD_State.FMTarget = UnitName(u)
-                            found = true
-                            break
                         end
+                        if allyActive then break end
                     end
-                    if found then break end
                 end
             end
         end
     end
 
-    local rem = (FMHUD_State.FMExpires and FMHUD_State.FMExpires > now) and (FMHUD_State.FMExpires - now) or 0
-    local dur = FMHUD_State.FMDur or 1800
-    local exp = FMHUD_State.FMExpires or 0
-    return rem, dur, exp
+    return hasProc, allyActive, procRem, procDur, procExp
 end"""
 
 def make_fm_trigger() -> str:
-    """Genera il trigger Lua per Focus Magic attivo con durata residua <= 5 minuti (300s)."""
+    """Genera il trigger Lua per Focus Magic attivo: visibile SOLO durante il proc di 10 secondi sul player."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
-    if rem > 0 and rem <= 300 then
-        return true
-    end
-    return false
+    local hasProc = _G.FMHUD_CheckFM(event, ...)
+    return hasProc == true
 end"""
 
 def make_fm_untrigger() -> str:
-    """Genera l'untrigger Lua per nascondere Focus Magic se > 5m o scaduto."""
+    """Genera l'untrigger Lua per Focus Magic attivo: nascosto quando il proc di 10s sul player finisce."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem, dur, exp = _G.FMHUD_CheckFM(event, ...)
-    if rem > 0 and rem <= 300 then
-        return false
-    end
-    return true
+    local hasProc = _G.FMHUD_CheckFM(event, ...)
+    return not hasProc
 end"""
 
 def make_fm_custom_duration() -> str:
-    """Genera la closure Lua per la durata e scadenza dello swipe circolare di Focus Magic."""
+    """Genera la durata e scadenza per lo swipe di Focus Magic per il proc da 10s."""
     return f"""function()
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem, dur, exp = _G.FMHUD_CheckFM()
-    if rem > 0 and rem <= 300 then
-        return dur, exp
+    local hasProc, allyActive, procRem, procDur, procExp = _G.FMHUD_CheckFM()
+    if hasProc then
+        return procDur, procExp
     end
     return 0, 0
 end"""
 
 def make_fm_custom_text() -> str:
-    """Genera il conto alla rovescia (%c) per Focus Magic attivo: m:ss in giallo (> 60s), secondi in rosso (<= 60s)."""
+    """Genera il conto alla rovescia in secondi per il proc da 10s."""
     return f"""function()
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem = _G.FMHUD_CheckFM()
-    if rem > 60 then
-        local m = math.floor(rem / 60)
-        local s = math.floor(rem % 60)
-        return string.format("|cFFFFFF00%d:%02d|r", m, s)
-    elseif rem > 0 then
-        return string.format("|cFFFF4444%.0fs|r", rem)
+    local hasProc, allyActive, procRem = _G.FMHUD_CheckFM()
+    if hasProc and procRem > 0 then
+        if procRem <= 3 then
+            return string.format("|cFFFF4444%.1fs|r", procRem)
+        else
+            return string.format("%.0fs", procRem)
+        end
     end
     return ""
 end"""
 
 def make_fm_off_trigger() -> str:
-    """Genera il trigger Lua per lo stato OFF di Focus Magic se il buff non è assegnato ad alcun alleato."""
+    """Genera il trigger Lua per Focus Magic OFF: visibile SOLO se nessun alleato ha il buff e il player non ha il proc 10s."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem = _G.FMHUD_CheckFM(event, ...)
-    if rem <= 0 then
-        -- Verifica di sicurezza: se il proc da 10s è attivo sul player, non mostrare mai OFF
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-            if not n then break end
-            if spellId == 54648 or n == "Focus Magic" or n == "Focalizzazione Magica" then
-                return false
-            end
-        end
-        return true
-    end
-    return false
+    local hasProc, allyActive = _G.FMHUD_CheckFM(event, ...)
+    return (not hasProc) and (not allyActive)
 end"""
 
 def make_fm_off_untrigger() -> str:
-    """Disattiva lo stato OFF non appena Focus Magic risulta attivo su un alleato."""
+    """Disattiva lo stato OFF se il player ha il proc 10s oppure un alleato ha il buff attivo."""
     return f"""function(event, ...)
     _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local rem = _G.FMHUD_CheckFM(event, ...)
-    if rem <= 0 then
-        for i = 1, 40 do
-            local n, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-            if not n then break end
-            if spellId == 54648 or n == "Focus Magic" or n == "Focalizzazione Magica" then
-                return true
-            end
-        end
-        return false
-    end
-    return true
+    local hasProc, allyActive = _G.FMHUD_CheckFM(event, ...)
+    return hasProc or allyActive
 end"""
 
 SHARED_COMBUSTION_CHECK_LUA = """function()
@@ -1791,26 +1460,50 @@ def make_stats_custom_text() -> str:
     end
 
     -- 3. SPELL HASTE
-    local haste = 0
-    if UnitSpellHaste then
-        haste = UnitSpellHaste("player") or 0
-    end
-    if not haste or haste == 0 then
-        local ratingBonus = GetCombatRatingBonus(20) or 0
-        local mult = 1 + (ratingBonus / 100)
-        for i = 1, 40 do
-            local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
-            if spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" then
-                mult = mult * 1.30
-            elseif spellId == 3738 or name == "Wrath of Air Totem" then
-                mult = mult * 1.05
-            elseif spellId == 48396 or spellId == 31583 or name == "Swift Retribution" or name == "Improved Moonkin Form" then
-                mult = mult * 1.03
-            end
+    local ratingBonus = GetCombatRatingBonus(20) or 0
+    local mult = 1 + (ratingBonus / 100)
+
+    local hasLust = false
+    local hasWrathAir = false
+    local has3Haste = false
+    local hasT10 = false
+    local hasPI = false
+    local hasBerserking = false
+
+    for i = 1, 40 do
+        local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+
+        -- 1. Bloodlust / Heroism (+30% Haste)
+        if not hasLust and (spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" or name == "Bramosia Sanguinaria" or name == "Eroismo") then
+            hasLust = true
+            mult = mult * 1.30
+        -- 2. Wrath of Air Totem (+5% Spell Haste Shamano)
+        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or (name.find and name:find("Wrath of Air"))) then
+            hasWrathAir = true
+            mult = mult * 1.05
+        -- 3. 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE (Anti-conflitto)
+        elseif not has3Haste and (spellId == 48396 or spellId == 53648 or spellId == 53379 or spellId == 24907 or spellId == 31583
+            or name == "Swift Retribution" or name == "Ritorsione Rapida" 
+            or name == "Improved Moonkin Form" or name == "Forma di Lunagufo Migliorata") then
+            has3Haste = true
+            mult = mult * 1.03
+        -- 4. Tier 10 2-Piece Bonus: Pushing the Limit (+12% Spell Haste per 5s)
+        elseif not hasT10 and (spellId == 70753 or spellId == 70752 or name == "Pushing the Limit" or name == "Oltre il Limite") then
+            hasT10 = true
+            mult = mult * 1.12
+        -- 5. Power Infusion (+20% Spell Haste Sacerdote)
+        elseif not hasPI and (spellId == 10060 or name == "Power Infusion" or name == "Infusione di Potere") then
+            hasPI = true
+            mult = mult * 1.20
+        -- 6. Berserking (+20% Haste Razziale Troll)
+        elseif not hasBerserking and (spellId == 26297 or name == "Berserking" or name == "Furia Berserker") then
+            hasBerserking = true
+            mult = mult * 1.20
         end
-        haste = (mult - 1) * 100
     end
+
+    local haste = (mult - 1) * 100
 
     -- 4. SPELL HIT
     local hitRatingBonus = GetCombatRatingBonus(8) or 0
@@ -2163,7 +1856,6 @@ def build_wa_tree() -> dict:
                 "05 - Trinket 2",
                 "06 - Cloak",
                 "06 - Tier 8",
-                "06 - Tier 10",
                 "06 - Mana Gem",
                 "06 - Combustion",
                 "06 - Mirror Image",
@@ -2192,12 +1884,82 @@ def build_wa_tree() -> dict:
                 "xOffset": 0,
                 "yOffset": 52,
                 "controlledChildren": [
+                    "Tier 10",
                     "Hot Streak",
                     "Clearcasting",
                     "Living Bomb",
                     "Ignite",
                     "Scorch",
                     "Molten Fury"
+                ],
+            },
+            # Tier 10 (Pushing the Limit +12% Haste buff - Active on proc, left of Hot Streak)
+            {
+                "id": "Tier 10",
+                "uid": "FMHUD_TIER10_PROC",
+                "parent": "01 - Procs",
+                "regionType": "icon",
+                "internalVersion": 52,
+                "width": 34,
+                "height": 34,
+                "displayIcon": "Interface\\Icons\\Spell_Fire_ElementalDevastation",
+                "auto": True,
+                "color": [1, 1, 1, 1],
+                "cooldown": True,
+                "cooldownSwipe": True,
+                "cooldownEdge": True,
+                "cooldownTextDisabled": True,
+                "inverse": False,
+                "customTextUpdate": "update",
+                "customText": """function()
+    for i = 1, 40 do
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+        if spellId == 70753 or spellId == 70752 or name == "Pushing the Limit" or name == "Oltre il Limite" or string.find(name, "Limit") or string.find(name, "Limite") then
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
+            if rem > 0 then
+                if rem <= 3 then
+                    return string.format("|cFFFF4444%.1fs|r", rem)
+                else
+                    return string.format("%.0fs", rem)
+                end
+            end
+        end
+    end
+    return ""
+end""",
+                "triggers": {
+                    1: {
+                        "trigger": {
+                            "type": "aura2",
+                            "unit": "player",
+                            "auranames": [
+                                "Pushing the Limit",
+                                "70753",
+                                "70752",
+                                "Oltre il Limite"
+                            ],
+                            "useName": True,
+                            "debuffType": "HELPFUL",
+                            "matchesShowOn": "showOnActive",
+                            "ownOnly": True,
+                        },
+                        "untrigger": {}
+                    },
+                    "activeTriggerMode": -10,
+                },
+                "subRegions": [
+                    { "type": "subbackground" },
+                    make_subtext("%c", justify="CENTER", anchor_point="INNER_BOTTOM", font_size=11),
+                    {
+                        "type": "subglow",
+                        "glow": True,
+                        "glowType": "Pixel",
+                        "glowLines": 8,
+                        "glowFrequency": 0.25,
+                        "glowLength": 10,
+                        "glowThickness": 2,
+                    }
                 ],
             },
             # Hot Streak (Active on proc)
@@ -2973,7 +2735,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "events": "UNIT_AURA,PLAYER_ENTERING_WORLD",
                             "custom": make_fm_trigger(),
                             "customDuration": make_fm_custom_duration(),
                             "customIcon": """function()
@@ -3009,7 +2771,7 @@ end""",
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
+                            "events": "COMBAT_LOG_EVENT_UNFILTERED,UNIT_SPELLCAST_SUCCEEDED,UNIT_AURA,PLAYER_TARGET_CHANGED,PLAYER_FOCUS_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,PLAYER_ENTERING_WORLD",
                             "custom": make_fm_off_trigger(),
                         },
                         "untrigger": {
@@ -3193,6 +2955,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "update",
+                            "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,ZONE_CHANGED_NEW_AREA,UNIT_AURA,FMHUD_T8_UPDATE",
                             "custom": f"""function(event, ...)
     if not _G.FMHUD_T8_InitDone then
         _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
@@ -3221,62 +2984,7 @@ end"""
             },
 
             # =================================================================
-            # 06 - TIER 10 (Left of Mana Gem - Pushing the Limit)
-            # Active when >= 2 pieces of T10 equipped (12% Haste for 5s)
-            # =================================================================
-            {
-                "id": "06 - Tier 10",
-                "uid": "FMHUD_TIER10",
-                "parent": "Fire Mage 3.3.5a AM",
-                "regionType": "icon",
-                "internalVersion": 52,
-                "xOffset": 0,
-                "yOffset": -54,
-                "width": 28,
-                "height": 28,
-                "displayIcon": "Interface\\Icons\\Spell_Fire_ElementalDevastation",
-                "cooldown": True,
-                "cooldownSwipe": True,
-                "cooldownEdge": True,
-                "cooldownTextDisabled": True,
-                "inverse": False,
-                "customTextUpdate": "update",
-                "customText": make_t10_custom_text(),
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "custom",
-                            "custom_type": "status",
-                            "check": "update",
-                            "custom": f"""function(event, ...)
-    if not _G.FMHUD_T8_InitDone then
-        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
-        _G.FMHUD_InitT8()
-    end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    return isEquipped
-end""",
-                            "customDuration": make_t10_custom_duration(),
-                            "customIcon": make_t10_custom_icon(),
-                        },
-                        "untrigger": {
-                            "custom": """function(event, ...)
-    if not _G.FMHUD_T8_InitDone then return true end
-    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT10()
-    return not isEquipped
-end"""
-                        }
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
-                ],
-            },
-
-            # =================================================================
-            # 06 - MANA GEM (Right of T8/T10 - T7 Proc + CD + Charges)
+            # 06 - MANA GEM (Right of T8 - T7 Proc + CD + Charges)
             # =================================================================
             {
                 "id": "06 - Mana Gem",
@@ -3284,7 +2992,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "icon",
                 "internalVersion": 52,
-                "xOffset": 38,
+                "xOffset": 22,
                 "yOffset": -54,
                 "width": 28,
                 "height": 28,

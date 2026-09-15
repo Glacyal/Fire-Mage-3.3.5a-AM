@@ -24,34 +24,26 @@ local T8_SetIDs = {
 }
 
 local ARMOR_SLOTS = { 1, 3, 5, 7, 10 }
-local T8_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false, lastSeen = 0 }
+local T8_ProcTimer = { lastProc = 0, lastEnd = 0, isProc = false }
 local T8_EquipCache = { time = 0, isEquipped = false }
-local T8_EquippedPersistent = false
 
 -- Frame per invalidare la cache all'effettivo cambio di equipaggiamento
 local T8_EventFrame = CreateFrame("Frame")
 T8_EventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 T8_EventFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
 T8_EventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+T8_EventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 T8_EventFrame:SetScript("OnEvent", function()
     T8_EquipCache.time = 0
     T8_EquipCache.isEquipped = false
-    T8_EquippedPersistent = false
 end)
 
 --- Verifica se il bonus 2P Tier 8 e' attivo sul mago con rilevamento multi-stadio.
 ---@return boolean isActive
 function FireMageHUD_Tier8_IsActive()
     local now = GetTime()
-    if (now - T8_EquipCache.time < 0.3) then
+    if (now - T8_EquipCache.time < 0.2) then
         return T8_EquipCache.isEquipped
-    end
-
-    -- Check 0: Stato persistente gia' confermato
-    if T8_EquippedPersistent then
-        T8_EquipCache.time = now
-        T8_EquipCache.isEquipped = true
-        return true
     end
 
     -- 1. Controllo buff attivo Praxis (64868 / "Praxis" / "Prassi")
@@ -59,15 +51,13 @@ function FireMageHUD_Tier8_IsActive()
         local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
-            T8_ProcTimer.lastSeen = now
-            T8_EquippedPersistent = true
             T8_EquipCache.time = now
             T8_EquipCache.isEquipped = true
             return true
         end
     end
 
-    -- 2. Controllo Item ID hardcoded
+    -- 2. Controllo Item ID noti Kirin Tor (10m e 25m)
     local count = 0
     for _, slot in ipairs(ARMOR_SLOTS) do
         local itemID = GetInventoryItemID("player", slot)
@@ -76,13 +66,12 @@ function FireMageHUD_Tier8_IsActive()
         end
     end
     if count >= 2 then
-        T8_EquippedPersistent = true
         T8_EquipCache.time = now
         T8_EquipCache.isEquipped = true
         return true
     end
 
-    -- 3. Scansione tooltip su pezzi equipaggiati
+    -- 3. Scansione tooltip su pezzi equipaggiati per "Kirin Tor", "Praxis" o "Prassi"
     local ttCount = 0
     local tt = _G.FMHUD_AddonScanTT
     if not tt then
@@ -109,15 +98,6 @@ function FireMageHUD_Tier8_IsActive()
         end
     end
     if ttCount >= 2 then
-        T8_EquippedPersistent = true
-        T8_EquipCache.time = now
-        T8_EquipCache.isEquipped = true
-        return true
-    end
-
-    -- 4. Buff visto di recente (ultimi 60s) o durante sessione
-    if T8_ProcTimer.lastSeen > 0 then
-        T8_EquippedPersistent = true
         T8_EquipCache.time = now
         T8_EquipCache.isEquipped = true
         return true
@@ -150,7 +130,6 @@ function FireMageHUD_Tier8_CustomText()
             local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or dur
             T8_ProcTimer.lastProc = now - (dur - rem)
             T8_ProcTimer.isProc = true
-            T8_ProcTimer.lastSeen = now
             return string.format("|cFFFFFF00%.1fs|r", rem)
         end
     end

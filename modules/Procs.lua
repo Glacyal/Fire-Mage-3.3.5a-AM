@@ -1,13 +1,13 @@
 --- =========================================================================
 --- Fire Mage 3.3.5a AM — Modulo 01: Proc & Rotazione Fire Mage
 --- =========================================================================
---- Gestisce le icone della riga orizzontale superiore (yOffset = +44):
---- 1. Hot Streak (Buff 48108, timer rosso <= 3s, pixel glow dorato).
---- 2. Clearcasting (Buff 12536, timer rosso <= 4s, pixel glow dorato).
---- 3. Living Bomb (Debuff 55360 sul target, timer rosso <= 3s per refresh senza clippare).
---- 4. Ignite (Debuff 12654 sul target, timer rosso <= 1.5s).
---- 5. Scorch / Improved Scorch (Debuff 22959 sul target, timer rosso <= 5s).
---- 6. Combustion (Stato a 3 fasi: READY, ACTIVE con stacks x%d, COOLDOWN).
+--- Gestisce le icone della riga orizzontale superiore (01 - Procs, yOffset = +52):
+--- 1. Tier 10 2P (Buff 70753 Pushing the Limit, +12% Haste per 5s, a sinistra di Hot Streak).
+--- 2. Hot Streak (Buff 48108, timer rosso <= 3s, pixel glow dorato).
+--- 3. Clearcasting (Buff 12536, timer rosso <= 4s, pixel glow dorato).
+--- 4. Living Bomb (Debuff 55360 sul target, timer rosso <= 3s per refresh senza clippare).
+--- 5. Ignite (Debuff 12654 sul target, timer rosso <= 1.5s).
+--- 6. Scorch / Improved Scorch (Debuff 22959 sul target, timer rosso <= 5s).
 --- 7. Molten Fury (Attivo quando il target scende a <= 35% HP).
 --- =========================================================================
 

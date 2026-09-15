@@ -45,26 +45,50 @@ function FireMageHUD_Stats_CustomText()
     end
 
     -- 3. SPELL HASTE
-    local haste = 0
-    if UnitSpellHaste then
-        haste = UnitSpellHaste("player") or 0
-    end
-    if not haste or haste == 0 then
-        local ratingBonus = GetCombatRatingBonus(20) or 0
-        local mult = 1 + (ratingBonus / 100)
-        for i = 1, 40 do
-            local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
-            if spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" then
-                mult = mult * 1.30
-            elseif spellId == 3738 or name == "Wrath of Air Totem" then
-                mult = mult * 1.05
-            elseif spellId == 48396 or spellId == 31583 or name == "Swift Retribution" or name == "Improved Moonkin Form" then
-                mult = mult * 1.03
-            end
+    local ratingBonus = GetCombatRatingBonus(20) or 0
+    local mult = 1 + (ratingBonus / 100)
+
+    local hasLust = false
+    local hasWrathAir = false
+    local has3Haste = false
+    local hasT10 = false
+    local hasPI = false
+    local hasBerserking = false
+
+    for i = 1, 40 do
+        local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        if not name then break end
+
+        -- 1. Bloodlust / Heroism (+30% Haste)
+        if not hasLust and (spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" or name == "Bramosia Sanguinaria" or name == "Eroismo") then
+            hasLust = true
+            mult = mult * 1.30
+        -- 2. Wrath of Air Totem (+5% Spell Haste Shamano)
+        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or (name.find and name:find("Wrath of Air"))) then
+            hasWrathAir = true
+            mult = mult * 1.05
+        -- 3. 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE (Anti-conflitto)
+        elseif not has3Haste and (spellId == 48396 or spellId == 53648 or spellId == 53379 or spellId == 24907 or spellId == 31583
+            or name == "Swift Retribution" or name == "Ritorsione Rapida" 
+            or name == "Improved Moonkin Form" or name == "Forma di Lunagufo Migliorata") then
+            has3Haste = true
+            mult = mult * 1.03
+        -- 4. Tier 10 2-Piece Bonus: Pushing the Limit (+12% Spell Haste per 5s)
+        elseif not hasT10 and (spellId == 70753 or spellId == 70752 or name == "Pushing the Limit" or name == "Oltre il Limite") then
+            hasT10 = true
+            mult = mult * 1.12
+        -- 5. Power Infusion (+20% Spell Haste Sacerdote)
+        elseif not hasPI and (spellId == 10060 or name == "Power Infusion" or name == "Infusione di Potere") then
+            hasPI = true
+            mult = mult * 1.20
+        -- 6. Berserking (+20% Haste Razziale Troll)
+        elseif not hasBerserking and (spellId == 26297 or name == "Berserking" or name == "Furia Berserker") then
+            hasBerserking = true
+            mult = mult * 1.20
         end
-        haste = (mult - 1) * 100
     end
+
+    local haste = (mult - 1) * 100
 
     -- 4. SPELL HIT
     local hitRatingBonus = GetCombatRatingBonus(8) or 0
