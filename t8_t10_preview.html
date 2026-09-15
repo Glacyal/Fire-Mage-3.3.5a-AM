@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Mage 3.3.5a AM — Simulatore HUD Fedele 1:1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fire-orange: #ff7700;
+            --fire-red: #ff2200;
+            --mana-blue: #0070DE;
+            --panel-bg: rgba(10, 12, 18, 0.92);
+            --border-dark: #1b202c;
+            --gold: #ffd100;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body {
+            background: #06070a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(255, 85, 0, 0.1) 0%, transparent 55%),
+                radial-gradient(circle at 15% 85%, rgba(0, 112, 222, 0.06) 0%, transparent 45%),
+                linear-gradient(180deg, #050609 0%, #0c0f16 100%);
+        }
+
+        header {
+            text-align: center;
+            padding: 22px 20px 14px;
+            width: 100%;
+            max-width: 1100px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255, 119, 0, 0.14);
+            border: 1px solid rgba(255, 119, 0, 0.4);
+            color: #ff9933;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 3px 12px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+        }
+        h1 {
+            color: #fff;
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 15px rgba(255, 119, 0, 0.35);
+            margin-bottom: 4px;
+        }
+        h1 span { color: var(--fire-orange); }
+        .subtitle {
+            color: #8896a6;
+            font-size: 13px;
+            max-width: 780px;
+            margin: 0 auto 10px;
+            line-height: 1.5;
+        }
+
+        /* Workspace */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1150px;
+            gap: 18px;
+            padding: 0 15px 40px;
+        }
+
+        /* WoW Game Viewport */
+        .viewport-frame {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 520px;
+            background: #040507;
+            border-radius: 8px;
+            border: 2px solid #1a2230;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 90px rgba(0, 0, 0, 0.95);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Sfondo ispirato al cortile dei manichini di Stormwind dello screenshot */
+        .wow-backdrop {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 50% 65%, rgba(20, 24, 35, 0.4) 0%, rgba(4, 5, 8, 0.92) 80%),
+                linear-gradient(180deg, rgba(80, 70, 60, 0.25) 0%, rgba(30, 32, 40, 0.7) 60%, rgba(10, 12, 16, 0.95) 100%),
+                repeating-radial-gradient(circle at 50% 70%, rgba(70, 75, 85, 0.15) 0, rgba(70, 75, 85, 0.15) 40px, rgba(40, 45, 55, 0.15) 41px, rgba(40, 45, 55, 0.15) 80px);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        /* Dummy target placeholder visivo nello sfondo */
+        .wow-dummy {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 110px;
+            background: rgba(120, 90, 60, 0.12);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+        /* Silhouette del personaggio Mago con mantello */
+        .wow-player-silhouette {
+            position: absolute;
+            top: 175px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 75px;
+            background: radial-gradient(circle at 50% 30%, rgba(90, 110, 170, 0.3) 0%, rgba(20, 25, 40, 0.6) 80%);
+            border-radius: 20px 20px 8px 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+        .wow-player-silhouette::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 14px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            filter: blur(4px);
+        }
+
+        /* Floating Combat Text */
+        .combat-text-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .fct-crit {
+            position: absolute;
+            left: 50%;
+            top: 36%;
+            transform: translate(-50%, -50%);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 30px;
+            font-weight: 900;
+            color: #ffd200;
+            text-shadow: 0 0 12px #ff4400, 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            animation: critFloat 1.2s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes critFloat {
+            0% { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+            20% { transform: translate(-50%, -30px) scale(1.3); opacity: 1; }
+            70% { transform: translate(-50%, -60px) scale(1.0); opacity: 1; }
+            100% { transform: translate(-50%, -85px) scale(0.9); opacity: 0; }
+        }
+
+        /* HUD Master Group - Fedele al gruppo WeakAuras (Scala 1.2, x = 0, y = -190) */
+        .hud-canvas {
+            position: relative;
+            width: 480px;
+            height: 310px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* 10 - Alerts (y = +105) */
+        .alert-box {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            line-height: 1.15;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            animation: alertPulse 0.7s infinite alternate ease-in-out;
+        }
+        .alert-line1 {
+            color: #ff5500;
+            font-size: 20px;
+            letter-spacing: 1px;
+            filter: drop-shadow(0 0 6px rgba(255, 85, 0, 0.8));
+        }
+        .alert-line2 {
+            color: #ffff00;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 0, 0.8));
+        }
+        @keyframes alertPulse {
+            0% { transform: translateX(-50%) scale(0.97); }
+            100% { transform: translateX(-50%) scale(1.03); }
+        }
+
+        /* 01 - Procs (Dynamic Group a y = 52 sopra la Castbar) */
+        .procs-bar {
+            position: absolute;
+            top: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Master Center: 08 - Castbar, 07 - Mana Bar, 10 - Hot Streak Bar */
+        .central-bars {
+            position: absolute;
+            top: 114px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 264px;
+        }
+
+        /* 08 - Castbar (264x18px) */
+        .castbar-container {
+            position: relative;
+            width: 264px;
+            height: 18px;
+            background: #000;
+            border: 1px solid #111;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+        }
+        .castbar-icon {
+            position: absolute;
+            left: -20px;
+            top: -1px;
+            width: 20px;
+            height: 20px;
+            background: #000 url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') center/cover;
+            border: 1px solid #000;
+        }
+        .castbar-fill {
+            height: 100%;
+            width: 38%;
+            background: linear-gradient(90deg, #991f00, #ff4400);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+            transition: width 0.05s linear;
+        }
+        .castbar-latency {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 24px;
+            background: rgba(30, 200, 80, 0.4);
+            border-left: 1px solid rgba(100, 255, 120, 0.5);
+            pointer-events: none;
+        }
+        .castbar-text-name {
+            position: absolute;
+            left: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+            z-index: 2;
+        }
+        .castbar-text-time {
+            position: absolute;
+            right: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+            z-index: 2;
+        }
+
+        /* 07 - Mana Bar (264x14px a y = -15) */
+        .manabar-container {
+            position: relative;
+            width: 264px;
+            height: 14px;
+            margin-top: 2px;
+            background: #0a0d14;
+            border: 1px solid #111;
+            overflow: hidden;
+        }
+        .manabar-fill {
+            height: 100%;
+            width: 14.01%;
+            background: linear-gradient(90deg, #7a1500, #cc2e00);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: width 0.3s ease;
+        }
+        .manabar-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            font-family: 'Share Tech Mono', monospace;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+        }
+
+        /* 10 - Hot Streak Bar (264x5px a y = -25) */
+        .hotstreak-container {
+            position: relative;
+            width: 264px;
+            height: 5px;
+            margin-top: 2px;
+            background: #08090d;
+            border: 1px solid #111;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .hs-segment-left {
+            width: 50%;
+            height: 100%;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        .hs-segment-right {
+            width: 50%;
+            height: 100%;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        /* Tick Marks in stile screenshot (. . . . . .) */
+        .hs-ticks {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            pointer-events: none;
+        }
+        .hs-tick {
+            width: 4px;
+            height: 2px;
+            background: #ffd100;
+            box-shadow: 0 0 2px #000;
+        }
+        /* Active States */
+        .hotstreak-container.heating-up .hs-segment-left {
+            background: #ff7700;
+            box-shadow: 0 0 8px #ff7700;
+        }
+        .hotstreak-container.hot-streak .hs-segment-left,
+        .hotstreak-container.hot-streak .hs-segment-right {
+            background: #ff2200;
+            box-shadow: 0 0 10px #ff2200;
+        }
+
+        /* Left Side: 3 Buffs Row + 12 - Stats Panel */
+        .left-panel-group {
+            position: absolute;
+            left: 20px;
+            top: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 88px;
+        }
+
+        /* Row of 3 Buffs: Molten Armor, Arcane Intellect, Focus Magic (28x28px a y = -14) */
+        .three-buffs-row {
+            display: flex;
+            gap: 2px;
+            justify-content: space-between;
+            width: 88px;
+        }
+
+        /* 12 - Stats Panel (88x48px a y = -54 sotto i 3 Buff) */
+        .stats-panel-box {
+            width: 88px;
+            height: 52px;
+            background: rgba(8, 10, 15, 0.9);
+            border: 1px solid #1a1e28;
+            padding: 3px 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+            line-height: 1.15;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+        .stat-line {
+            display: flex;
+            justify-content: flex-start;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .stat-lbl-sp { color: #ff2222; }
+        .stat-lbl-crit { color: #ff8800; }
+        .stat-lbl-haste { color: #cc44ff; }
+        .stat-lbl-hit { color: #ffff00; }
+        .stat-val-white { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 10.5px; }
+
+        /* Bottom Row (Utility Row a y = -54, a destra del pannello Stats) */
+        .utility-row-bar {
+            position: absolute;
+            top: 153px;
+            left: 114px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        /* Standard WeakAuras Icon Box */
+        .wa-box {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            background: #000;
+            border: 1px solid #000;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.9);
+        }
+        .wa-box.size-34 {
+            width: 34px;
+            height: 34px;
+        }
+        .wa-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .wa-box.desaturated img {
+            filter: grayscale(100%) brightness(50%);
+        }
+        /* Scritta OFF rossa autentica */
+        .wa-box .tag-off {
+            position: absolute;
+            bottom: 0px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9.5px;
+            font-weight: 900;
+            color: #ff3333;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 0 0 6px #ff0000;
+            z-index: 5;
+        }
+        .wa-box .tag-timer {
+            position: absolute;
+            bottom: 0px;
+            right: 1px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+            z-index: 5;
+        }
+        .wa-box .tag-timer.urgent {
+            color: #ff4444;
+            text-shadow: 0 0 6px #ff0000;
+        }
+        .wa-box .tag-stack {
+            position: absolute;
+            top: 0px;
+            left: 1px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9px;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px #000;
+            z-index: 5;
+        }
+        .wa-box .tag-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+            z-index: 5;
+        }
+        /* Pixel Glow autentico di WeakAuras (cornice gialla tratteggiata) */
+        .wa-box.pixel-glow {
+            border: 1px dashed #ffd100;
+            box-shadow: 0 0 8px rgba(255, 209, 0, 0.7), inset 0 0 4px rgba(255, 209, 0, 0.4);
+            animation: pixelPulse 1.2s infinite alternate;
+        }
+        @keyframes pixelPulse {
+            0% { border-color: #ffd100; }
+            100% { border-color: #ff8800; }
+        }
+
+        /* Controls Sandbox Board */
+        .controls-card {
+            width: 100%;
+            max-width: 900px;
+            background: #10141d;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1c2332;
+            padding-bottom: 8px;
+        }
+        .card-header h3 {
+            font-size: 13px;
+            color: var(--fire-orange);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .group-box {
+            background: #161b26;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #222938;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .group-box h4 {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-flex {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .btn-act {
+            background: #1f2636;
+            color: #cbd5e1;
+            border: 1px solid #313d54;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-act:hover {
+            background: #2a354a;
+            color: #fff;
+            border-color: var(--fire-orange);
+        }
+        .btn-act.active {
+            background: #ff7700;
+            color: #000;
+            border-color: #ffa347;
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(255, 119, 0, 0.4);
+        }
+        .btn-act.btn-main {
+            background: linear-gradient(135deg, #c23800, #ff6600);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+        }
+        .btn-act.btn-main:hover {
+            background: linear-gradient(135deg, #d43e00, #ff7a1a);
+            box-shadow: 0 0 10px rgba(255, 102, 0, 0.6);
+        }
+        .btn-act.btn-reset {
+            background: #2a1818;
+            color: #ff9999;
+            border-color: #4a2222;
+        }
+
+        /* Verification Table */
+        .compare-box {
+            width: 100%;
+            max-width: 900px;
+            background: #0d1017;
+            border: 1px solid #1a202c;
+            border-radius: 6px;
+            padding: 14px 16px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .compare-box h5 {
+            color: #ff9933;
+            font-size: 13px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+        }
+        .compare-item {
+            background: #131722;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--fire-orange);
+        }
+        .compare-item strong { color: #fff; }
+        .compare-item p { color: #8896a6; font-size: 11px; margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="badge">Confronto & Verifica Fedeltà 1:1 • World of Warcraft 3.3.5a</div>
+        <h1>Fire Mage <span>3.3.5a AM</span> — Simulatore HUD Fedele allo Screenshot</h1>
+        <p class="subtitle">
+            Disposizione verificata e allineata al 100% con la foto in-game: Dynamic Group a 7 Proc sopra la Castbar,
+            3 Buff lunghi con avviso OFF e Pannello Statistiche a 4 righe (SP, Crit, Haste, Hit) a sinistra, Fila Utility a 7 icone in basso.
+        </p>
+    </header>
+
+    <div class="workspace">
+
+        <!-- WoW In-Game Screen Viewport -->
+        <div class="viewport-frame" id="viewport">
+            <div class="wow-backdrop"></div>
+            <div class="wow-dummy"></div>
+            <div class="wow-player-silhouette"></div>
+            <div class="combat-text-layer" id="fctLayer"></div>
+
+            <!-- WeakAuras Master Group Container (Scala 1.2, x = 0, y = -190) -->
+            <div class="hud-canvas">
+
+                <!-- 10 - Alerts (y = +105) -->
+                <div class="alert-box" id="alertBox">
+                    <div class="alert-line1">HOT STREAK!</div>
+                    <div class="alert-line2">PYROBLAST READY!</div>
+                </div>
+
+                <!-- 01 - Procs (Dynamic Group a y = 52 sopra la Castbar, 7 Icone) -->
+                <div class="procs-bar" id="procsBar">
+                    <!-- 1. Tier 10 (Pushing the Limit +12% Haste) -->
+                    <div class="wa-box size-34 pixel-glow" id="procT10" title="Tier 10: Pushing the Limit">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_elementaldevastation.jpg" alt="Tier 10">
+                        <div class="tag-timer urgent" id="t10Timer"></div>
+                    </div>
+                    <!-- 2. Hot Streak -->
+                    <div class="wa-box size-34 pixel-glow" id="procHotStreak" title="Hot Streak Proc">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_hotstreak.jpg" alt="Hot Streak">
+                        <div class="tag-timer" id="hsTimer"></div>
+                    </div>
+                    <!-- 3. Clearcasting / Arcane Concentration -->
+                    <div class="wa-box size-34 pixel-glow" id="procClearcasting" title="Clearcasting">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_shadow_manaburn.jpg" alt="Clearcasting">
+                        <div class="tag-timer" id="ccTimer"></div>
+                    </div>
+                    <!-- 4. Living Bomb (Target Debuff) -->
+                    <div class="wa-box size-34" id="procLivingBomb" title="Living Bomb">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_livingbomb.jpg" alt="Living Bomb">
+                        <div class="tag-timer" id="lbTimer"></div>
+                    </div>
+                    <!-- 5. Ignite (Target Debuff) -->
+                    <div class="wa-box size-34" id="procIgnite" title="Ignite">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_incinerate.jpg" alt="Ignite">
+                        <div class="tag-timer" id="igniteTimer"></div>
+                    </div>
+                    <!-- 6. Scorch / Improved Scorch (+5% Crit) -->
+                    <div class="wa-box size-34" id="procScorch" title="Scorch (+5% Spell Crit Debuff)">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_soulburn.jpg" alt="Scorch">
+                        <div class="tag-timer" id="scorchTimer"></div>
+                    </div>
+                    <!-- 7. Molten Fury (Target <= 35% HP) -->
+                    <div class="wa-box size-34" id="procMoltenFury" title="Molten Fury (Bersaglio <= 35% Vita)">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_moltenblood.jpg" alt="Molten Fury">
+                        <div class="tag-center">35%</div>
+                    </div>
+                </div>
+
+                <!-- Central Bars: 08 - Castbar, 07 - Mana Bar, 10 - Hot Streak Bar -->
+                <div class="central-bars">
+                    <!-- 08 - Castbar (264x18px a y = 0) -->
+                    <div class="castbar-container">
+                        <div class="castbar-icon" id="castIcon"></div>
+                        <div class="castbar-fill" id="castFill"></div>
+                        <div class="castbar-latency"></div>
+                        <span class="castbar-text-name" id="castName">08 - Castbar</span>
+                        <span class="castbar-text-time" id="castTime">1.4</span>
+                    </div>
+
+                    <!-- 07 - Mana Bar (264x14px a y = -15) -->
+                    <div class="manabar-container">
+                        <div class="manabar-fill" id="manaFill"></div>
+                        <div class="manabar-text" id="manaText">14.01%</div>
+                    </div>
+
+                    <!-- 10 - Hot Streak Bar (264x5px a y = -25) -->
+                    <div class="hotstreak-container hot-streak" id="hotStreakBar">
+                        <div class="hs-segment-left"></div>
+                        <div class="hs-segment-right"></div>
+                        <div class="hs-ticks">
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                            <div class="hs-tick"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Left Column (x = -180): 3 Buffs Row + 12 - Stats Panel -->
+                <div class="left-panel-group">
+                    <!-- Row of 3 Long Buffs (Molten Armor, Arcane Intellect, Focus Magic a y = -14) -->
+                    <div class="three-buffs-row">
+                        <!-- 02 - Molten Armor -->
+                        <div class="wa-box desaturated" id="boxMolten" title="02 - Molten Armor (OFF)">
+                            <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_moltenarmor.jpg" alt="Molten Armor">
+                            <div class="tag-off" id="tagMoltenOff">OFF</div>
+                        </div>
+                        <!-- 03 - Arcane Intellect -->
+                        <div class="wa-box desaturated" id="boxIntellect" title="03 - Arcane Intellect (OFF)">
+                            <img src="https://wow.zamimg.com/images/wow/icons/large/spell_holy_magicalsentry.jpg" alt="Intellect">
+                            <div class="tag-off" id="tagIntOff">OFF</div>
+                        </div>
+                        <!-- 04 - Focus Magic -->
+                        <div class="wa-box desaturated" id="boxFocusMagic" title="04 - Focus Magic (OFF)">
+                            <img src="https://wow.zamimg.com/images/wow/icons/large/spell_arcane_studentofmagic.jpg" alt="Focus Magic">
+                            <div class="tag-off" id="tagFmOff">OFF</div>
+                            <div class="tag-timer urgent" id="tagFmTimer" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 12 - Stats Panel in Tempo Reale (88x48px a y = -54) -->
+                    <div class="stats-panel-box" id="statsBox">
+                        <div class="stat-line">
+                            <span class="stat-lbl-sp">SP:</span>
+                            <span class="stat-val-white" id="statSP">2874</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-lbl-crit">Crit:</span>
+                            <span class="stat-val-white" id="statCrit">42.12%</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-lbl-haste">Haste:</span>
+                            <span class="stat-val-white" id="statHaste">33.27%</span>
+                        </div>
+                        <div class="stat-line">
+                            <span class="stat-lbl-hit">Hit:</span>
+                            <span class="stat-val-white" id="statHit">11.67%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Row (Utility Row a y = -54, a destra del pannello Stats) -->
+                <div class="utility-row-bar">
+                    <!-- 1. 05 - Trinket 1 (con timer 1:09 nello screenshot) -->
+                    <div class="wa-box" id="utilTrinket1" title="05 - Trinket 1">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/inv_jewelry_trinket_04.jpg" alt="Trinket 1">
+                        <div class="tag-timer" id="tagT1Timer">1:09</div>
+                    </div>
+                    <!-- 2. 05 - Trinket 2 -->
+                    <div class="wa-box" id="utilTrinket2" title="05 - Trinket 2">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_pearl_06.jpg" alt="Trinket 2">
+                    </div>
+                    <!-- 3. 06 - Cloak (Lightweave Embroidery) -->
+                    <div class="wa-box" id="utilCloak" title="06 - Cloak (Lightweave Embroidery)">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_cape_18.jpg" alt="Cloak">
+                    </div>
+                    <!-- 4. 06 - Tier 8 (Student of Magic +136 SP) -->
+                    <div class="wa-box" id="utilTier8" title="06 - Tier 8 (Student of Magic)">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_arcane_studentofmagic.jpg" alt="Tier 8">
+                    </div>
+                    <!-- 5. 06 - Mana Gem (con timer 1.4 nello screenshot) -->
+                    <div class="wa-box" id="utilManaGem" title="06 - Mana Gem">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg" alt="Mana Gem">
+                        <div class="tag-timer" id="tagGemTimer">1.4</div>
+                        <div class="tag-stack" style="color:#ff3333;">0</div>
+                    </div>
+                    <!-- 6. 06 - Combustion -->
+                    <div class="wa-box" id="utilCombustion" title="06 - Combustion">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_sealoffire.jpg" alt="Combustion">
+                    </div>
+                    <!-- 7. 06 - Mirror Image -->
+                    <div class="wa-box" id="utilMirror" title="06 - Mirror Image">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_magic_lesserinvisibilty.jpg" alt="Mirror Image">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Controls Sandbox Board -->
+        <div class="controls-card">
+            <div class="card-header">
+                <h3>🎮 Banco di Prova & Switch di Visualizzazione</h3>
+                <div class="btn-flex">
+                    <button class="btn-act active" id="btnModeScreenshot" onclick="setMode('SCREENSHOT')">📸 Stato Esatto Screenshot</button>
+                    <button class="btn-act" id="btnModeLive" onclick="setMode('LIVE')">⚡ Modalità Simulatore Dinamico</button>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <!-- Azioni di Combattimento -->
+                <div class="group-box">
+                    <h4>Azioni Combattimento</h4>
+                    <div class="btn-flex">
+                        <button class="btn-act btn-main" onclick="castSpellAction(true)">🔥 Cast Fireball (Critico)</button>
+                        <button class="btn-act" onclick="castSpellAction(false)">Cast (Normale)</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnPyroAct" onclick="castPyroAction()">☄️ Lancia Pyroblast!</button>
+                    </div>
+                </div>
+
+                <!-- Focus Magic Monitor -->
+                <div class="group-box">
+                    <h4>Focus Magic (Nuovo Stile)</h4>
+                    <div class="btn-flex">
+                        <button class="btn-act active" id="btnFmOff" onclick="setFmState('OFF')">❌ Mancante/Morto (OFF)</button>
+                        <button class="btn-act" id="btnFmAlly" onclick="setFmState('ALLY')">🛡️ Assegnato (Nascosto)</button>
+                        <button class="btn-act" id="btnFmProc" onclick="setFmState('PROC')">⚡ Proc 10s (+3% Crit)</button>
+                    </div>
+                </div>
+
+                <!-- Buff Lunghi (Molten / Intellect) -->
+                <div class="group-box">
+                    <h4>Buff Lunghi</h4>
+                    <div class="btn-flex">
+                        <button class="btn-act active" id="btnMoltenToggle" onclick="toggleMolten()">Molten: OFF</button>
+                        <button class="btn-act active" id="btnIntToggle" onclick="toggleIntellect()">Intell.: OFF</button>
+                    </div>
+                </div>
+
+                <!-- Stats & Combustion -->
+                <div class="group-box">
+                    <h4>Combustion & Ricalcolo Stats</h4>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnCombustCycle" onclick="cycleCombustion()">Combustion: 0 Stacks</button>
+                        <button class="btn-act" onclick="triggerProcBonuses()">Attiva Proc T10 / T8</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Structural Alignment Check (Verifica 1:1) -->
+        <div class="compare-box">
+            <h5>🔍 Verifica di Corrispondenza con lo Screenshot In-Game:</h5>
+            <div class="compare-grid">
+                <div class="compare-item">
+                    <strong>1. 10 - Alerts (In alto, centrato)</strong>
+                    <p>Righe <code>HOT STREAK!</code> (arancione) e <code>PYROBLAST READY!</code> (giallo oro) posizionate sopra il personaggio.</p>
+                </div>
+                <div class="compare-item">
+                    <strong>2. 01 - Procs (Fila a 7 Icone a y = +52)</strong>
+                    <p>Esattamente le 7 icone della foto: Tier 10 (con Pixel Glow), Hot Streak, Clearcasting, Living Bomb, Ignite, Scorch e Molten Fury (con badge <code>35%</code>).</p>
+                </div>
+                <div class="compare-item">
+                    <strong>3. Barre Centrali (y = 0, y = -15, y = -25)</strong>
+                    <p>Castbar da 264px con icona <code>?</code> e tempo 1.4s, Barra Mana con testo <code>14.01%</code>, Barra Hot Streak a 2 segmenti con puntini di tick.</p>
+                </div>
+                <div class="compare-item">
+                    <strong>4. Colonna Sinistra (x = -180)</strong>
+                    <p>I 3 Buff lunghi con testo rosso <code>OFF</code> (Molten, Intellect, Focus Magic) e subito sotto il pannello Stats a 4 righe (SP, Crit, Haste, Hit).</p>
+                </div>
+                <div class="compare-item">
+                    <strong>5. Fila Utility Inferiore (a destra di Stats)</strong>
+                    <p>Le 7 icone della foto: Trinket 1 (con timer <code>1:09</code>), Trinket 2, Cloak, Tier 8, Mana Gem (con timer <code>1.4</code> e stack <code>0</code>), Combustion, Mirror Image.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Stato Globale
+        const sim = {
+            mode: 'SCREENSHOT', // 'SCREENSHOT' or 'LIVE'
+            sp: 2874,
+            crit: 42.12,
+            haste: 33.27,
+            hit: 11.67,
+            hotStreak: 2, // 0 = none, 1 = Heating Up, 2 = Hot Streak
+            molten: 'OFF', // 'OFF', 'ACTIVE'
+            intellect: 'OFF',
+            focusMagic: 'OFF', // 'OFF', 'ALLY', 'PROC'
+            combustion: 0,
+            isCasting: false,
+            fmTimerVal: 10
+        };
+
+        // Aggiorna Pannello Statistiche
+        function renderStats() {
+            let sp = sim.sp;
+            let crit = sim.crit;
+            let haste = sim.haste;
+            let hit = sim.hit;
+
+            if (sim.mode === 'LIVE') {
+                if (sim.molten === 'ACTIVE') crit += 6.8;
+                if (sim.focusMagic === 'PROC') crit += 3.0;
+                if (sim.combustion > 0) crit += (sim.combustion * 10.0);
+            }
+
+            document.getElementById('statSP').textContent = Math.round(sp);
+            document.getElementById('statCrit').textContent = crit.toFixed(2) + '%';
+            document.getElementById('statHaste').textContent = haste.toFixed(2) + '%';
+            document.getElementById('statHit').textContent = hit.toFixed(2) + '%';
+        }
+
+        // Spawn Floating Combat Text
+        function spawnFCT(text, isCrit) {
+            const fct = document.createElement('div');
+            fct.className = 'fct-crit';
+            fct.textContent = (isCrit ? '💥 ' : '') + text + (isCrit ? '!' : '');
+            fct.style.left = (46 + (Math.random() * 8)) + '%';
+            document.getElementById('fctLayer').appendChild(fct);
+            setTimeout(() => fct.remove(), 1200);
+        }
+
+        // Switch Modalità Foto Screenshot vs Live
+        function setMode(mode) {
+            sim.mode = mode;
+            document.getElementById('btnModeScreenshot').className = 'btn-act' + (mode === 'SCREENSHOT' ? ' active' : '');
+            document.getElementById('btnModeLive').className = 'btn-act' + (mode === 'LIVE' ? ' active' : '');
+
+            if (mode === 'SCREENSHOT') {
+                // Ripristina l'esatto stato visibile nella foto dell'utente
+                sim.sp = 2874;
+                sim.crit = 42.12;
+                sim.haste = 33.27;
+                sim.hit = 11.67;
+                sim.hotStreak = 2;
+                sim.molten = 'OFF';
+                sim.intellect = 'OFF';
+                sim.focusMagic = 'OFF';
+                sim.combustion = 0;
+
+                // Alerts ON
+                document.getElementById('alertBox').style.display = 'flex';
+                // Castbar: 08 - Castbar, 1.4s, 38%
+                document.getElementById('castName').textContent = '08 - Castbar';
+                document.getElementById('castTime').textContent = '1.4';
+                document.getElementById('castFill').style.width = '38%';
+                document.getElementById('castIcon').style.backgroundImage = "url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg')";
+
+                // Mana Bar: 14.01%
+                document.getElementById('manaText').textContent = '14.01%';
+                document.getElementById('manaFill').style.width = '14.01%';
+
+                // Hot Streak Bar Full
+                document.getElementById('hotStreakBar').className = 'hotstreak-container hot-streak';
+
+                // 3 Buffs: tutti OFF
+                setBuffUI('boxMolten', 'tagMoltenOff', 'OFF');
+                setBuffUI('boxIntellect', 'tagIntOff', 'OFF');
+                setFmState('OFF');
+
+                // Utility Timers
+                document.getElementById('tagT1Timer').textContent = '1:09';
+                document.getElementById('tagGemTimer').textContent = '1.4';
+
+                renderStats();
+            } else {
+                // Modalità Live
+                document.getElementById('castName').textContent = 'Pronto';
+                document.getElementById('castTime').textContent = '';
+                document.getElementById('castFill').style.width = '0%';
+                renderStats();
+            }
+        }
+
+        // Helper per stato Buff Box
+        function setBuffUI(boxId, tagId, state) {
+            const box = document.getElementById(boxId);
+            const tag = document.getElementById(tagId);
+            if (state === 'OFF') {
+                box.className = 'wa-box desaturated';
+                tag.style.display = 'block';
+                tag.textContent = 'OFF';
+            } else if (state === 'ACTIVE') {
+                // Nascosto se attivo
+                box.style.display = 'none';
+            }
+        }
+
+        // Gestione Focus Magic
+        function setFmState(st) {
+            sim.focusMagic = st;
+            const box = document.getElementById('boxFocusMagic');
+            const offTag = document.getElementById('tagFmOff');
+            const timerTag = document.getElementById('tagFmTimer');
+
+            document.getElementById('btnFmOff').className = 'btn-act' + (st === 'OFF' ? ' active' : '');
+            document.getElementById('btnFmAlly').className = 'btn-act' + (st === 'ALLY' ? ' active' : '');
+            document.getElementById('btnFmProc').className = 'btn-act' + (st === 'PROC' ? ' active' : '');
+
+            if (st === 'OFF') {
+                box.style.display = 'block';
+                box.className = 'wa-box desaturated';
+                offTag.style.display = 'block';
+                timerTag.style.display = 'none';
+            } else if (st === 'ALLY') {
+                // Nascosto se presente su alleato vivo (Zero Clutter!)
+                box.style.display = 'none';
+            } else if (st === 'PROC') {
+                // Attivo a colori con conto alla rovescia 10s
+                box.style.display = 'block';
+                box.className = 'wa-box pixel-glow';
+                offTag.style.display = 'none';
+                timerTag.style.display = 'block';
+                timerTag.textContent = '10s';
+
+                let rem = 10.0;
+                let interval = setInterval(() => {
+                    rem -= 0.1;
+                    if (rem <= 0 || sim.focusMagic !== 'PROC') {
+                        clearInterval(interval);
+                        if (sim.focusMagic === 'PROC') setFmState('ALLY'); // Ritorna nascosto!
+                    } else {
+                        timerTag.textContent = rem <= 3 ? rem.toFixed(1) + 's' : Math.ceil(rem) + 's';
+                    }
+                }, 100);
+            }
+            renderStats();
+        }
+
+        // Toggle Molten Armor
+        function toggleMolten() {
+            sim.molten = sim.molten === 'OFF' ? 'ACTIVE' : 'OFF';
+            document.getElementById('btnMoltenToggle').textContent = 'Molten: ' + sim.molten;
+            setBuffUI('boxMolten', 'tagMoltenOff', sim.molten);
+            renderStats();
+        }
+
+        // Toggle Intellect
+        function toggleIntellect() {
+            sim.intellect = sim.intellect === 'OFF' ? 'ACTIVE' : 'OFF';
+            document.getElementById('btnIntToggle').textContent = 'Intell.: ' + sim.intellect;
+            setBuffUI('boxIntellect', 'tagIntOff', sim.intellect);
+            renderStats();
+        }
+
+        // Combustion Cycle
+        function cycleCombustion() {
+            sim.combustion = (sim.combustion + 1) % 4;
+            document.getElementById('btnCombustCycle').textContent = 'Combustion: ' + sim.combustion + ' Stacks';
+            renderStats();
+        }
+
+        // Cast Spell Action
+        function castSpellAction(isCrit) {
+            if (sim.isCasting) return;
+            sim.isCasting = true;
+
+            const castFill = document.getElementById('castFill');
+            const castName = document.getElementById('castName');
+            const castTime = document.getElementById('castTime');
+            const castIcon = document.getElementById('castIcon');
+
+            castName.textContent = 'Fireball';
+            castIcon.style.backgroundImage = "url('https://wow.zamimg.com/images/wow/icons/large/spell_fire_fireball02.jpg')";
+
+            let elapsed = 0;
+            const duration = 2200;
+            const interval = setInterval(() => {
+                elapsed += 50;
+                const pct = Math.min(100, (elapsed / duration) * 100);
+                castFill.style.width = pct + '%';
+                castTime.textContent = ((duration - elapsed) / 1000).toFixed(1) + 's';
+
+                if (elapsed >= duration) {
+                    clearInterval(interval);
+                    sim.isCasting = false;
+                    castFill.style.width = '0%';
+                    castName.textContent = 'Pronto';
+                    castTime.textContent = '';
+                    
+                    const dmg = isCrit ? Math.floor(12000 + Math.random() * 2500) : Math.floor(5800 + Math.random() * 800);
+                    spawnFCT(dmg, isCrit);
+
+                    if (isCrit) {
+                        if (sim.hotStreak === 0) {
+                            sim.hotStreak = 1;
+                            document.getElementById('hotStreakBar').className = 'hotstreak-container heating-up';
+                            document.getElementById('alertBox').style.display = 'none';
+                        } else {
+                            sim.hotStreak = 2;
+                            document.getElementById('hotStreakBar').className = 'hotstreak-container hot-streak';
+                            document.getElementById('alertBox').style.display = 'flex';
+                        }
+                    } else {
+                        if (sim.hotStreak === 1) {
+                            sim.hotStreak = 0;
+                            document.getElementById('hotStreakBar').className = 'hotstreak-container';
+                            document.getElementById('alertBox').style.display = 'none';
+                        }
+                    }
+                }
+            }, 50);
+        }
+
+        // Cast Pyro Action
+        function castPyroAction() {
+            if (sim.hotStreak < 2) return;
+            const dmg = Math.floor(18000 + Math.random() * 4000);
+            spawnFCT('🔥 PYRO: ' + dmg, true);
+            sim.hotStreak = 0;
+            document.getElementById('hotStreakBar').className = 'hotstreak-container';
+            document.getElementById('alertBox').style.display = 'none';
+        }
+
+        // Trigger Proc Bonuses
+        function triggerProcBonuses() {
+            sim.sp += 136;
+            sim.haste += 12.0;
+            renderStats();
+            setTimeout(() => {
+                sim.sp -= 136;
+                sim.haste -= 12.0;
+                renderStats();
+            }, 5000);
+        }
+
+        // Inizializza allo stato dello screenshot
+        window.addEventListener('DOMContentLoaded', () => {
+            setMode('SCREENSHOT');
+        });
+    </script>
+</body>
+</html>
