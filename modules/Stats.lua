@@ -64,7 +64,7 @@ function FireMageHUD_Stats_CustomText()
             hasLust = true
             mult = mult * 1.30
         -- 2. Wrath of Air Totem (+5% Spell Haste Shamano)
-        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or (name.find and name:find("Wrath of Air"))) then
+        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or name:find("Wrath of Air")) then
             hasWrathAir = true
             mult = mult * 1.05
         -- 3. 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE (Anti-conflitto)

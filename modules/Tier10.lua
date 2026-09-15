@@ -68,7 +68,7 @@ function FireMageHUD_Tier10_IsActive()
     for i = 1, 40 do
         local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
+        if spellId == 70753 or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name:find("Limit") or name:find("Limite")) then
             T10_ProcTimer.lastSeen = now
             T10_EquippedPersistent = true
             T10_EquipCache = { time = now, isEquipped = true }
@@ -176,7 +176,7 @@ function FireMageHUD_Tier10_CustomText()
     for i = 1, 40 do
         local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == buffID or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
+        if spellId == buffID or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name:find("Limit") or name:find("Limite")) then
             local actualDur = (duration and duration > 0) and duration or dur
             local rem = (expirationTime and expirationTime > 0) and (expirationTime - now) or actualDur
             T10_ProcTimer.lastProc = now - (actualDur - rem)
@@ -212,7 +212,7 @@ function FireMageHUD_Tier10_CustomDuration()
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == buffID or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name.find and (name:find("Limit") or name:find("Limite"))) then
+        if spellId == buffID or spellId == 70752 or spellId == 70747 or name == "Pushing the Limit" or name == "Oltre il Limite" or (name:find("Limit") or name:find("Limite")) then
             local actualDur = (duration and duration > 0) and duration or dur
             local rem = (expirationTime and expirationTime > 0) and (expirationTime - now) or actualDur
             return actualDur, now + rem

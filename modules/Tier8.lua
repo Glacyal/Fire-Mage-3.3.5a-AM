@@ -50,7 +50,7 @@ function FireMageHUD_Tier8_IsActive()
     for i = 1, 40 do
         local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+        if spellId == 64868 or name == "Praxis" or name == "Prassi" or name:find("T8 2P") then
             T8_EquipCache.time = now
             T8_EquipCache.isEquipped = true
             return true
@@ -126,7 +126,7 @@ function FireMageHUD_Tier8_CustomText()
     for i = 1, 40 do
         local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == buffID or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+        if spellId == buffID or name == "Praxis" or name == "Prassi" or name:find("T8 2P") then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or dur
             T8_ProcTimer.lastProc = now - (dur - rem)
             T8_ProcTimer.isProc = true
@@ -175,7 +175,7 @@ function FireMageHUD_Tier8_CustomDuration()
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if spellId == buffID or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+        if spellId == buffID or name == "Praxis" or name == "Prassi" or name:find("T8 2P") then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or dur
             return dur, now + rem
         end
