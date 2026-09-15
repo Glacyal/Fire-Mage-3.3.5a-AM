@@ -527,7 +527,7 @@ SHARED_T8_INIT_LUA = """function()
         for i = 1, 40 do
             local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
             if not name then break end
-            if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+            if spellId == 64868 or name == "Praxis" or name == "Prassi" or name:find("T8 2P") then
                 cache.time = now
                 cache.isEquipped = true
                 return true
@@ -606,7 +606,7 @@ SHARED_T8_INIT_LUA = """function()
         for i = 1, 40 do
             local name, _, bIcon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
             if not name then break end
-            if spellId == 64868 or name == "Praxis" or name == "Prassi" or (name.find and name:find("T8 2P")) then
+            if spellId == 64868 or name == "Praxis" or name == "Prassi" or name:find("T8 2P") then
                 foundBuff = true
                 durBuff = (duration and duration > 0) and duration or 15
                 remBuff = (expirationTime and expirationTime > 0) and (expirationTime - now) or durBuff
@@ -1479,7 +1479,7 @@ def make_stats_custom_text() -> str:
             hasLust = true
             mult = mult * 1.30
         -- 2. Wrath of Air Totem (+5% Spell Haste Shamano)
-        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or (name.find and name:find("Wrath of Air"))) then
+        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or name:find("Wrath of Air")) then
             hasWrathAir = true
             mult = mult * 1.05
         -- 3. 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE (Anti-conflitto)
@@ -1709,9 +1709,9 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
             local subEvent = select(2, ...)
             if subEvent == "SPELL_DAMAGE" then
-                local sourceGUID = select(4, ...)
-                local sourceName = select(5, ...)
-                local sourceFlags = select(6, ...)
+                local sourceGUID = select(3, ...)
+                local sourceName = select(4, ...)
+                local sourceFlags = select(5, ...)
 
                 -- Controllo sorgente: GUID player, nome player, o flag COMBATLOG_OBJECT_AFFILIATION_MINE (0x00000001)
                 local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
@@ -1733,7 +1733,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                     if isQualifying(spellId, spellName) then
                         -- De-duplicazione eventi: evita doppi incrementi su multi-target/stesso frame
                         local timestamp = select(1, ...)
-                        local destGUID = select(7, ...) or select(8, ...) or ""
+                        local destGUID = select(6, ...) or destGUID or ""
                         local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
 
                         if hs.lastEventKey ~= eventKey then
