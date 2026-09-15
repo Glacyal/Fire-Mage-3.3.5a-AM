@@ -19,4 +19,10 @@ desktop.ini
 # Agent scratch / internal artifacts
 .system_generated/
 scratch/
-
+.agents/
+.agent/
+_agents/
+_agent/
+GEMINI.md
+AGENTS.md
+*.html
