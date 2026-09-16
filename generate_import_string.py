@@ -2391,7 +2391,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -180,
+                "xOffset": -190,
                 "yOffset": -4,
                 "controlledChildren": [
                     "Molten Armor - Active",
@@ -2544,7 +2544,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -210,
+                "xOffset": -220,
                 "yOffset": -4,
                 "controlledChildren": [
                     "Arcane Intellect - Active",
@@ -2700,7 +2700,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -150,
+                "xOffset": -160,
                 "yOffset": -4,
                 "controlledChildren": [
                     "Focus Magic - Active",
@@ -3481,7 +3481,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "group",
                 "internalVersion": 52,
-                "xOffset": -180,
+                "xOffset": -190,
                 "yOffset": -45,
                 "anchorPoint": "CENTER",
                 "selfPoint": "CENTER",
