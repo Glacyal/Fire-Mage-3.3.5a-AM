@@ -24,8 +24,8 @@ class TestHTMLSimultaneous(unittest.TestCase):
     def test_dom_ids_exist(self):
         """Verifica che ogni getElementById usato nel JS esista nel DOM HTML."""
         for fname in self.html_files:
-            fpath = os.path.join(ROOT_DIR, fname)
-            self.assertTrue(os.path.exists(fpath), f"{fname} non trovato")
+            fpath = os.path.join(ROOT_DIR, "docs", fname)
+            self.assertTrue(os.path.exists(fpath), f"{fname} non trovato in docs/")
             with open(fpath, "r", encoding="utf-8") as f:
                 content = f.read()
 
@@ -45,7 +45,7 @@ class TestHTMLSimultaneous(unittest.TestCase):
     def test_onclick_handlers_defined(self):
         """Verifica che ogni attributo onclick punti a una funzione definita in JS."""
         for fname in self.html_files:
-            fpath = os.path.join(ROOT_DIR, fname)
+            fpath = os.path.join(ROOT_DIR, "docs", fname)
             with open(fpath, "r", encoding="utf-8") as f:
                 content = f.read()
 
@@ -109,7 +109,7 @@ class TestHTMLSimultaneous(unittest.TestCase):
         senza perdite di interval/timer (verificando la presenza della gestione timers).
         """
         for fname in self.html_files:
-            fpath = os.path.join(ROOT_DIR, fname)
+            fpath = os.path.join(ROOT_DIR, "docs", fname)
             with open(fpath, "r", encoding="utf-8") as f:
                 content = f.read()
 

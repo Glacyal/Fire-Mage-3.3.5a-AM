@@ -47,7 +47,7 @@ def run_tests():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     all_ok = True
     for fname in ["index.html", "t8_t10_preview.html"]:
-        fpath = os.path.join(root_dir, fname)
+        fpath = os.path.join(root_dir, "docs", fname)
         if os.path.exists(fpath):
             if not audit_html(fpath):
                 all_ok = False

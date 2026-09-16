@@ -1,30 +1,22 @@
-from builder.core import serialize_string, serialize_value
-def make_subtext(text: str, justify: str = "CENTER", anchor_point: str = "INNER_BOTTOM", font_size: int = 12, y_offset: int = 0, extra_props: dict = None) -> dict:
-    """Genera la struttura per una subRegion di tipo subtext con font Expressway OUTLINE ad alta leggibilità."""
-    res = {
-        "type": "subtext",
-        "text_text": text,
-        "text_justify": justify,
-        "text_anchorPoint": anchor_point,
-        "text_fontSize": font_size,
-        "text_font": "Expressway",
-        "text_fontType": "OUTLINE",
-        "text_color": [1, 1, 1, 1],
-        "text_visible": True,
-        "text_selfPoint": "AUTO",
-        "text_automaticWidth": "Auto",
-        "text_fixedWidth": 64,
-        "anchorYOffset": y_offset,
-        "anchorXOffset": 0,
-        "text_shadowXOffset": 1,
-        "text_shadowYOffset": -1,
-        "text_shadowColor": [0, 0, 0, 1],
-    }
-    if extra_props:
-        res.update(extra_props)
-    return res
+"""
+Modulo Componente: 05 - Trinkets & 06 - Utility Row
+====================================================
+Gestisce la fila orizzontale utility a y = -45 con riposizionamento dinamico
+a 6 o 7 icone (se il Tier 8 è equipaggiato o meno):
+1. 05 - Trinket 1 (Slot 13, ICD 45s/90s/120s o On-Use, Pixel Glow su proc)
+2. 05 - Trinket 2 (Slot 14, ICD 45s/90s/120s o On-Use, Pixel Glow su proc)
+3. 06 - Cloak (Slot 15, Ricamo Spadatesta / Luce Intessuta ICD 45s)
+4. 06 - Tier 8 (Attivo solo con >= 2 pezzi T8 Kirin Tor, Praxis +350 SP, 45s ICD)
+5. 06 - Mana Gem (Gemma del Mana, Cooldown + cariche in borsa + Proc T7 Mana Surge)
+6. 06 - Combustion (Combustione, stato ON, stack critici rimanenti, cooldown)
+7. 06 - Mirror Image (Copie, durata 30s + Bonus T10 4P Quad Core +18% danni)
+"""
+from builder.core.helpers import make_subtext
 
-# Core Lua function for shared slot tracking with ICD
+
+# =============================================================================
+# LOGICA LUA CONDIVISA: TRINKETS E CLOAK ICD TRACKING
+# =============================================================================
 SHARED_SLOT_CHECK_LUA = """function(slot)
     _G.FMHUD_ICD = _G.FMHUD_ICD or {
         [13] = { lastStart = 0, lastEnd = 0, isProc = false, lastItemID = 0 },
@@ -283,8 +275,9 @@ SHARED_SLOT_CHECK_LUA = """function(slot)
     return finish("READY", 0, 0, nil)
 end"""
 
+
 def make_slot_custom_text(slot: int) -> str:
-    """Genera la closure Lua per il testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo e riposizionamento dinamico."""
+    """Testo descrittivo del monile/mantello (%c), con pixel glow su proc attivo e riposizionamento dinamico."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -321,8 +314,9 @@ def make_slot_custom_text(slot: int) -> str:
     end
 end"""
 
+
 def make_slot_custom_duration(slot: int) -> str:
-    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per lo slot indicato."""
+    """Durata e scadenza dello swipe di ricarica per lo slot indicato."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -335,8 +329,9 @@ def make_slot_custom_duration(slot: int) -> str:
     return 0, 0
 end"""
 
+
 def make_slot_custom_icon(slot: int, default_icon: str) -> str:
-    """Genera la closure Lua per determinare dinamicamente l'icona dell'oggetto equipaggiato o del proc attivo."""
+    """Restituisce dinamicamente l'icona dell'oggetto equipaggiato o del proc attivo."""
     return f"""function()
     if not _G.FMHUD_CheckSlot_v5 then
         _G.FMHUD_CheckSlot = {SHARED_SLOT_CHECK_LUA}
@@ -350,6 +345,9 @@ def make_slot_custom_icon(slot: int, default_icon: str) -> str:
 end"""
 
 
+# =============================================================================
+# LOGICA LUA CONDIVISA: TIER 8 2-PIECE BONUS & LAYOUT DINAMICO A 6/7 ICONE
+# =============================================================================
 SHARED_T8_INIT_LUA = """function()
     if _G.FMHUD_T8_InitDone then return end
 
@@ -610,17 +608,9 @@ SHARED_T8_INIT_LUA = """function()
     _G.FMHUD_T8_InitDone = true
 end"""
 
-SHARED_UTILITY_POS_LUA = """function(env, x6, x7)
-    if not _G.FMHUD_T8_InitDone then
-        if _G.FMHUD_InitT8 then _G.FMHUD_InitT8() end
-    end
-    if _G.FMHUD_UpdateUtilityRowPositions then
-        _G.FMHUD_UpdateUtilityRowPositions()
-    end
-end"""
 
 def make_t8_custom_text() -> str:
-    """Genera la closure Lua per il testo descrittivo del Tier 8 2P (%c), con pixel glow su proc attivo e timer ICD."""
+    """Testo descrittivo del Tier 8 2P (%c), con pixel glow su proc attivo e timer ICD."""
     return f"""function()
     if not _G.FMHUD_T8_InitDone then
         _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
@@ -653,8 +643,9 @@ def make_t8_custom_text() -> str:
     end
 end"""
 
+
 def make_t8_custom_duration() -> str:
-    """Genera la closure Lua per la durata e scadenza dello swipe di ricarica per il Tier 8 2P."""
+    """Durata e scadenza dello swipe di ricarica per il Tier 8 2P."""
     return f"""function()
     if not _G.FMHUD_T8_InitDone then
         _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
@@ -667,8 +658,9 @@ def make_t8_custom_duration() -> str:
     return 0, 0
 end"""
 
+
 def make_t8_custom_icon() -> str:
-    """Genera la closure Lua per l'icona del Tier 8 2P (Praxis / Kirin Tor)."""
+    """Icona del Tier 8 2P (Praxis / Kirin Tor)."""
     return f"""function()
     if not _G.FMHUD_T8_InitDone then
         _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
@@ -678,207 +670,10 @@ def make_t8_custom_icon() -> str:
     return icon or GetSpellTexture(64868) or "Interface\\\\Icons\\\\Spell_Arcane_StudentOfMagic"
 end"""
 
-SHARED_FM_CHECK_LUA = """function(event, ...)
-    local state = _G.FMHUD_FMState
-    if not state then
-        state = { targetGUID = nil, targetName = nil, expires = 0 }
-        _G.FMHUD_FMState = state
-    end
 
-    local now = GetTime()
-
-    -- 1. Gestione Eventi Assegnazione, Rimozione e Morte
-    if event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit, spell = ...
-        if unit == "player" and (spell == "Focus Magic" or spell == "Focalizzazione Magica") then
-            state.targetName = UnitName("target")
-            state.targetGUID = UnitGUID("target")
-            state.expires = now + 1800
-        end
-    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
-        local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
-        if sourceGUID == UnitGUID("player") and (spellId == 54646 or spellName == "Focus Magic" or spellName == "Focalizzazione Magica") then
-            if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
-                state.targetName = destName
-                state.targetGUID = destGUID
-                state.expires = now + 1800
-            elseif subEvent == "SPELL_AURA_REMOVED" or subEvent == "SPELL_AURA_BROKEN" then
-                state.targetName = nil
-                state.targetGUID = nil
-                state.expires = 0
-            end
-        elseif subEvent == "UNIT_DIED" then
-            if (state.targetGUID and destGUID == state.targetGUID) or (state.targetName and destName == state.targetName) then
-                state.targetName = nil
-                state.targetGUID = nil
-                state.expires = 0
-            end
-        end
-    end
-
-    -- 2. Controllo se il player ha il proc di 10 secondi (Spell ID 54648, +3% Crit)
-    local hasProc = false
-    local procRem = 0
-    local procDur = 10
-    local procExp = 0
-    for i = 1, 40 do
-        local n, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not n then break end
-        if spellId == 54648 or ((n == "Focus Magic" or n == "Focalizzazione Magica") and duration and duration <= 15) then
-            hasProc = true
-            procDur = (duration and duration > 0) and duration or 10
-            procRem = (expirationTime and expirationTime > 0) and (expirationTime - now) or procDur
-            procExp = (expirationTime and expirationTime > 0) and expirationTime or (now + procRem)
-            break
-        end
-    end
-
-    -- 3. Verifica se l'alleato registrato ha ancora il buff ed e vivo
-    if state.expires and state.expires > now then
-        if state.targetName and UnitExists(state.targetName) and UnitIsDead(state.targetName) then
-            state.targetName = nil
-            state.targetGUID = nil
-            state.expires = 0
-        else
-            return hasProc, true, procRem, procDur, procExp
-        end
-    end
-
-    -- 4. Scansione attiva su target, focus, raid o party (utile al login, reload o cambio zona)
-    local allyActive = false
-    if UnitExists("target") and UnitIsFriend("player", "target") and not UnitIsDead("target") then
-        for i = 1, 40 do
-            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("target", i)
-            if not n then break end
-            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
-                state.targetName = UnitName("target")
-                state.targetGUID = UnitGUID("target")
-                state.expires = (exp and exp > 0) and exp or (now + 1800)
-                allyActive = true
-                break
-            end
-        end
-    end
-
-    if not allyActive and UnitExists("focus") and UnitIsFriend("player", "focus") and not UnitIsDead("focus") then
-        for i = 1, 40 do
-            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff("focus", i)
-            if not n then break end
-            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
-                state.targetName = UnitName("focus")
-                state.targetGUID = UnitGUID("focus")
-                state.expires = (exp and exp > 0) and exp or (now + 1800)
-                allyActive = true
-                break
-            end
-        end
-    end
-
-    if not allyActive then
-        local nr = GetNumRaidMembers()
-        if nr and nr > 0 then
-            for r = 1, nr do
-                local u = "raid"..r
-                if not UnitIsDead(u) then
-                    for i = 1, 40 do
-                        local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
-                        if not n then break end
-                        if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
-                            state.targetName = UnitName(u)
-                            state.targetGUID = UnitGUID(u)
-                            state.expires = (exp and exp > 0) and exp or (now + 1800)
-                            allyActive = true
-                            break
-                        end
-                    end
-                    if allyActive then break end
-                end
-            end
-        else
-            local np = GetNumPartyMembers()
-            if np and np > 0 then
-                for p = 1, np do
-                    local u = "party"..p
-                    if not UnitIsDead(u) then
-                        for i = 1, 40 do
-                            local n, _, _, _, _, dur, exp, c, _, _, spellId = UnitBuff(u, i)
-                            if not n then break end
-                            if (spellId == 54646 or n == "Focus Magic" or n == "Focalizzazione Magica") and (c == "player" or not c) then
-                                state.targetName = UnitName(u)
-                                state.targetGUID = UnitGUID(u)
-                                state.expires = (exp and exp > 0) and exp or (now + 1800)
-                                allyActive = true
-                                break
-                            end
-                        end
-                        if allyActive then break end
-                    end
-                end
-            end
-        end
-    end
-
-    return hasProc, allyActive, procRem, procDur, procExp
-end"""
-
-def make_fm_trigger() -> str:
-    """Genera il trigger Lua per Focus Magic attivo: visibile SOLO durante il proc di 10 secondi sul player."""
-    return f"""function(event, ...)
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc = _G.FMHUD_CheckFM(event, ...)
-    return hasProc == true
-end"""
-
-def make_fm_untrigger() -> str:
-    """Genera l'untrigger Lua per Focus Magic attivo: nascosto quando il proc di 10s sul player finisce."""
-    return f"""function(event, ...)
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc = _G.FMHUD_CheckFM(event, ...)
-    return not hasProc
-end"""
-
-def make_fm_custom_duration() -> str:
-    """Genera la durata e scadenza per lo swipe di Focus Magic per il proc da 10s."""
-    return f"""function()
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc, allyActive, procRem, procDur, procExp = _G.FMHUD_CheckFM()
-    if hasProc then
-        return procDur, procExp
-    end
-    return 0, 0
-end"""
-
-def make_fm_custom_text() -> str:
-    """Genera il conto alla rovescia in secondi per il proc da 10s."""
-    return f"""function()
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc, allyActive, procRem = _G.FMHUD_CheckFM()
-    if hasProc and procRem > 0 then
-        if procRem <= 3 then
-            return string.format("|cFFFF4444%.1fs|r", procRem)
-        else
-            return string.format("%.0fs", procRem)
-        end
-    end
-    return ""
-end"""
-
-def make_fm_off_trigger() -> str:
-    """Genera il trigger Lua per Focus Magic OFF: visibile SOLO se nessun alleato ha il buff e il player non ha il proc 10s."""
-    return f"""function(event, ...)
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc, allyActive = _G.FMHUD_CheckFM(event, ...)
-    return (not hasProc) and (not allyActive)
-end"""
-
-def make_fm_off_untrigger() -> str:
-    """Disattiva lo stato OFF se il player ha il proc 10s oppure un alleato ha il buff attivo."""
-    return f"""function(event, ...)
-    _G.FMHUD_CheckFM = _G.FMHUD_CheckFM or {SHARED_FM_CHECK_LUA}
-    local hasProc, allyActive = _G.FMHUD_CheckFM(event, ...)
-    return hasProc or allyActive
-end"""
-
+# =============================================================================
+# LOGICA LUA CONDIVISA: COMBUSTION
+# =============================================================================
 SHARED_COMBUSTION_CHECK_LUA = """function()
     local now = GetTime()
     
@@ -909,8 +704,9 @@ SHARED_COMBUSTION_CHECK_LUA = """function()
     return "READY", 0, 0, 0, "Interface\\\\Icons\\\\Spell_Fire_SealOfFire"
 end"""
 
+
 def make_combustion_custom_text() -> str:
-    """Genera il testo descrittivo (%c) di Combustion con conteggio cariche critiche e pixel glow dorato."""
+    """Testo descrittivo (%c) di Combustion con conteggio cariche critiche e pixel glow dorato."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
     if not _G.FMHUD_T8_InitDone then
@@ -949,8 +745,9 @@ def make_combustion_custom_text() -> str:
     end
 end"""
 
+
 def make_combustion_custom_duration() -> str:
-    """Genera la durata e scadenza per lo swipe di Combustion (CD o buff attivo)."""
+    """Durata e scadenza per lo swipe di Combustion (CD o buff attivo)."""
     return f"""function()
     _G.FMHUD_CheckCombustion = _G.FMHUD_CheckCombustion or {SHARED_COMBUSTION_CHECK_LUA}
     local state, rem, dur = _G.FMHUD_CheckCombustion()
@@ -960,12 +757,16 @@ def make_combustion_custom_duration() -> str:
     return 0, 0
 end"""
 
+
+# =============================================================================
+# LOGICA LUA CONDIVISA: MIRROR IMAGE & TIER 10 4P QUAD CORE
+# =============================================================================
 SHARED_MIRRORIMAGE_CHECK_LUA = """function()
     local now = GetTime()
     local baseIcon = GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
     local quadCoreIcon = GetSpellTexture(70747) or "Interface\\\\Icons\\\\Spell_Nature_Invisibilty"
     
-    -- 1. Controllo pezzi T10 equipaggiati (Elmo 50069/51159/51284, Spalle 50073/51155/51280, Veste 50070/51158/51283, Guanti 50071/51157/51282, Gambe 50072/51156/51281)
+    -- 1. Controllo pezzi T10 equipaggiati
     local hasT10_4P = false
     local t10Pieces = _G.FMHUD_T10_4P_Pieces
     if not t10Pieces then
@@ -1023,10 +824,8 @@ SHARED_MIRRORIMAGE_CHECK_LUA = """function()
     
     if start and duration and start > 0 and duration > 1.5 then
         local elapsed = now - start
-        -- Le copie durano 30 secondi dal cast: se entro i 30s, siamo in fase ATTIVA delle copie
         if elapsed >= 0 and elapsed < 30 then
             local remActive = 30 - elapsed
-            -- Se il buff T10 non e' presente in UnitBuff, mostrare SEMPRE l'icona base delle copie
             return "ACTIVE", remActive, 30, baseIcon, false
         else
             local remCD = (start + duration) - now
@@ -1040,8 +839,9 @@ SHARED_MIRRORIMAGE_CHECK_LUA = """function()
     return "READY", 0, 0, baseIcon, false
 end"""
 
+
 def make_mirrorimage_custom_text() -> str:
-    """Genera il testo descrittivo (%c) delle Copie (Mirror Image): durata attiva 30s con proc T10 (+18% danni) o CD 3 min."""
+    """Testo descrittivo (%c) delle Copie (Mirror Image): durata attiva 30s con proc T10 (+18% danni) o CD 3 min."""
     return f"""function()
     if not _G.FMHUD_CheckMirrorImage_v4 then
         _G.FMHUD_CheckMirrorImage = {SHARED_MIRRORIMAGE_CHECK_LUA}
@@ -1057,7 +857,6 @@ def make_mirrorimage_custom_text() -> str:
     local state, rem, dur, icon, isT10 = _G.FMHUD_CheckMirrorImage()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
 
-    -- Aggiornamento immediato texture: Quad Core SOLO durante proc T10 attivo, altrimenti SEMPRE Copie standard
     if aura_env and aura_env.region then
         local defIcon = GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
         local targetIcon = (state == "ACTIVE" and isT10 and icon) and icon or defIcon
@@ -1109,8 +908,9 @@ def make_mirrorimage_custom_text() -> str:
     end
 end"""
 
+
 def make_mirrorimage_custom_duration() -> str:
-    """Genera la durata e scadenza per lo swipe di Mirror Image / proc T10."""
+    """Durata e scadenza per lo swipe di Mirror Image / proc T10."""
     return f"""function()
     if not _G.FMHUD_CheckMirrorImage_v4 then
         _G.FMHUD_CheckMirrorImage = {SHARED_MIRRORIMAGE_CHECK_LUA}
@@ -1123,8 +923,9 @@ def make_mirrorimage_custom_duration() -> str:
     return 0, 0
 end"""
 
+
 def make_mirrorimage_custom_icon() -> str:
-    """Restituisce dinamicamente l'icona Quad Core (Spell_Nature_Invisibilty) durante il proc T10, altrimenti Mirror Image."""
+    """Icona Quad Core (Spell_Nature_Invisibilty) durante il proc T10, altrimenti Mirror Image."""
     return f"""function()
     if not _G.FMHUD_CheckMirrorImage_v4 then
         _G.FMHUD_CheckMirrorImage = {SHARED_MIRRORIMAGE_CHECK_LUA}
@@ -1137,6 +938,10 @@ def make_mirrorimage_custom_icon() -> str:
     return GetSpellTexture(55342) or "Interface\\\\Icons\\\\Spell_Magic_LesserInvisibilty"
 end"""
 
+
+# =============================================================================
+# LOGICA LUA CONDIVISA: MANA GEM & PROC T7 MANA SURGE
+# =============================================================================
 SHARED_MANAGEM_CHECK_LUA = """function()
     local now = GetTime()
     local isT7Active = false
@@ -1147,7 +952,7 @@ SHARED_MANAGEM_CHECK_LUA = """function()
                      or  "Interface\\\\Icons\\\\INV_Misc_Gem_Sapphire_02"
     local procIcon = nil
 
-    -- 1. Controllo buff bonus 2 pezzi T7 Mago (+225 Spell Power per 15s dopo l'uso della gemma)
+    -- 1. Controllo buff bonus 2 pezzi T7 Mago (+225 Spell Power per 15s)
     for i = 1, 40 do
         local n, _, icon, _, _, dur, exp, _, _, _, spellId = UnitBuff("player", i)
         if not n then break end
@@ -1165,7 +970,7 @@ SHARED_MANAGEM_CHECK_LUA = """function()
         end
     end
 
-    -- 2. Controllo cooldown oggetto Gemma del Mana (Mana Sapphire 33312, Mana Emerald 22044)
+    -- 2. Controllo cooldown oggetto Gemma del Mana (33312 / 22044)
     local start, duration = GetItemCooldown(33312)
     if not start or duration == 0 then
         start, duration = GetItemCooldown(22044)
@@ -1189,8 +994,9 @@ SHARED_MANAGEM_CHECK_LUA = """function()
     end
 end"""
 
+
 def make_managem_custom_text() -> str:
-    """Genera il testo descrittivo (%c) delle cariche della Gemma del Mana, gestendo il Pixel Glow durante il proc T7 e icon swap."""
+    """Testo descrittivo (%c) delle cariche della Gemma del Mana, con Pixel Glow durante proc T7."""
     return f"""function()
     if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
@@ -1206,7 +1012,6 @@ def make_managem_custom_text() -> str:
     local state, rem, dur, icon = _G.FMHUD_CheckManaGem()
     local LCG = LibStub and LibStub("LibCustomGlow-1.0", true)
 
-    -- Aggiornamento immediato texture dell'icona: Mana Surge SOLO durante proc T7 attivo, altrimenti SEMPRE Gemma standard
     if aura_env and aura_env.region then
         local defIcon = (GetItemCount(33312) == 0 and GetItemCount(22044) > 0)
                          and "Interface\\\\Icons\\\\INV_Misc_Gem_Emerald_01"
@@ -1233,7 +1038,6 @@ def make_managem_custom_text() -> str:
         end
     end
 
-    -- Imposta il colore del timer a sud (%p): Giallo durante il proc T7, Bianco durante il cooldown
     if aura_env and aura_env.region and aura_env.region.subRegions then
         local timerSub = aura_env.region.subRegions[2]
         if timerSub and timerSub.text and timerSub.text.SetTextColor then
@@ -1245,7 +1049,6 @@ def make_managem_custom_text() -> str:
         end
     end
 
-    -- Conteggio cariche disponibili in borsa per la subRegion in alto a destra (%c)
     local c = GetItemCount(33312, nil, true) or 0
     if c == 0 then
         c = GetItemCount(22044, nil, true) or 0
@@ -1256,8 +1059,9 @@ def make_managem_custom_text() -> str:
     return "|cFFFF22220|r"
 end"""
 
+
 def make_managem_custom_duration() -> str:
-    """Genera la durata e scadenza per lo swipe di ricarica della Gemma del Mana (durata T7 o CD oggetto)."""
+    """Durata e scadenza per lo swipe di ricarica della Gemma del Mana."""
     return f"""function()
     if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
@@ -1270,8 +1074,9 @@ def make_managem_custom_duration() -> str:
     return 0, 0
 end"""
 
+
 def make_managem_custom_icon() -> str:
-    """Restituisce dinamicamente la texture del proc T7 (Mana Surge) durante il buff attivo, altrimenti Mana Sapphire."""
+    """Restituisce dinamicamente la texture del proc T7 (Mana Surge) o Gemma del Mana."""
     return f"""function()
     if not _G.FMHUD_CheckManaGem_v5 then
         _G.FMHUD_CheckManaGem = {SHARED_MANAGEM_CHECK_LUA}
@@ -1287,328 +1092,366 @@ def make_managem_custom_icon() -> str:
     return defIcon
 end"""
 
-def make_stats_bg_trigger() -> str:
-    return """function(event, ...)
-    return true
-end"""
 
-def make_stats_bg_untrigger() -> str:
-    return """function(event, ...)
+# =============================================================================
+# BUILDER: AURE WEAKAURAS PER LA FILA UTILITY
+# =============================================================================
+def build_utility_auras() -> list[dict]:
+    """
+    Costruisce e restituisce le 7 aure che compongono la fila utility inferiore:
+    - 05 - Trinket 1 (Icon)
+    - 05 - Trinket 2 (Icon)
+    - 06 - Cloak (Icon)
+    - 06 - Tier 8 (Icon)
+    - 06 - Mana Gem (Icon)
+    - 06 - Combustion (Icon)
+    - 06 - Mirror Image (Icon)
+    """
+    return [
+        # 05 - Trinket 1 (Slot 13)
+        {
+            "id": "05 - Trinket 1",
+            "uid": "FMHUD_TRINKET1",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": -110,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_slot_custom_text(13),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "event",
+                        "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,BAG_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                        "custom": """function(event, ...)
+    return true
+end""",
+                        "customDuration": make_slot_custom_duration(13),
+                        "customIcon": make_slot_custom_icon(13, "Interface\\Icons\\INV_Misc_QuestionMark"),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
     return false
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
 
-def make_stats_trigger() -> str:
-    return """function(event, ...)
+        # 05 - Trinket 2 (Slot 14)
+        {
+            "id": "05 - Trinket 2",
+            "uid": "FMHUD_TRINKET2",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": -66,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_slot_custom_text(14),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "event",
+                        "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,BAG_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                        "custom": """function(event, ...)
     return true
-end"""
-
-def make_stats_untrigger() -> str:
-    return """function(event, ...)
+end""",
+                        "customDuration": make_slot_custom_duration(14),
+                        "customIcon": make_slot_custom_icon(14, "Interface\\Icons\\INV_Misc_QuestionMark"),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
     return false
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
 
-def make_stats_custom_text() -> str:
-    return """function()
-    local now = GetTime()
-    if _G.FMHUD_LastStatsText and (now - (_G.FMHUD_LastStatsTime or 0)) < 0.1 then
-        return _G.FMHUD_LastStatsText
-    end
-
-    -- 1. SPELL POWER (Fire School = 3)
-    local sp = GetSpellBonusDamage(3) or 0
-    sp = math.floor(sp + 0.5)
-
-    -- 2. SPELL CRIT (Fire School = 3)
-    local crit = GetSpellCritChance(3) or 0
-
-    -- 3. SPELL HASTE & HIT BUFFS (Scansione in singolo passaggio di UnitBuff)
-    local ratingBonus = GetCombatRatingBonus(20) or 0
-    local mult = 1 + (ratingBonus / 100)
-
-    local hasCombustion = false
-    local hasLust = false
-    local hasWrathAir = false
-    local has3Haste = false
-    local hasT10 = false
-    local hasPI = false
-    local hasBerserking = false
-    local hasHeroicPresence = false
-
-    for i = 1, 40 do
-        local name, _, _, count, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-
-        -- Combustion (+10% Fire crit per stack)
-        if not hasCombustion and (spellId == 11129 or name == "Combustion" or name == "Combustione") then
-            hasCombustion = true
-            local stacks = (count and count > 0) and count or 1
-            crit = crit + (stacks * 10)
-        end
-
-        -- Bloodlust / Heroism (+30% Haste)
-        if not hasLust and (spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" or name == "Bramosia Sanguinaria" or name == "Eroismo") then
-            hasLust = true
-            mult = mult * 1.30
-        -- Wrath of Air Totem (+5% Spell Haste Shamano)
-        elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or name:find("Wrath of Air")) then
-            hasWrathAir = true
-            mult = mult * 1.05
-        -- 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE
-        elseif not has3Haste and (spellId == 48396 or spellId == 53648 or spellId == 53379 or spellId == 24907 or spellId == 31583
-            or name == "Swift Retribution" or name == "Ritorsione Rapida" 
-            or name == "Improved Moonkin Form" or name == "Forma di Lunagufo Migliorata") then
-            has3Haste = true
-            mult = mult * 1.03
-        -- Tier 10 2-Piece Bonus: Pushing the Limit (+12% Spell Haste per 5s)
-        elseif not hasT10 and (spellId == 70753 or spellId == 70752 or name == "Pushing the Limit" or name == "Oltre il Limite") then
-            hasT10 = true
-            mult = mult * 1.12
-        -- Power Infusion (+20% Spell Haste Sacerdote)
-        elseif not hasPI and (spellId == 10060 or name == "Power Infusion" or name == "Infusione di Potere") then
-            hasPI = true
-            mult = mult * 1.20
-        -- Berserking (+20% Haste Razziale Troll)
-        elseif not hasBerserking and (spellId == 26297 or name == "Berserking" or name == "Furia Berserker") then
-            hasBerserking = true
-            mult = mult * 1.20
-        end
-
-        -- Heroic Presence (Draenei aura)
-        if not hasHeroicPresence and (name == "Heroic Presence" or spellId == 28878 or spellId == 6562) then
-            hasHeroicPresence = true
-        end
-    end
-
-    local haste = (mult - 1) * 100
-
-    -- 4. SPELL HIT
-    local hitRatingBonus = GetCombatRatingBonus(8) or 0
-
-    _G.FMHUD_StatCache = _G.FMHUD_StatCache or {
-        lastTalentCheck = 0,
-        precisionHit = 0,
-        isDraenei = (select(2, UnitRace("player")) == "Draenei") and 1 or 0,
-    }
-    if (now - _G.FMHUD_StatCache.lastTalentCheck) > 10 then
-        _G.FMHUD_StatCache.lastTalentCheck = now
-        local prec = 0
-        for i = 1, 35 do
-            local name, _, _, _, currentRank = GetTalentInfo(1, i)
-            if not name then break end
-            if name == "Precision" or name:find("Precision") then
-                prec = currentRank or 0
-                break
-            end
-        end
-        _G.FMHUD_StatCache.precisionHit = prec
-    end
-
-    local draeneiHit = (_G.FMHUD_StatCache.isDraenei == 1 or hasHeroicPresence) and 1 or 0
-
-    -- 5. TARGET DEBUFFS (Crit & Hit on target / boss)
-    local targetCritBonus = 0
-    local targetHitBonus = 0
-    if UnitExists("target") and not UnitIsDead("target") and UnitCanAttack("player", "target") then
-        local has5Crit = false
-        local has3Crit = false
-        local has3Hit = false
-
-        for i = 1, 40 do
-            local dname, _, _, _, _, _, _, _, _, _, dId = UnitDebuff("target", i)
-            if not dname then break end
-
-            -- +5% Spell Crit: Improved Scorch, Shadow and Flame, Winter's Chill
-            if not has5Crit then
-                if dId == 22959 or dId == 12873 or dId == 12872 or dId == 17800 or dId == 28593
-                   or dname == "Improved Scorch" or dname == "Scorch" or dname == "Shadow and Flame"
-                   or dname == "Winter's Chill" or string.find(dname, "Scorch") or string.find(dname, "Bruciatura") then
-                    has5Crit = true
-                    targetCritBonus = targetCritBonus + 5.0
-                end
-            end
-
-            -- +3% All Crit: Heart of the Crusader, Master Poisoner, Totem of Wrath
-            if not has3Crit then
-                if dId == 20337 or dId == 20336 or dId == 20335 or dId == 58410 or dId == 30708 or dId == 30706
-                   or dname == "Heart of the Crusader" or dname == "Cuore del Crociato"
-                   or dname == "Master Poisoner" or dname == "Mastro Velenifero"
-                   or dname == "Totem of Wrath" or dname == "Totem dell'Ira" then
-                    has3Crit = true
-                    targetCritBonus = targetCritBonus + 3.0
-                end
-            end
-
-            -- +3% Spell Hit: Misery, Faerie Fire / Improved Faerie Fire
-            if not has3Hit then
-                if dId == 33198 or dId == 33197 or dId == 33196 or dId == 770 or dId == 16857
-                   or dname == "Misery" or dname == "Miseria"
-                   or dname == "Faerie Fire" or dname == "Fuoco Fatato" or string.find(dname, "Faerie Fire") then
-                    has3Hit = true
-                    targetHitBonus = targetHitBonus + 3.0
-                end
-            end
-
-            if has5Crit and has3Crit and has3Hit then
-                break
-            end
-        end
-    end
-
-    crit = crit + targetCritBonus
-    local totalHit = hitRatingBonus + _G.FMHUD_StatCache.precisionHit + draeneiHit + targetHitBonus
-
-    local hitText
-    if totalHit >= 17.0 then
-        hitText = string.format("|cFFFFFF00Hit:|r |cFFFFFFFF%.2f%%|r |cFF55FF55(Cap)|r", totalHit)
-    else
-        hitText = string.format("|cFFFFFF00Hit:|r |cFFFFFFFF%.2f%%|r", totalHit)
-    end
-
-    local out = string.format(
-        "|cFFFF2222SP:|r |cFFFFFFFF%d|r\\n|cFFFF8800Crit:|r |cFFFFFFFF%.2f%%|r\\n|cFFCC44FFHaste:|r |cFFFFFFFF%.2f%%|r\\n%s",
-        sp, crit, haste, hitText
-    )
-    _G.FMHUD_LastStatsTime = now
-    _G.FMHUD_LastStatsText = out
-    return out
+        # 06 - Cloak (Slot 15)
+        {
+            "id": "06 - Cloak",
+            "uid": "FMHUD_CLOAK",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": -22,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_slot_custom_text(15),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "event",
+                        "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,BAG_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                        "custom": """function(event, ...)
+    return true
+end""",
+                        "customDuration": make_slot_custom_duration(15),
+                        "customIcon": make_slot_custom_icon(15, "Interface\\Icons\\INV_Misc_Cape_19"),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
+    return false
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
 
-SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
-    _G.FMHUD_HS = _G.FMHUD_HS or {
-        streak = 0,
-        lastEventKey = nil,
-    }
-    local hs = _G.FMHUD_HS
-
-    local QUALIFYING_SPELLS = {
-        [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
-        [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
-        [2948]=true,[8444]=true,[8445]=true,[8446]=true,[10205]=true,[10206]=true,[10207]=true,[27073]=true,[27074]=true,[42858]=true,[42859]=true, -- Scorch
-        [44614]=true,[47610]=true, -- Frostfire Bolt
-        [44461]=true,[55361]=true,[55362]=true,[44457]=true,[55359]=true,[55360]=true, -- Living Bomb
-    }
-
-    local function isQualifying(spellId, spellName)
-        if spellId and QUALIFYING_SPELLS[spellId] then return true end
-        if spellName then
-            if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
-               string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
-               string.find(spellName, "Scorch") or string.find(spellName, "Bruciatura") or
-               string.find(spellName, "Frostfire") or string.find(spellName, "Fuocogelo") or
-               string.find(spellName, "Living Bomb") or string.find(spellName, "Bomba Vivente") then
-                return true
-            end
-        end
-        return false
+        # 06 - Tier 8
+        {
+            "id": "06 - Tier 8",
+            "uid": "FMHUD_TIER8",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": 0,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_t8_custom_text(),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "update",
+                        "events": "PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,ZONE_CHANGED_NEW_AREA,UNIT_AURA,FMHUD_T8_UPDATE",
+                        "custom": f"""function(event, ...)
+    if not _G.FMHUD_T8_InitDone then
+        _G.FMHUD_InitT8 = {SHARED_T8_INIT_LUA}
+        _G.FMHUD_InitT8()
     end
-
-    local function notifyWA()
-        if WeakAuras and WeakAuras.ScanEvents then
-            WeakAuras.ScanEvents("FMHUD_HS_UPDATE")
-        end
-    end
-
-    local function handleEvent(ev, ...)
-        if ev == "PLAYER_ENTERING_WORLD" or ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
-            hs.streak = 0
-            notifyWA()
-        elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
-            local subEvent = select(2, ...)
-            if subEvent == "SPELL_DAMAGE" then
-                local sourceGUID = select(3, ...)
-                local sourceName = select(4, ...)
-                local sourceFlags = select(5, ...)
-
-                local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
-                if not isPlayer and sourceFlags and bit and bit.band then
-                    if bit.band(sourceFlags, 0x00000001) > 0 then
-                        isPlayer = true
-                    end
-                end
-
-                if isPlayer then
-                    local spellId = select(9, ...)
-                    local spellName = select(10, ...)
-                    if not isQualifying(spellId, spellName) then
-                        spellId = select(10, ...)
-                        spellName = select(11, ...)
-                    end
-
-                    if isQualifying(spellId, spellName) then
-                        local timestamp = select(1, ...)
-                        local destGUID = select(6, ...) or ""
-                        local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
-
-                        if hs.lastEventKey ~= eventKey then
-                            hs.lastEventKey = eventKey
-
-                            local c18, c19, c20 = select(18, ...)
-                            local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
-
-                            if isCrit then
-                                if hs.streak == 0 then
-                                    hs.streak = 1
-                                else
-                                    hs.streak = 0
-                                end
-                            else
-                                hs.streak = 0
-                            end
-                            notifyWA()
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    _G.FMHUD_HandleHSEvent = handleEvent
-
-    local f = _G.FMHUD_HSFrame
-    if not f then
-        f = CreateFrame("Frame", "FMHUD_HSFrame")
-        _G.FMHUD_HSFrame = f
-    end
-    f:UnregisterAllEvents()
-    f:RegisterEvent("PLAYER_ENTERING_WORLD")
-    f:RegisterEvent("PLAYER_DEAD")
-    f:RegisterEvent("PLAYER_UNGHOST")
-    f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    f:SetScript("OnEvent", function(self, ev, ...)
-        if _G.FMHUD_HandleHSEvent then
-            _G.FMHUD_HandleHSEvent(ev, ...)
-        end
-    end)
-
-    if event then
-        handleEvent(event, ...)
-    end
-    return hs
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
+    return isEquipped
+end""",
+                        "customDuration": make_t8_custom_duration(),
+                        "customIcon": make_t8_custom_icon(),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
+    if not _G.FMHUD_T8_InitDone then return true end
+    local state, rem, dur, icon, isEquipped = _G.FMHUD_CheckT8()
+    return not isEquipped
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
 
-def make_hotstreak_bg_trigger() -> str:
-    return """function(event, ...)
-    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    _G.FMHUD_InitHotStreak(event, ...)
-    return not UnitIsDeadOrGhost("player")
+        # 06 - Mana Gem
+        {
+            "id": "06 - Mana Gem",
+            "uid": "FMHUD_MANAGEM",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": 22,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_managem_custom_text(),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "update",
+                        "custom": """function(event, ...)
+    return true
+end""",
+                        "customDuration": make_managem_custom_duration(),
+                        "customIcon": make_managem_custom_icon(),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
+    return false
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext(
+                    "%p",
+                    justify="CENTER",
+                    anchor_point="INNER_BOTTOM",
+                    font_size=10,
+                    y_offset=1,
+                    extra_props={
+                        "text_text_format_p_format": "timed",
+                        "text_text_format_p_time_precision": 1,
+                        "text_text_format_p_time_dynamic_threshold": 60,
+                    }
+                ),
+                make_subtext(
+                    "%c",
+                    justify="RIGHT",
+                    anchor_point="INNER_TOPRIGHT",
+                    font_size=9,
+                    extra_props={
+                        "anchorXOffset": -1,
+                        "anchorYOffset": -1,
+                    }
+                ),
+            ],
+        },
 
-def make_hotstreak_bg_untrigger() -> str:
-    return """function(event, ...)
-    return UnitIsDeadOrGhost("player")
+        # 06 - Combustion
+        {
+            "id": "06 - Combustion",
+            "uid": "FMHUD_COMBUSTION",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": 66,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_combustion_custom_text(),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "event",
+                        "events": "UNIT_AURA,SPELL_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,COMBAT_LOG_EVENT_UNFILTERED",
+                        "custom": """function(event, ...)
+    return true
+end""",
+                        "customDuration": make_combustion_custom_duration(),
+                        "customIcon": """function()
+    return "Interface\\Icons\\Spell_Fire_SealOfFire"
+end""",
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
+    return false
 end"""
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
 
-def make_hotstreak_seg1_trigger() -> str:
-    return """function(event, ...)
-    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    _G.FMHUD_InitHotStreak(event, ...)
-    local hs = _G.FMHUD_HS
-    return (hs and hs.streak == 1)
+        # 06 - Mirror Image
+        {
+            "id": "06 - Mirror Image",
+            "uid": "FMHUD_MIRRORIMAGE",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "icon",
+            "internalVersion": 52,
+            "xOffset": 110,
+            "yOffset": -45,
+            "width": 28,
+            "height": 28,
+            "displayIcon": "Interface\\Icons\\Spell_Magic_LesserInvisibilty",
+            "cooldown": True,
+            "cooldownSwipe": True,
+            "cooldownEdge": True,
+            "cooldownTextDisabled": True,
+            "inverse": False,
+            "customTextUpdate": "update",
+            "customText": make_mirrorimage_custom_text(),
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "custom",
+                        "custom_type": "status",
+                        "check": "update",
+                        "custom": """function(event, ...)
+    return true
+end""",
+                        "customDuration": make_mirrorimage_custom_duration(),
+                        "customIcon": make_mirrorimage_custom_icon(),
+                    },
+                    "untrigger": {
+                        "custom": """function(event, ...)
+    return false
 end"""
-
-def make_hotstreak_seg1_untrigger() -> str:
-    return """function(event, ...)
-    local hs = _G.FMHUD_HS
-    return not (hs and hs.streak == 1)
-end"""
-
+                    }
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                make_subtext("%c", justify="CENTER", anchor_point="CENTER", font_size=10),
+            ],
+        },
+    ]

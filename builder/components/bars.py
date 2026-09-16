@@ -1,0 +1,141 @@
+"""
+Modulo Componente: 07 - Mana Bar & 08 - Castbar
+================================================
+Gestisce le barre centrali sincronizzate a 278px di larghezza:
+1. 07 - Mana Bar (278x14px a y = -15):
+   - Barra percentuale del mana con cambio colore dinamico in rosso se mana <= 20%.
+   - Testo centrale: % mana con due decimali (%1.percentpower%%).
+2. 08 - Castbar (278x20px a y = +8):
+   - Barra di lancio nativa WeakAuras (texture Blizzard, colore azzurro [0.0, 0.77, 1.0]).
+   - Mostra il nome dell'incantesimo a sinistra (%n) e il tempo rimanente a destra (%p).
+   - Priva di icona per mantenere un perfetto allineamento orizzontale a 278px identico alla barra del mana.
+"""
+from builder.core.helpers import make_subtext
+from builder.core.constants import TEXTURE_STATUSBAR
+
+
+def build_bars_auras() -> list[dict]:
+    """
+    Costruisce e restituisce le 2 barre principali dell'HUD:
+    - 07 - Mana Bar (Aurabar)
+    - 08 - Castbar (Aurabar)
+    """
+    return [
+        # =====================================================================
+        # 07 - MANA BAR
+        # =====================================================================
+        {
+            "id": "07 - Mana Bar",
+            "uid": "FMHUD_MANABAR",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "aurabar",
+            "internalVersion": 52,
+            "width": 278,
+            "height": 14,
+            "xOffset": 0,
+            "yOffset": -15,
+            "barColor": [0.09, 0.55, 1.0, 1.0],
+            "backgroundColor": [0.1, 0.1, 0.1, 0.8],
+            "texture": TEXTURE_STATUSBAR,
+            "displayText_format_1.percentpower_format": "Number",
+            "displayText_format_1.percentpower_decimal_precision": 2,
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "unit",
+                        "event": "Power",
+                        "unit": "player",
+                        "powertype": 0,
+                        "use_powertype": True,
+                        "use_unit": True,
+                    },
+                    "untrigger": {}
+                },
+                "activeTriggerMode": -10,
+            },
+            "conditions": [
+                {
+                    "check": {
+                        "trigger": 1,
+                        "op": "<=",
+                        "variable": "percentpower",
+                        "value": "20",
+                    },
+                    "changes": [
+                        {
+                            "property": "barColor",
+                            "value": [1.0, 0.15, 0.15, 1.0],
+                        }
+                    ]
+                }
+            ],
+            "subRegions": [
+                {"type": "subbackground"},
+                {"type": "subforeground"},
+                make_subtext(
+                    "%1.percentpower%%",
+                    justify="CENTER",
+                    anchor_point="CENTER",
+                    font_size=10,
+                    extra_props={
+                        "text_text_format_1.percentpower_format": "Number",
+                        "text_text_format_1.percentpower_decimal_precision": 2,
+                    }
+                ),
+            ],
+        },
+
+        # =====================================================================
+        # 08 - CASTBAR
+        # =====================================================================
+        {
+            "id": "08 - Castbar",
+            "uid": "FMHUD_CASTBAR",
+            "parent": "Fire Mage 3.3.5a AM",
+            "regionType": "aurabar",
+            "internalVersion": 52,
+            "width": 278,
+            "height": 20,
+            "xOffset": 0,
+            "yOffset": 8,
+            "barColor": [0.0, 0.77, 1.0, 1.0],
+            "backgroundColor": [0.15, 0.15, 0.15, 0.8],
+            "texture": "Blizzard",
+            "icon": False,
+            "icon_color": [1, 1, 1, 1],
+            "triggers": {
+                1: {
+                    "trigger": {
+                        "type": "unit",
+                        "event": "Cast",
+                        "unit": "player",
+                        "use_unit": True,
+                    },
+                    "untrigger": {}
+                },
+                "activeTriggerMode": -10,
+            },
+            "subRegions": [
+                {"type": "subbackground"},
+                {"type": "subforeground"},
+                make_subtext(
+                    "%p",
+                    justify="RIGHT",
+                    anchor_point="INNER_RIGHT",
+                    font_size=11,
+                    extra_props={
+                        "anchorXOffset": -6,
+                        "text_text_format_p_format": "timed",
+                        "text_text_format_p_time_precision": 1,
+                    }
+                ),
+                make_subtext(
+                    "%n",
+                    justify="LEFT",
+                    anchor_point="INNER_LEFT",
+                    font_size=11,
+                    extra_props={"anchorXOffset": 6}
+                ),
+            ],
+        },
+    ]
