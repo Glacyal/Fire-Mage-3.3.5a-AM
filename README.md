@@ -49,7 +49,7 @@ Monitora costantemente le 4 statistiche chiave del Mago Fuoco, risolvendo automa
 
 1. **Copia la Stringa**: Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt)** e copia tutto il testo (`Ctrl+A`, poi `Ctrl+C`).
 2. **Apri WeakAuras**: In World of Warcraft, digita `/wa` nella chat.
-3. **Importa**: Clicca su **Import** in alto a sinistra, incolla con `Ctrl+V` e seleziona **Import Group** (oppure **Update Auras** se stai aggiornando una versione precedente).
+3. **Importa**: Clicca su **Import** (o Importa) in alto a sinistra, incolla con `Ctrl + V` e conferma cliccando su **Update** (oppure Aggiorna, per sovrascrivere correttamente le auree preesistenti).
 
 ---
 
