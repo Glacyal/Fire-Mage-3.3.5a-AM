@@ -44,7 +44,7 @@ Fire Mage 3.3.5a AM/
 │       ├── utility.py               # 06 - Utility Row (Combustion, DFO, CTS, Gemma, Copie, T8)
 │       ├── bars.py                  # 08 - Castbar, 09 - Mana Bar, Global Cooldown (GCD)
 │       ├── stats.py                 # 07 - Stats (SP, Crit, Haste, Hit con cap resolution)
-│       └── alerts.py                # Allerte visive e sonore (Pyro istantaneo, mana critico)
+│       └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
 │
 ├── docs/                            # Documentazione e anteprima interattiva per GitHub Pages
 │   └── index.html                   # Simulatore interattivo HTML/CSS/JS (proporzioni 1:1)

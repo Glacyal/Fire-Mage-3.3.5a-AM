@@ -88,7 +88,7 @@ Fire Mage 3.3.5a AM/
 │   │   ├── utility.py               # Combustion, Monili (DFO/CTS), Gemma, Copie, Tier 8
 │   │   ├── bars.py                  # Castbar, Mana Bar, Global Cooldown (GCD)
 │   │   ├── stats.py                 # Pannello 4 Statistiche (SP, Crit, Haste, Hit)
-│   │   └── alerts.py                # Allerte sonore e visive (Pyro istantaneo, mana basso)
+│   │   └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
 │   └── tree.py                      # Assemblatore dell'albero gerarchico (28 aure WeakAuras)
 ├── docs/
 │   └── index.html                   # Simulatore Web Interattivo (GitHub Pages 1:1)
