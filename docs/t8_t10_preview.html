@@ -967,9 +967,11 @@
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_shadow_manaburn.jpg" alt="Clearcasting">
                         <div class="tag-timer" id="ccTimer"></div>
                     </div>
-                    <!-- 4. Combustion / Fire Proc -->
-                    <div class="wa-box size-34 pixel-glow" id="procCombustion" onclick="cycleCombustion()" title="Combustion Proc">
-                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_burnout.jpg" alt="Combustion Proc">
+                    <!-- 4. Ignite (Debuff rolling 4s da colpi critici) -->
+                    <div class="wa-box size-34 pixel-glow" id="procIgnite" onclick="applyIgnite()" title="Ignite: Debuff rolling 4s da colpi critici">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_incinerate.jpg" alt="Ignite">
+                        <div class="cd-swipe" id="swipeIgnite"></div>
+                        <div class="tag-timer" id="igniteTimer">4.0s</div>
                     </div>
                     <!-- 5. Scorch / Improved Scorch (+5% Crit) -->
                     <div class="wa-box size-34" id="procScorch" onclick="applyScorch()" title="Scorch (+5% Spell Crit Debuff)">
@@ -1137,6 +1139,7 @@
                     <div class="btn-flex">
                         <button class="btn-act" id="btnLbAct" onclick="applyLivingBomb()">💣 Living Bomb</button>
                         <button class="btn-act" id="btnScorchAct" onclick="castSpellAction('Scorch', true)">🔥 Cast Scorch</button>
+                        <button class="btn-act" id="btnIgniteAct" onclick="applyIgnite()">🔥 Ignite</button>
                     </div>
                     <div class="btn-flex">
                         <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Pyroblast Istantaneo</button>
@@ -1211,7 +1214,7 @@
                 </div>
                 <div class="compare-item">
                     <strong>3. 01 - Procs Dynamic Group (Reattivo)</strong>
-                    <p>Gruppo dinamico sopra la Castbar: ospita fino a 7 icone (Tier 10, Hot Streak, Clearcasting, Combustion, Scorch, Incinerate e Molten Fury). Le icone non attive si contraggono a larghezza 0 e il gruppo si ricentra automaticamente.</p>
+                    <p>Gruppo dinamico sopra la Castbar: ospita fino a 7 icone (Tier 10, Hot Streak, Clearcasting, Living Bomb, Ignite, Scorch e Molten Fury). Le icone non attive si contraggono a larghezza 0 e il gruppo si ricentra automaticamente.</p>
                 </div>
                 <div class="compare-item">
                     <strong>4. Barra Hot Streak a 2 Segmenti Predittiva</strong>
@@ -1276,6 +1279,7 @@
             ctsActive: false,
             cloakActive: false,
             lbActive: true,
+            igniteActive: true,
             scorchActive: true,
             clearcastingActive: true,
             autoPlayTimer: null,
@@ -1486,12 +1490,46 @@
             spawnFCT(sim.hsStreak === 1 ? '🔥 1° CRITICO ATTIVO (SEGMENTO 1)' : '1° Critico Spento', sim.hsStreak === 1);
         }
 
-        // Aggiorna Visibilità Dinamica Procs (Dynamic Group)
+        // Gestione Debuff Ignite (Target debuff da critici, 4s rolling)
+        function applyIgnite(force) {
+            if (force === undefined) {
+                sim.igniteActive = !sim.igniteActive;
+            } else {
+                sim.igniteActive = force;
+            }
+            clearSimTimer('ignite');
+            const swipe = document.getElementById('swipeIgnite');
+            const timer = document.getElementById('igniteTimer');
+            if (sim.igniteActive) {
+                if (swipe) swipe.classList.add('active');
+                let rem = 4.0;
+                if (timer) timer.textContent = rem.toFixed(1) + 's';
+                sim.timers['ignite'] = setInterval(() => {
+                    rem -= 0.1;
+                    if (rem <= 0) {
+                        clearSimTimer('ignite');
+                        sim.igniteActive = false;
+                        if (swipe) swipe.classList.remove('active');
+                        if (timer) timer.textContent = '';
+                        updateProcsVisibility();
+                    } else {
+                        if (timer) timer.textContent = rem.toFixed(1) + 's';
+                    }
+                }, 100);
+                spawnFCT('🔥 Ignite Applicato (4s Dot)', true);
+            } else {
+                if (swipe) swipe.classList.remove('active');
+                if (timer) timer.textContent = '';
+            }
+            updateProcsVisibility();
+        }
+
+        // Aggiorna Visibilità Dinamica Procs (Dynamic Group: Tier 10, Hot Streak, CC, Ignite, Scorch, LB, Molten Fury)
         function updateProcsVisibility() {
             const t10 = document.getElementById('procT10');
             const hs = document.getElementById('procHotStreak');
             const cc = document.getElementById('procClearcasting');
-            const comb = document.getElementById('procCombustion');
+            const ignite = document.getElementById('procIgnite');
             const scorch = document.getElementById('procScorch');
             const lb = document.getElementById('procLivingBomb');
             const fury = document.getElementById('procMoltenFury');
@@ -1499,13 +1537,13 @@
             t10.className = 'wa-box size-34' + (sim.t10Active ? ' pixel-glow' : ' proc-hidden');
             hs.className = 'wa-box size-34' + (sim.hsProc ? ' pixel-glow' : ' proc-hidden');
             cc.className = 'wa-box size-34' + (sim.clearcastingActive ? ' pixel-glow' : ' proc-hidden');
-            comb.className = 'wa-box size-34' + (sim.combustion > 0 || sim.mode === 'SCREENSHOT' ? ' pixel-glow' : ' proc-hidden');
+            ignite.className = 'wa-box size-34' + (sim.igniteActive ? ' pixel-glow' : ' proc-hidden');
             scorch.className = 'wa-box size-34' + (sim.scorchActive ? ' pixel-glow' : ' proc-hidden');
             lb.className = 'wa-box size-34' + (sim.lbActive ? ' pixel-glow' : ' proc-hidden');
             fury.className = 'wa-box size-34' + (sim.targetExecute ? ' pixel-glow' : ' proc-hidden');
 
             const procsBar = document.getElementById('procsBar');
-            const anyActive = sim.t10Active || sim.hsProc || sim.clearcastingActive || (sim.combustion > 0) || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT' || sim.lbActive;
+            const anyActive = sim.t10Active || sim.hsProc || sim.clearcastingActive || sim.igniteActive || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT' || sim.lbActive;
             
             if (anyActive && sim.mode !== 'IDLE') {
                 procsBar.classList.remove('hidden');
@@ -1552,6 +1590,7 @@
                 sim.t10Active = true;
                 sim.clearcastingActive = true;
                 sim.targetExecute = true;
+                sim.igniteActive = true;
                 sim.scorchActive = true;
                 sim.manaGems = 0;
 
@@ -1573,6 +1612,8 @@
                 document.getElementById('tagGemStack').textContent = '0';
                 document.getElementById('tagGemStack').style.color = '#ff3333';
                 document.getElementById('tagT1Timer').textContent = '';
+                const ignTimer = document.getElementById('igniteTimer');
+                if (ignTimer) ignTimer.textContent = '4.0s';
 
                 renderHotStreakUI();
                 updateProcsVisibility();
@@ -1586,6 +1627,7 @@
                 sim.t10Active = false;
                 sim.clearcastingActive = false;
                 sim.targetExecute = false;
+                sim.igniteActive = false;
                 sim.scorchActive = false;
                 sim.combustion = 0;
                 sim.isCasting = false;
@@ -1604,6 +1646,11 @@
                 document.getElementById('tagGemStack').textContent = '0';
                 document.getElementById('tagGemStack').style.color = '#ff3333';
                 document.getElementById('tagT1Timer').textContent = '';
+                clearSimTimer('ignite');
+                const ignTimer = document.getElementById('igniteTimer');
+                if (ignTimer) ignTimer.textContent = '';
+                const ignSwipe = document.getElementById('swipeIgnite');
+                if (ignSwipe) ignSwipe.classList.remove('active');
 
                 renderHotStreakUI();
                 updateProcsVisibility();
@@ -1617,12 +1664,18 @@
                 sim.t10Active = false;
                 sim.clearcastingActive = false;
                 sim.targetExecute = false;
+                sim.igniteActive = false;
                 sim.scorchActive = false;
                 sim.manaGems = 3;
 
                 alertBox.style.display = 'none';
                 castbarWrap.classList.add('hidden');
                 document.getElementById('castFill').style.width = '0%';
+                clearSimTimer('ignite');
+                const ignTimer = document.getElementById('igniteTimer');
+                if (ignTimer) ignTimer.textContent = '';
+                const ignSwipe = document.getElementById('swipeIgnite');
+                if (ignSwipe) ignSwipe.classList.remove('active');
                 
                 setManaPct(100.0);
                 refillManaGems();
@@ -2093,6 +2146,7 @@
 
                     // Gestione Hot Streak Decoppiato & Rolling Streak
                     if (isCrit) {
+                        applyIgnite(true);
                         if (!sim.t10Active && Math.random() < 0.35) triggerT10();
                         if (!sim.dfoActive && Math.random() < 0.25) useTrinket1();
 
