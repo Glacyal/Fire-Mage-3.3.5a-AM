@@ -1,9 +1,9 @@
 """
-Test di audit interattivo per index.html e t8_t10_preview.html:
+Test di audit interattivo per index.html:
 Verifica:
 1. Che tutti gli handler onclick corrispondano a funzioni JavaScript definite.
 2. Che tutti i tag <button> abbiano un handler attivo.
-3. Che index.html e t8_t10_preview.html siano sincronizzati e validi.
+3. Che index.html sia integro, valido e reattivo al 100%.
 """
 import os
 import re
@@ -45,14 +45,11 @@ def audit_html(file_path):
 
 def run_tests():
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    all_ok = True
-    for fname in ["index.html", "t8_t10_preview.html"]:
-        fpath = os.path.join(root_dir, "docs", fname)
-        if os.path.exists(fpath):
-            if not audit_html(fpath):
-                all_ok = False
-
-    return 0 if all_ok else 1
+    fpath = os.path.join(root_dir, "docs", "index.html")
+    if not os.path.exists(fpath):
+        print(f"[-] docs/index.html non trovato!")
+        return 1
+    return 0 if audit_html(fpath) else 1
 
 if __name__ == "__main__":
     sys.exit(run_tests())

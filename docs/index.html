@@ -400,6 +400,16 @@
             align-items: center;
             overflow: visible;
         }
+        .castbar-icon {
+            position: absolute;
+            left: -20px;
+            top: -1px;
+            width: 20px;
+            height: 20px;
+            background: #000 url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') center/cover;
+            border: 1px solid #000;
+            transition: background 0.15s;
+        }
         .castbar-fill {
             height: 100%;
             width: 0%;
@@ -985,6 +995,7 @@
                 <!-- 3. 08 - Castbar (Sopra la Mana Bar, allineata con la colonna destra) -->
                 <div class="castbar-wrap" id="castbarWrap" onclick="castSpellAction('Fireball', true)" title="Clicca per lanciare Fireball">
                     <div class="castbar-container" id="castbarContainer">
+                        <div class="castbar-icon" id="castIcon"></div>
                         <div class="castbar-fill" id="castFill"></div>
                         <div class="castbar-latency"></div>
                         <span class="castbar-text-name" id="castName">08 - Castbar</span>
@@ -1588,6 +1599,7 @@
                 document.getElementById('castName').textContent = '08 - Castbar';
                 document.getElementById('castTime').textContent = '1.4';
                 document.getElementById('castFill').style.width = '38%';
+                document.getElementById('castIcon').style.backgroundImage = "url('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg')";
 
                 setManaPct(38.77);
 
@@ -2089,15 +2101,20 @@
             const castFill = document.getElementById('castFill');
             const castName = document.getElementById('castName');
             const castTime = document.getElementById('castTime');
+            const castIcon = document.getElementById('castIcon');
 
             castbarWrap.classList.remove('hidden');
             castName.textContent = spellName;
 
+            let iconUrl = "https://wow.zamimg.com/images/wow/icons/large/spell_fire_fireball02.jpg";
             let baseDuration = 2400;
 
             if (spellName === 'Scorch') {
+                iconUrl = "https://wow.zamimg.com/images/wow/icons/large/spell_fire_soulburn.jpg";
                 baseDuration = 1500;
             }
+
+            castIcon.style.backgroundImage = `url('${iconUrl}')`;
 
             let currentHaste = sim.baseHaste + (sim.t10Active ? 12.0 : 0);
             let duration = Math.round(baseDuration / (1 + (currentHaste / 100)));

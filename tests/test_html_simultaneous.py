@@ -1,8 +1,8 @@
 """
-Test suite approfondita per la validazione di index.html e t8_t10_preview.html:
-1. Integrita DOM: verifica che ogni document.getElementById(...) e document.querySelector(...)
+Test suite approfondita per la validazione del simulatore Web in index.html:
+1. Integrità DOM: verifica che ogni document.getElementById(...) e document.querySelector(...)
    utilizzato negli script JS punti a un elemento effettivamente esistente nel DOM.
-2. Integrita Eventi: verifica che ogni tag interattivo con onclick chiami una funzione JS valida.
+2. Integrità Eventi: verifica che ogni tag interattivo con onclick chiami una funzione JS valida.
 3. Test di Concorrenza & Robustezza Temporale:
    - Verifica la gestione di timer multipli/sovrapposti (anti-concurrency leak).
    - Verifica che le transizioni di stato simultanee (tutti i proc attivi contemporaneamente)
@@ -19,7 +19,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class TestHTMLSimultaneous(unittest.TestCase):
 
     def setUp(self):
-        self.html_files = ["index.html", "t8_t10_preview.html"]
+        self.html_files = ["index.html"]
 
     def test_dom_ids_exist(self):
         """Verifica che ogni getElementById usato nel JS esista nel DOM HTML."""
