@@ -1474,19 +1474,12 @@ def make_stats_custom_text() -> str:
 end"""
 
 SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
-    -- Frame nativo invisibile dedicato: in WeakAuras 3.3.5a i custom status trigger
-    -- non ricevono COMBAT_LOG_EVENT_UNFILTERED in modo affidabile. Un frame C++ dedicato
-    -- garantisce la cattura al 100% di tutti i colpi e notifica WA via FMHUD_HS_UPDATE.
     _G.FMHUD_HS = _G.FMHUD_HS or {
         streak = 0,
-        hasBuff = false,
-        duration = 10,
-        expirationTime = 0,
         lastEventKey = nil,
     }
     local hs = _G.FMHUD_HS
 
-    -- Spells valide: solo colpi diretti non-periodici che concorrono al talento Hot Streak
     local QUALIFYING_SPELLS = {
         [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
         [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
@@ -1515,58 +1508,10 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         end
     end
 
-    local function syncBuff()
-        local found = false
-        for i = 1, 40 do
-            local name, _, _, _, _, dur, expTime, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
-            if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" or string.find(name, "Hot Streak") then
-                found = true
-                hs.hasBuff = true
-                hs.duration = (dur and dur > 0) and dur or 10
-                hs.expirationTime = (expTime and expTime > 0) and expTime or (GetTime() + hs.duration)
-                break
-            end
-        end
-        if not found and hs.hasBuff then
-            hs.hasBuff = false
-            hs.expirationTime = 0
-        end
-    end
-
     local function handleEvent(ev, ...)
-        if ev == "PLAYER_ENTERING_WORLD" then
+        if ev == "PLAYER_ENTERING_WORLD" or ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
             hs.streak = 0
-            hs.hasBuff = false
-            hs.expirationTime = 0
-            syncBuff()
             notifyWA()
-        elseif ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
-            hs.streak = 0
-            hs.hasBuff = false
-            hs.expirationTime = 0
-            notifyWA()
-
-        elseif ev == "UNIT_AURA" then
-            local unit = ...
-            if unit == "player" then
-                local oldBuff = hs.hasBuff
-                syncBuff()
-                if oldBuff ~= hs.hasBuff then
-                    notifyWA()
-                end
-            end
-        elseif ev == "UNIT_SPELLCAST_SUCCEEDED" then
-            local unit, spellName, _, _, spellId = ...
-            if unit == "player" then
-                if spellId == 11366 or spellId == 12505 or spellId == 12522 or spellId == 12523 or
-                   spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
-                   spellId == 42890 or spellId == 42891 or (spellName and (string.find(spellName, "Pyro") or string.find(spellName, "Piro"))) then
-                    hs.hasBuff = false
-                    hs.expirationTime = 0
-                    notifyWA()
-                end
-            end
         elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
             local subEvent = select(2, ...)
             if subEvent == "SPELL_DAMAGE" then
@@ -1574,7 +1519,6 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                 local sourceName = select(4, ...)
                 local sourceFlags = select(5, ...)
 
-                -- Controllo sorgente: GUID player, nome player, o flag COMBATLOG_OBJECT_AFFILIATION_MINE (0x00000001)
                 local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
                 if not isPlayer and sourceFlags and bit and bit.band then
                     if bit.band(sourceFlags, 0x00000001) > 0 then
@@ -1583,45 +1527,34 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                 end
 
                 if isPlayer then
-                    -- Multi-offset spell: gestisce server con e senza hideCaster (Arg 9/10 vs 10/11)
-                    local spellId = select(10, ...)
-                    local spellName = select(11, ...)
+                    local spellId = select(9, ...)
+                    local spellName = select(10, ...)
                     if not isQualifying(spellId, spellName) then
-                        spellId = select(9, ...)
-                        spellName = select(10, ...)
+                        spellId = select(10, ...)
+                        spellName = select(11, ...)
                     end
 
                     if isQualifying(spellId, spellName) then
-                        -- De-duplicazione eventi: evita doppi incrementi su multi-target/stesso frame
                         local timestamp = select(1, ...)
-                        local destGUID = select(6, ...) or destGUID or ""
+                        local destGUID = select(6, ...) or ""
                         local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
 
                         if hs.lastEventKey ~= eventKey then
                             hs.lastEventKey = eventKey
 
-                            -- Multi-offset critical: supporta core WotLK che passano true booleano o 1 numerico
                             local c18, c19, c20 = select(18, ...)
-                            local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)
+                            local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
 
                             if isCrit then
                                 if hs.streak == 0 then
                                     hs.streak = 1
-                                    notifyWA()
                                 else
-                                    -- 2nd Crit: Proc Hot Streak, and reset streak to 0
                                     hs.streak = 0
-                                    hs.hasBuff = true
-                                    hs.duration = 10.0
-                                    hs.expirationTime = GetTime() + 10.0
-                                    notifyWA()
                                 end
                             else
-                                if hs.streak > 0 then
-                                    hs.streak = 0
-                                    notifyWA()
-                                end
+                                hs.streak = 0
                             end
+                            notifyWA()
                         end
                     end
                 end
@@ -1629,20 +1562,23 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         end
     end
 
-    if not _G.FMHUD_HSFrame then
-        local f = CreateFrame("Frame", "FMHUD_HSFrame")
-        _G.FMHUD_HSFrame = f
-        f:RegisterEvent("PLAYER_ENTERING_WORLD")
-        f:RegisterEvent("PLAYER_DEAD")
-        f:RegisterEvent("PLAYER_UNGHOST")
+    _G.FMHUD_HandleHSEvent = handleEvent
 
-        f:RegisterEvent("UNIT_AURA")
-        f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-        f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-        f:SetScript("OnEvent", function(self, ev, ...)
-            handleEvent(ev, ...)
-        end)
+    local f = _G.FMHUD_HSFrame
+    if not f then
+        f = CreateFrame("Frame", "FMHUD_HSFrame")
+        _G.FMHUD_HSFrame = f
     end
+    f:UnregisterAllEvents()
+    f:RegisterEvent("PLAYER_ENTERING_WORLD")
+    f:RegisterEvent("PLAYER_DEAD")
+    f:RegisterEvent("PLAYER_UNGHOST")
+    f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    f:SetScript("OnEvent", function(self, ev, ...)
+        if _G.FMHUD_HandleHSEvent then
+            _G.FMHUD_HandleHSEvent(ev, ...)
+        end
+    end)
 
     if event then
         handleEvent(event, ...)

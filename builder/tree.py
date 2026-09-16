@@ -1455,7 +1455,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "FMHUD_HS_UPDATE,PLAYER_ENTERING_WORLD,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_DEAD,PLAYER_ALIVE",
+                            "events": "FMHUD_HS_UPDATE,PLAYER_ENTERING_WORLD,PLAYER_DEAD,PLAYER_ALIVE",
                             "custom": make_hotstreak_seg1_trigger(),
                         },
                         "untrigger": {
