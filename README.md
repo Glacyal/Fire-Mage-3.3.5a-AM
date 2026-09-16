@@ -89,7 +89,7 @@ python tests/test_tree_layout.py
 
 Per ricompilare la stringa di importazione dopo aver modificato i moduli:
 ```bash
-python generate_import_string.py
+python generate.py
 ```
 
 ---

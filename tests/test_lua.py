@@ -60,8 +60,8 @@ def run_tests():
     # 3. Verifica blocchi Lua embedded nella WeakAura
     sys.path.insert(0, root_dir)
     try:
-        import generate_import_string
-        tree = generate_import_string.build_wa_tree()
+        import builder.tree
+        tree = builder.tree.build_wa_tree()
         for item in tree.get('c', []):
             for k in ['customText', 'custom']:
                 if k in item and isinstance(item[k], str):
@@ -69,7 +69,7 @@ def run_tests():
                         all_passed = False
         print("[OK] Tutti i blocchi Lua embedded in WeakAuras")
     except Exception as e:
-        print(f"[-] Errore durante l'import di generate_import_string: {e}")
+        print(f"[-] Errore durante l'import di builder.tree: {e}")
         all_passed = False
 
     if all_passed:

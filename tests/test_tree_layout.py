@@ -11,7 +11,7 @@ import sys
 
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, root_dir)
-from generate_import_string import build_wa_tree
+from builder.tree import build_wa_tree
 
 def test_tree_structure():
     tree = build_wa_tree()

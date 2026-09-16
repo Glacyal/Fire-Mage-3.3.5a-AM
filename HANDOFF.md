@@ -23,7 +23,7 @@ La suite è distribuita principalmente come **WeakAura 100% autonoma** in format
 ```text
 Fire Mage 3.3.5a AM/
 ├── IMPORT_STRING.txt         # Stringa WeakAuras pronta all'uso per il comando /wa
-├── generate_import_string.py # Compilatore Python dell'albero WA (AceSerializer + LibDeflate)
+├── generate.py # Compilatore Python dell'albero WA (AceSerializer + LibDeflate)
 ├── index.html                # Simulatore interattivo HTML/CSS/JS (proporzioni 1:1)
 ├── t8_t10_preview.html       # Copia di sincronizzazione dello showcase
 │
@@ -66,7 +66,7 @@ Fire Mage 3.3.5a AM/
 Per apportare modifiche alla suite o aggiornare la logica di gioco:
 
 1. **Modifica Codice**:
-   - Modifica la logica nei file della cartella `modules/` o direttamente nei template di `generate_import_string.py`.
+   - Modifica la logica nei file della cartella `modules/` o direttamente nei template di `generate.py`.
 2. **Esecuzione dei Test**:
    - Lancia la suite di test sfruttando il multi-threading del processore per la massima velocità, oppure lancia script specifici in base alle modifiche fatte:
      ```bash
@@ -79,7 +79,7 @@ Per apportare modifiche alla suite o aggiornare la logica di gioco:
 3. **Rigenerazione della Stringa**:
    - Ricompila la stringa WA eseguendo:
      ```bash
-     python generate_import_string.py
+     python generate.py
      ```
    - Il comando aggiornerà [`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt) in modo deterministico.
 4. **Verifica sul Simulatore**:
@@ -128,5 +128,5 @@ Il pannello statistiche previene la duplicazione dei buff raid appartenenti alla
 ## 5. Linee Guida per Contributi Futuri
 
 - **Compatibilità Lua 5.1**: Non utilizzare sintassi o funzioni introdotte in versioni successive di Lua (es. operatori bitwise nativi di Lua 5.3; usare `bit.band` se necessario).
-- **Auto-sufficienza delle Auras**: Ciascun blocco di codice inserito in `generate_import_string.py` deve poter funzionare in autonomia all'interno dell'ambiente protetto di WeakAuras.
-- **Determinismo**: La stringa esportata deve essere sempre riproducibile eseguendo `generate_import_string.py`.
+- **Auto-sufficienza delle Auras**: Ciascun blocco di codice inserito in `generate.py` deve poter funzionare in autonomia all'interno dell'ambiente protetto di WeakAuras.
+- **Determinismo**: La stringa esportata deve essere sempre riproducibile eseguendo `generate.py`.
