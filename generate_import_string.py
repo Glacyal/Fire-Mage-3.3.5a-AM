@@ -686,18 +686,18 @@ SHARED_T8_INIT_LUA = """function()
             local r = regObj and (regObj.region or (regObj.GetPoint and regObj))
             if r then
                 local point, relTo, relPoint, curX, curY = r:GetPoint(1)
-                if force or not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-54)) > 0.5) then
+                if force or not curX or math.abs(curX - targetX) > 0.5 or (curY and math.abs(curY - (-45)) > 0.5) then
                     r:ClearAllPoints()
-                    r:SetPoint("CENTER", group, "CENTER", targetX, -54)
+                    r:SetPoint("CENTER", group, "CENTER", targetX, -45)
                 end
                 if r.GetWidth and math.abs(r:GetWidth() - targetW) > 0.5 then
                     r:SetWidth(targetW)
                     r:SetHeight(targetW)
                 end
                 local data = WeakAuras.GetData and WeakAuras.GetData(id)
-                if data and (data.xOffset ~= targetX or data.yOffset ~= -54) then
+                if data and (data.xOffset ~= targetX or data.yOffset ~= -45) then
                     data.xOffset = targetX
-                    data.yOffset = -54
+                    data.yOffset = -45
                 end
             else
                 allFound = false
@@ -2392,7 +2392,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -180,
-                "yOffset": -14,
+                "yOffset": -4,
                 "controlledChildren": [
                     "Molten Armor - Active",
                     "Molten Armor - OFF"
@@ -2545,7 +2545,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -210,
-                "yOffset": -14,
+                "yOffset": -4,
                 "controlledChildren": [
                     "Arcane Intellect - Active",
                     "Arcane Intellect - OFF"
@@ -2701,7 +2701,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -150,
-                "yOffset": -14,
+                "yOffset": -4,
                 "controlledChildren": [
                     "Focus Magic - Active",
                     "Focus Magic - OFF"
@@ -2793,7 +2793,7 @@ end""",
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -110,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "cooldown": True,
@@ -2840,7 +2840,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -66,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "cooldown": True,
@@ -2887,7 +2887,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": -22,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "cooldown": True,
@@ -2935,7 +2935,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 0,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "displayIcon": "Interface\\Icons\\Spell_Arcane_StudentOfMagic",
@@ -2990,7 +2990,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 22,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "displayIcon": "Interface\\Icons\\INV_Misc_Gem_Sapphire_02",
@@ -3058,7 +3058,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 66,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "displayIcon": "Interface\\Icons\\Spell_Fire_SealOfFire",
@@ -3108,7 +3108,7 @@ end"""
                 "regionType": "icon",
                 "internalVersion": 52,
                 "xOffset": 110,
-                "yOffset": -54,
+                "yOffset": -45,
                 "width": 28,
                 "height": 28,
                 "displayIcon": "Interface\\Icons\\Spell_Magic_LesserInvisibilty",
@@ -3154,7 +3154,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 264,
+                "width": 278,
                 "height": 14,
                 "xOffset": 0,
                 "yOffset": -15,
@@ -3237,7 +3237,7 @@ end"""
                 "internalVersion": 52,
                 "xOffset": 0,
                 "yOffset": 0,
-                "width": 264,
+                "width": 278,
                 "height": 7,
                 "texture": "Interface\\Buttons\\WHITE8X8",
                 "color": [0.05, 0.05, 0.05, 0.85],
@@ -3266,9 +3266,9 @@ end"""
                 "parent": "10 - Hot Streak Bar",
                 "regionType": "texture",
                 "internalVersion": 52,
-                "width": 130,
+                "width": 137,
                 "height": 5,
-                "xOffset": -66,
+                "xOffset": -70,
                 "yOffset": 0,
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
                 "color": [1.0, 0.55, 0.0, 1.0],
@@ -3297,7 +3297,7 @@ end"""
                 "parent": "10 - Hot Streak Bar",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 264,
+                "width": 278,
                 "height": 5,
                 "xOffset": 0,
                 "yOffset": 0,
@@ -3348,7 +3348,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 264,
+                "width": 278,
                 "height": 20,
                 "xOffset": 0,
                 "yOffset": 8,
@@ -3398,7 +3398,7 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 264,
+                "width": 278,
                 "height": 3,
                 "xOffset": 0,
                 "yOffset": -4,
@@ -3482,7 +3482,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -180,
-                "yOffset": -54,
+                "yOffset": -45,
                 "anchorPoint": "CENTER",
                 "selfPoint": "CENTER",
                 "controlledChildren": [
