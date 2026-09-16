@@ -7,7 +7,14 @@ Verifica la conformità di tutti i 7 moduli in builder/components/:
 - Integrità referenziale tra controlledChildren e nodi figli
 - Conformità con WeakAuras 4.0.0 (internalVersion 52)
 """
+import os
+import sys
 import unittest
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 from builder.tree import build_wa_tree
 from builder.components import (
     build_procs_auras,

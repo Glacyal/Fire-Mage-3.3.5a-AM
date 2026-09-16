@@ -7,7 +7,14 @@ Verifica che la barra Hot Streak rispetti i requisiti ingegneristici:
 - Gestore dinamico degli eventi _G.FMHUD_HandleHSEvent e UnregisterAllEvents
 - Assenza di reset su PLAYER_REGEN_ENABLED (uscita combat)
 """
+import os
+import sys
 import unittest
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 from builder.components.hot_streak import (
     build_hotstreak_auras,
     SHARED_HOTSTREAK_CHECK_LUA,
