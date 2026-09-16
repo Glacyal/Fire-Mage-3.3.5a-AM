@@ -958,7 +958,7 @@
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_burnout.jpg" alt="Combustion Proc">
                     </div>
                     <!-- 5. Scorch / Improved Scorch (+5% Crit) -->
-                    <div class="wa-box size-34" id="procScorch" onclick="toggleScorch()" title="Scorch (+5% Spell Crit Debuff)">
+                    <div class="wa-box size-34" id="procScorch" onclick="applyScorch()" title="Scorch (+5% Spell Crit Debuff)">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_soulburn.jpg" alt="Scorch">
                         <div class="cd-swipe" id="swipeScorch"></div>
                         <div class="tag-timer" id="scorchTimer"></div>
@@ -1093,7 +1093,9 @@
                             <!-- 6. Combustion (Sigillo dorato di fuoco) -->
                             <div class="wa-box size-34" id="utilCombustion" onclick="cycleCombustion()" title="Combustione (Clicca per aggiungere stack, +10% Crit/stack)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_sealoffire.jpg" alt="Combustion">
+                                <div class="cd-swipe" id="swipeCombustion"></div>
                                 <div class="tag-stack" id="tagCombustStack"></div>
+                                <div class="tag-timer" id="timerCombustion"></div>
                             </div>
                             <!-- 7. Mirror Image (3 volti arcani blu) -->
                             <div class="wa-box size-34" id="utilMirror" onclick="useMirrorImage()" title="Immagine Speculare (3 min CD)">
@@ -1118,41 +1120,39 @@
 
             <div class="card-grid">
                 <!-- Rotazione Incantesimi -->
+                <!-- Rotazione Incantesimi -->
                 <div class="group-box">
-                    <h4>Azioni di Lancio Magie</h4>
+                    <h4>Rotazione & Magie</h4>
                     <div class="btn-flex">
                         <button class="btn-act btn-main" id="btnCastCrit" onclick="castSpellAction('Fireball', true)">🔥 Fireball (Crit!)</button>
                         <button class="btn-act" id="btnCastNorm" onclick="castSpellAction('Fireball', false)">Fireball (Normale)</button>
                     </div>
                     <div class="btn-flex">
-                        <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Pyroblast Istantaneo</button>
-                        <button class="btn-act" id="btnForceHs" onclick="forceHotStreakReady()">⚡ Attiva Hot Streak</button>
-                    </div>
-                    <div class="btn-flex">
                         <button class="btn-act" id="btnLbAct" onclick="applyLivingBomb()">💣 Living Bomb</button>
                         <button class="btn-act" id="btnScorchAct" onclick="castSpellAction('Scorch', true)">🔥 Cast Scorch</button>
                     </div>
-                </div>
-
-                <!-- Monili & Set Endgame Fire -->
-                <div class="group-box">
-                    <h4>Monili Endgame & Set BiS</h4>
                     <div class="btn-flex">
-                        <button class="btn-act" id="btnDfoAct" onclick="useTrinket1()">💎 DFO (Rotface ICC)</button>
-                        <button class="btn-act" id="btnCtsAct" onclick="useTrinket2()">🔥 CTS (Halion RS)</button>
-                    </div>
-                    <div class="btn-flex">
-                        <button class="btn-act" id="btnT10Toggle" onclick="triggerT10()">⚡ Proc T10 (+12% Haste)</button>
-                        <button class="btn-act" id="btnT8Toggle" onclick="triggerT8()">✨ Proc T8 (+350 SP)</button>
-                    </div>
-                    <div class="btn-flex">
-                        <button class="btn-act active" id="btnMoltenFuryToggle" onclick="toggleMoltenFury()">🩸 Bersaglio &le; 35% (Fury ON)</button>
+                        <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Pyroblast Istantaneo</button>
                     </div>
                 </div>
 
-                <!-- Buff Personali (Molten, Intellect, FM) -->
+                <!-- Cooldown Offensivi -->
                 <div class="group-box">
-                    <h4>Buff Lunghi & Utility</h4>
+                    <h4>Cooldown & Burst (Trinket)</h4>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnCombustCycle" onclick="cycleCombustion()">Combustion: 0 Stacks</button>
+                        <button class="btn-act" id="btnMirrorAct" onclick="useMirrorImage()">👥 Mirror Image</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act" id="btnDfoAct" onclick="useTrinket1()">💎 DFO (Rotface)</button>
+                        <button class="btn-act" id="btnCtsAct" onclick="useTrinket2()">🔥 CTS (Halion)</button>
+                        <button class="btn-act" id="btnCloakAct" onclick="triggerCloak()">🪡 Mantello</button>
+                    </div>
+                </div>
+
+                <!-- Proc & Setup -->
+                <div class="group-box">
+                    <h4>Buff, Proc & Scenari</h4>
                     <div class="btn-flex">
                         <button class="btn-act active" id="btnMoltenToggle" onclick="toggleMolten()">Molten: OFF</button>
                         <button class="btn-act active" id="btnIntToggle" onclick="toggleIntellect()">Intell.: OFF</button>
@@ -1163,26 +1163,27 @@
                         <button class="btn-act" id="btnFmProc" onclick="setFmState('PROC')">FM: Proc 10s</button>
                     </div>
                     <div class="btn-flex">
-                        <button class="btn-act" id="btnCloakAct" onclick="triggerCloak()">🪡 Mantello Ricamo</button>
-                        <button class="btn-act" id="btnMirrorAct" onclick="useMirrorImage()">👥 Mirror Image</button>
+                        <button class="btn-act" id="btnForceHs" onclick="forceHotStreakReady()">⚡ Forza Hot Streak</button>
+                        <button class="btn-act" id="btnT10Toggle" onclick="triggerT10()">⚡ Forza Proc T10</button>
+                        <button class="btn-act" id="btnT8Toggle" onclick="triggerT8()">✨ Forza Proc T8</button>
+                    </div>
+                    <div class="btn-flex">
+                        <button class="btn-act active" id="btnMoltenFuryToggle" onclick="toggleMoltenFury()">🩸 Target &le; 35% (Molten Fury)</button>
                     </div>
                 </div>
 
-                <!-- Gestione Mana & Combustion -->
+                <!-- Gestione Mana -->
                 <div class="group-box">
-                    <h4>Mana & Combustione</h4>
+                    <h4>Gestione Mana (Test)</h4>
                     <div class="btn-flex">
-                        <button class="btn-act" id="btnCombustCycle" onclick="cycleCombustion()">Combustion: 0 Stacks</button>
-                        <button class="btn-act" id="btnManaGemAct" onclick="useManaGem()">Usa Gemma Mana</button>
-                    </div>
-                    <div class="btn-flex">
+                        <button class="btn-act" id="btnManaGemAct" onclick="useManaGem()">Usa Gemma</button>
                         <button class="btn-act" id="btnRefillGems" onclick="refillManaGems()">Ricarica 3 Gemme</button>
-                        <button class="btn-act" id="btnManaFull" onclick="setManaPct(100.0)">Mana 100%</button>
                     </div>
                     <div class="btn-flex">
-                        <button class="btn-act" id="btnMana38" onclick="setManaPct(38.77)">Mana 38% (Foto 1)</button>
-                        <button class="btn-act" id="btnMana56" onclick="setManaPct(56.27)">Mana 56% (Foto 2)</button>
-                        <button class="btn-act" id="btnMana43" onclick="setManaPct(43.01)">Mana 43% (Foto 3)</button>
+                        <button class="btn-act" id="btnManaFull" onclick="setManaPct(100.0)">Mana 100%</button>
+                        <button class="btn-act" id="btnMana56" onclick="setManaPct(56.27)">Mana 56%</button>
+                        <button class="btn-act" id="btnMana43" onclick="setManaPct(43.01)">Mana 43%</button>
+                        <button class="btn-act" id="btnMana38" onclick="setManaPct(38.77)">Mana 38%</button>
                     </div>
                 </div>
             </div>
@@ -1604,12 +1605,51 @@
 
         // Combustion
         function cycleCombustion() {
-            sim.combustion = (sim.combustion + 1) % 4;
-            document.getElementById('btnCombustCycle').textContent = 'Combustion: ' + sim.combustion + ' Stacks';
-            document.getElementById('tagCombustStack').textContent = sim.combustion > 0 ? sim.combustion : '';
+            if (sim.combustion === -1) {
+                // If it's on CD, clicking it could theoretically reset it or we just do nothing.
+                // For simulator purposes, clicking it during CD will cancel the CD and reset to 0.
+                clearSimTimer('combustion');
+                sim.combustion = 0;
+                document.getElementById('swipeCombustion').classList.remove('active');
+                document.getElementById('timerCombustion').textContent = '';
+                spawnFCT('Combustion: Azzerata (CD Cancellato)', false);
+            } else if (sim.combustion >= 0 && sim.combustion < 3) {
+                sim.combustion += 1;
+                spawnFCT('Combustion: ' + sim.combustion + ' Stacks', false);
+            } else if (sim.combustion === 3) {
+                // Go to CD
+                sim.combustion = -1;
+                spawnFCT('Combustion: In Cooldown (2m)', false);
+                
+                const swipe = document.getElementById('swipeCombustion');
+                const timer = document.getElementById('timerCombustion');
+                swipe.classList.add('active');
+                let rem = 120; // 2 minutes
+                timer.textContent = '2m';
+                
+                sim.timers['combustion'] = setInterval(() => {
+                    rem -= 1;
+                    if (rem <= 0 || sim.combustion !== -1) {
+                        clearSimTimer('combustion');
+                        sim.combustion = 0;
+                        swipe.classList.remove('active');
+                        timer.textContent = '';
+                        updateProcsVisibility();
+                        renderStats();
+                        document.getElementById('btnCombustCycle').textContent = 'Combustion: 0 Stacks';
+                        document.getElementById('tagCombustStack').textContent = '';
+                    } else {
+                        timer.textContent = rem > 60 ? Math.ceil(rem / 60) + 'm' : rem + 's';
+                    }
+                }, 1000);
+            }
+
+            let btnText = sim.combustion === -1 ? 'Combustion: In CD' : 'Combustion: ' + sim.combustion + ' Stacks';
+            document.getElementById('btnCombustCycle').textContent = btnText;
+            document.getElementById('tagCombustStack').textContent = (sim.combustion > 0) ? sim.combustion : '';
+            
             updateProcsVisibility();
             renderStats();
-            spawnFCT('Combustion: ' + sim.combustion + ' Stacks', false);
         }
 
         // Clearcasting Toggle
@@ -1619,10 +1659,14 @@
             spawnFCT('Clearcasting: ' + (sim.clearcastingActive ? 'ON' : 'OFF'), false);
         }
 
-        // Scorch Toggle
-        function toggleScorch() {
+        // Scorch Toggle / Apply
+        function applyScorch(forceApply = false) {
             clearSimTimer('scorch');
-            sim.scorchActive = !sim.scorchActive;
+            if (forceApply) {
+                sim.scorchActive = true;
+            } else {
+                sim.scorchActive = !sim.scorchActive;
+            }
             updateProcsVisibility();
             spawnFCT('Scorch Debuff: ' + (sim.scorchActive ? 'ON (+5% Crit)' : 'OFF'), false);
             
@@ -1930,6 +1974,10 @@
                     const isCrit = forceCrit !== undefined ? forceCrit : (Math.random() * 100 < (sim.baseCrit + 10));
                     const dmg = isCrit ? Math.floor(12500 + Math.random() * 3000) : Math.floor(6200 + Math.random() * 800);
                     spawnFCT(dmg, isCrit);
+                    
+                    if (spellName === 'Scorch') {
+                        applyScorch(true);
+                    }
 
                     const hotStreakBar = document.getElementById('hotStreakBar');
                     const alertBox = document.getElementById('alertBox');
