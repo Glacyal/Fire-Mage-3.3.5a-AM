@@ -62,8 +62,6 @@ def serialize_string(s: str) -> str:
         else:
             res.append(ch)
     return ''.join(res)
-    """Serializza una stringa nel formato AceSerializer-3.0 con sequenze di escape per caratteri di controllo via str.translate."""
-    return '^S' + s.translate(ACE_ESCAPE_TRANS)
 
 def serialize_value(v) -> str:
     """Serializza ricorsivamente valori Python (None, bool, int/float, str, dict, list) in formato AceSerializer."""
@@ -536,7 +534,11 @@ SHARED_T8_INIT_LUA = """function()
 
         -- 2. Controllo Item ID noti Kirin Tor (10m e 25m)
         local count = 0
-        local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
+        local slots = _G.FMHUD_ArmorSlots
+        if not slots then
+            slots = { 1, 3, 5, 7, 10 }
+            _G.FMHUD_ArmorSlots = slots
+        end
         local setIDs = _G.FMHUD_T8_SetIDs
         for _, s in ipairs(slots) do
             local id = GetInventoryItemID("player", s)
@@ -1113,7 +1115,11 @@ SHARED_MIRRORIMAGE_CHECK_LUA = """function()
         }
         _G.FMHUD_T10_4P_Pieces = t10Pieces
     end
-    local slots = _G.FMHUD_ArmorSlots or { 1, 3, 5, 7, 10 }
+    local slots = _G.FMHUD_ArmorSlots
+    if not slots then
+        slots = { 1, 3, 5, 7, 10 }
+        _G.FMHUD_ArmorSlots = slots
+    end
     local t10Count = 0
     for _, slot in ipairs(slots) do
         local id = GetInventoryItemID("player", slot)
@@ -1440,66 +1446,73 @@ end"""
 
 def make_stats_custom_text() -> str:
     return """function()
+    local now = GetTime()
+    if _G.FMHUD_LastStatsText and (now - (_G.FMHUD_LastStatsTime or 0)) < 0.1 then
+        return _G.FMHUD_LastStatsText
+    end
+
     -- 1. SPELL POWER (Fire School = 3)
     local sp = GetSpellBonusDamage(3) or 0
     sp = math.floor(sp + 0.5)
 
     -- 2. SPELL CRIT (Fire School = 3)
-    -- Includes base crit, int contribution, Molten Armor (with spirit & glyph), talents, and buffs
     local crit = GetSpellCritChance(3) or 0
 
-    -- Combustion stacks (+10% Fire crit per stack if active)
-    for i = 1, 40 do
-        local bname, _, _, count, _, _, _, _, _, _, bId = UnitBuff("player", i)
-        if not bname then break end
-        if bId == 11129 or bname == "Combustion" then
-            local stacks = (count and count > 0) and count or 1
-            crit = crit + (stacks * 10)
-            break
-        end
-    end
-
-    -- 3. SPELL HASTE
+    -- 3. SPELL HASTE & HIT BUFFS (Scansione in singolo passaggio di UnitBuff)
     local ratingBonus = GetCombatRatingBonus(20) or 0
     local mult = 1 + (ratingBonus / 100)
 
+    local hasCombustion = false
     local hasLust = false
     local hasWrathAir = false
     local has3Haste = false
     local hasT10 = false
     local hasPI = false
     local hasBerserking = false
+    local hasHeroicPresence = false
 
     for i = 1, 40 do
-        local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+        local name, _, _, count, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
 
-        -- 1. Bloodlust / Heroism (+30% Haste)
+        -- Combustion (+10% Fire crit per stack)
+        if not hasCombustion and (spellId == 11129 or name == "Combustion" or name == "Combustione") then
+            hasCombustion = true
+            local stacks = (count and count > 0) and count or 1
+            crit = crit + (stacks * 10)
+        end
+
+        -- Bloodlust / Heroism (+30% Haste)
         if not hasLust and (spellId == 2825 or spellId == 32182 or name == "Bloodlust" or name == "Heroism" or name == "Bramosia Sanguinaria" or name == "Eroismo") then
             hasLust = true
             mult = mult * 1.30
-        -- 2. Wrath of Air Totem (+5% Spell Haste Shamano)
+        -- Wrath of Air Totem (+5% Spell Haste Shamano)
         elseif not hasWrathAir and (spellId == 3738 or spellId == 2895 or name == "Wrath of Air Totem" or name == "Totem dell'Aria Furiosa" or name:find("Wrath of Air")) then
             hasWrathAir = true
             mult = mult * 1.05
-        -- 3. 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE (Anti-conflitto)
+        -- 3% Raid Haste: Swift Retribution (Paladino) vs Improved Moonkin Form (Druido) - MAX ONCE
         elseif not has3Haste and (spellId == 48396 or spellId == 53648 or spellId == 53379 or spellId == 24907 or spellId == 31583
             or name == "Swift Retribution" or name == "Ritorsione Rapida" 
             or name == "Improved Moonkin Form" or name == "Forma di Lunagufo Migliorata") then
             has3Haste = true
             mult = mult * 1.03
-        -- 4. Tier 10 2-Piece Bonus: Pushing the Limit (+12% Spell Haste per 5s)
+        -- Tier 10 2-Piece Bonus: Pushing the Limit (+12% Spell Haste per 5s)
         elseif not hasT10 and (spellId == 70753 or spellId == 70752 or name == "Pushing the Limit" or name == "Oltre il Limite") then
             hasT10 = true
             mult = mult * 1.12
-        -- 5. Power Infusion (+20% Spell Haste Sacerdote)
+        -- Power Infusion (+20% Spell Haste Sacerdote)
         elseif not hasPI and (spellId == 10060 or name == "Power Infusion" or name == "Infusione di Potere") then
             hasPI = true
             mult = mult * 1.20
-        -- 6. Berserking (+20% Haste Razziale Troll)
+        -- Berserking (+20% Haste Razziale Troll)
         elseif not hasBerserking and (spellId == 26297 or name == "Berserking" or name == "Furia Berserker") then
             hasBerserking = true
             mult = mult * 1.20
+        end
+
+        -- Heroic Presence (Draenei aura)
+        if not hasHeroicPresence and (name == "Heroic Presence" or spellId == 28878 or spellId == 6562) then
+            hasHeroicPresence = true
         end
     end
 
@@ -1513,7 +1526,6 @@ def make_stats_custom_text() -> str:
         precisionHit = 0,
         isDraenei = (select(2, UnitRace("player")) == "Draenei") and 1 or 0,
     }
-    local now = GetTime()
     if (now - _G.FMHUD_StatCache.lastTalentCheck) > 10 then
         _G.FMHUD_StatCache.lastTalentCheck = now
         local prec = 0
@@ -1528,17 +1540,7 @@ def make_stats_custom_text() -> str:
         _G.FMHUD_StatCache.precisionHit = prec
     end
 
-    local draeneiHit = _G.FMHUD_StatCache.isDraenei
-    if draeneiHit == 0 then
-        for i = 1, 40 do
-            local bname, _, _, _, _, _, _, _, _, _, bId = UnitBuff("player", i)
-            if not bname then break end
-            if bname == "Heroic Presence" or bId == 28878 or bId == 6562 then
-                draeneiHit = 1
-                break
-            end
-        end
-    end
+    local draeneiHit = (_G.FMHUD_StatCache.isDraenei == 1 or hasHeroicPresence) and 1 or 0
 
     -- 5. TARGET DEBUFFS (Crit & Hit on target / boss)
     local targetCritBonus = 0
@@ -1599,10 +1601,13 @@ def make_stats_custom_text() -> str:
         hitText = string.format("|cFFFFFF00Hit:|r |cFFFFFFFF%.2f%%|r", totalHit)
     end
 
-    return string.format(
+    local out = string.format(
         "|cFFFF2222SP:|r |cFFFFFFFF%d|r\\n|cFFFF8800Crit:|r |cFFFFFFFF%.2f%%|r\\n|cFFCC44FFHaste:|r |cFFFFFFFF%.2f%%|r\\n%s",
         sp, crit, haste, hitText
     )
+    _G.FMHUD_LastStatsTime = now
+    _G.FMHUD_LastStatsText = out
+    return out
 end"""
 
 SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
@@ -2413,9 +2418,9 @@ end"""
                 "customTextUpdate": "update",
                 "customText": """function()
     for i = 1, 40 do
-        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if name == "Molten Armor" then
+        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 60 then
                 local m = math.floor(rem / 60)
@@ -2437,9 +2442,9 @@ end""",
                             "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if name == "Molten Armor" then
+        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 0 and rem <= 300 then
                 return true
@@ -2451,9 +2456,9 @@ end""",
 end""",
                             "customDuration": """function()
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if name == "Molten Armor" then
+        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
             return duration or 1800, expirationTime
         end
     end
@@ -2466,9 +2471,9 @@ end""",
                         "untrigger": {
                             "custom": """function(event, ...)
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if name == "Molten Armor" then
+        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 0 and rem <= 300 then
                 return false
@@ -2555,17 +2560,10 @@ end"""
                 "inverse": False,
                 "customTextUpdate": "update",
                 "customText": """function()
-    local b = {
-        ["Arcane Intellect"] = true,
-        ["Arcane Brilliance"] = true,
-        ["Dalaran Intellect"] = true,
-        ["Dalaran Brilliance"] = true,
-        ["Fel Intelligence"] = true,
-    }
     for i = 1, 40 do
-        local name, _, _, _, _, _, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if b[name] then
+        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 60 then
                 local m = math.floor(rem / 60)
@@ -2586,17 +2584,10 @@ end""",
                             "check": "event",
                             "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
-    local b = {
-        ["Arcane Intellect"] = true,
-        ["Arcane Brilliance"] = true,
-        ["Dalaran Intellect"] = true,
-        ["Dalaran Brilliance"] = true,
-        ["Fel Intelligence"] = true,
-    }
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if b[name] then
+        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 0 and rem <= 300 then
                 return true
@@ -2607,17 +2598,10 @@ end""",
     return false
 end""",
                             "customDuration": """function()
-    local b = {
-        ["Arcane Intellect"] = true,
-        ["Arcane Brilliance"] = true,
-        ["Dalaran Intellect"] = true,
-        ["Dalaran Brilliance"] = true,
-        ["Fel Intelligence"] = true,
-    }
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if b[name] then
+        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
             return duration or 3600, expirationTime
         end
     end
@@ -2626,17 +2610,10 @@ end""",
                         },
                         "untrigger": {
                             "custom": """function(event, ...)
-    local b = {
-        ["Arcane Intellect"] = true,
-        ["Arcane Brilliance"] = true,
-        ["Dalaran Intellect"] = true,
-        ["Dalaran Brilliance"] = true,
-        ["Fel Intelligence"] = true,
-    }
     for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime = UnitBuff("player", i)
+        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
-        if b[name] then
+        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
             local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
             if rem > 0 and rem <= 300 then
                 return false
