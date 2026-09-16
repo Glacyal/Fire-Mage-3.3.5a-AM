@@ -68,11 +68,13 @@ Per apportare modifiche alla suite o aggiornare la logica di gioco:
 1. **Modifica Codice**:
    - Modifica la logica nei file della cartella `modules/` o direttamente nei template di `generate_import_string.py`.
 2. **Esecuzione dei Test**:
-   - Lancia la suite di test per accertarti di non aver introdotto errori di sintassi o regressioni:
+   - Lancia la suite di test sfruttando il multi-threading del processore per la massima velocità, oppure lancia script specifici in base alle modifiche fatte:
      ```bash
-     python -m unittest discover -s tests -p "test_*.py"
+     python tests/run_parallel_tests.py
+     # Oppure singolarmente:
+     python tests/test_html_simultaneous.py
+     python tests/test_showcase.py
      python tests/test_lua.py
-     python tests/test_tree_layout.py
      ```
 3. **Rigenerazione della Stringa**:
    - Ricompila la stringa WA eseguendo:
@@ -115,6 +117,11 @@ Il pannello statistiche previene la duplicazione dei buff raid appartenenti alla
 - **Spell Crit 5%**: *Improved Scorch*, *Winter's Chill* e *Shadow and Flame* sono conteggiati una sola volta.
 - **All Crit 3%**: *Heart of the Crusader*, *Master Poisoner* e *Totem of Wrath* sono conteggiati una sola volta.
 - **Hit 3%**: *Misery* e *Improved Faerie Fire* sono conteggiati una sola volta.
+
+### 4.5 Ottimizzazione Estrema (Zero-Allocation e Concorrenza)
+- **Zero-Allocation**: La WA alloca strutture di supporto (es. `_G.FMHUD_ArmorSlots`) una volta sola globalmente, limitando al massimo la creazione di garbage e sventando gli spike di latenza della Garbage Collection di Lua 5.1.
+- **Throttling CPU**: Le logiche con eventi ad alta frequenza (come i loop del pannello stat o della corazza) adottano un throttle manuale (es. limitato a `0.25s` o 4Hz). I trigger non essenziali sono stati epurati dall'evento passivo `FRAME_UPDATE`.
+- **Client Agnostici**: La suite riconosce i buff tramite **Spell ID** anziché nome, garantendo il supporto nativo a tutte le lingue dei client (En, It, Ru, ecc).
 
 ---
 

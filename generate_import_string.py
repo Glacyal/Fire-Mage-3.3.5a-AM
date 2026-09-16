@@ -2441,17 +2441,22 @@ end""",
                             "check": "event",
                             "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
+    local now = GetTime()
+    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastMATime or 0)) < 0.25 then
+        return _G.FMHUD_LastMAActive or false
+    end
+    _G.FMHUD_LastMATime = now
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 0 and rem <= 300 then
-                return true
-            end
-            return false
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local active = rem > 0 and rem <= 300
+            _G.FMHUD_LastMAActive = active
+            return active
         end
     end
+    _G.FMHUD_LastMAActive = false
     return false
 end""",
                             "customDuration": """function()
@@ -2470,17 +2475,22 @@ end""",
                         },
                         "untrigger": {
                             "custom": """function(event, ...)
+    local now = GetTime()
+    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastMAUntrigTime or 0)) < 0.25 then
+        return _G.FMHUD_LastMAUntrig or false
+    end
+    _G.FMHUD_LastMAUntrigTime = now
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 0 and rem <= 300 then
-                return false
-            end
-            return true
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local untrig = not (rem > 0 and rem <= 300)
+            _G.FMHUD_LastMAUntrig = untrig
+            return untrig
         end
     end
+    _G.FMHUD_LastMAUntrig = true
     return true
 end"""
                         }
@@ -2584,17 +2594,22 @@ end""",
                             "check": "event",
                             "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
                             "custom": """function(event, ...)
+    local now = GetTime()
+    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastAITime or 0)) < 0.25 then
+        return _G.FMHUD_LastAIActive or false
+    end
+    _G.FMHUD_LastAITime = now
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 0 and rem <= 300 then
-                return true
-            end
-            return false
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local active = rem > 0 and rem <= 300
+            _G.FMHUD_LastAIActive = active
+            return active
         end
     end
+    _G.FMHUD_LastAIActive = false
     return false
 end""",
                             "customDuration": """function()
@@ -2610,17 +2625,22 @@ end""",
                         },
                         "untrigger": {
                             "custom": """function(event, ...)
+    local now = GetTime()
+    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastAIUntrigTime or 0)) < 0.25 then
+        return _G.FMHUD_LastAIUntrig or false
+    end
+    _G.FMHUD_LastAIUntrigTime = now
     for i = 1, 40 do
         local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
         if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 0 and rem <= 300 then
-                return false
-            end
-            return true
+            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
+            local untrig = not (rem > 0 and rem <= 300)
+            _G.FMHUD_LastAIUntrig = untrig
+            return untrig
         end
     end
+    _G.FMHUD_LastAIUntrig = true
     return true
 end"""
                         }
@@ -3528,7 +3548,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "UNIT_AURA,COMBAT_RATING_UPDATE,PLAYER_DAMAGE_DONE_MODS,PLAYER_ENTERING_WORLD,UNIT_INVENTORY_CHANGED,PLAYER_EQUIPMENT_CHANGED,PLAYER_TARGET_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,CHARACTER_POINTS_CHANGED,FRAME_UPDATE",
+                            "events": "UNIT_AURA,COMBAT_RATING_UPDATE,PLAYER_DAMAGE_DONE_MODS,PLAYER_ENTERING_WORLD,UNIT_INVENTORY_CHANGED,PLAYER_EQUIPMENT_CHANGED,PLAYER_TARGET_CHANGED,RAID_ROSTER_UPDATE,PARTY_MEMBERS_CHANGED,CHARACTER_POINTS_CHANGED",
                             "custom": make_stats_trigger(),
                         },
                         "untrigger": {

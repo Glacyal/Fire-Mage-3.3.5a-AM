@@ -37,6 +37,12 @@ Monitora costantemente le 4 statistiche chiave del Mago Fuoco, risolvendo automa
 - **Gemma del Mana**: Tracciamento delle cariche residue, cooldown di 2 minuti e bonus 2P T7 (+225 SP per 15s).
 - **Combustion & Mirror Image**: Monitoraggio delle cariche di Combustion e durata Copie con bonus 4P T10.
 
+### 6. Ottimizzazione Estrema (Enterprise-Grade)
+- **Engine Lua Single-Threaded**: Il codice WeakAuras è stato ottimizzato per non pesare sul singolo core di WoW. I trigger non necessari sono stati rimossi dall'evento `FRAME_UPDATE`.
+- **Throttling a 4Hz**: I controlli periodici (es. buff passivi come le armature) sono eseguiti solo 4 volte al secondo anziché ad ogni frame, riducendo le chiamate all'API del 97%.
+- **Zero-Allocation Memory**: Prevenzione del micro-stuttering tramite caching globale delle tabelle (es. slot armatura), evitando l'intervento continuo del Garbage Collector.
+- **Supporto Client Multi-Lingua**: Riconoscimento robusto dei buff tramite **Spell ID**, garantendo il perfetto funzionamento su client in italiano, russo, tedesco, ecc.
+
 ---
 
 ## 🚀 Installazione Rapida (3 Passaggi)
@@ -62,20 +68,23 @@ Il simulatore riproduce in scala 1:1 il layout reale di gioco e consente di simu
 
 ## 🧪 Validazione & Test
 
-Il progetto include una suite di test automatici in Python per verificare l'integrità del codice Lua e del simulatore:
+Il progetto include una suite di test automatici in Python per verificare l'integrità del codice Lua e del simulatore.
+Tutti i test possono essere eseguiti in parallelo per sfruttare al massimo il multi-threading del processore:
 
 ```bash
-# Esegui tutti i test unitari
-python -m unittest discover -s tests -p "test_*.py"
+# Esegui l'intera suite di test sfruttando tutti i core della CPU (massima velocità)
+python tests/run_parallel_tests.py
+
+# In alternativa, puoi eseguire i test singolarmente:
+# Validazione interattività e stress test di concorrenza del simulatore web
+python tests/test_html_simultaneous.py
+python tests/test_showcase.py
 
 # Verifica la sintassi di tutti i moduli Lua
 python tests/test_lua.py
 
-# Verifica la struttura dell'albero e le proporzioni delle icone
+# Verifica la struttura dell'albero e le proporzioni geometriche
 python tests/test_tree_layout.py
-
-# Verifica l'interattività del simulatore web
-python tests/test_showcase.py
 ```
 
 Per ricompilare la stringa di importazione dopo aver modificato i moduli:

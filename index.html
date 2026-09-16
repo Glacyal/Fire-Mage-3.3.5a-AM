@@ -1256,8 +1256,24 @@
             scorchActive: true,
             clearcastingActive: true,
             autoPlayTimer: null,
-            autoPlayStep: 0
+            autoPlayStep: 0,
+            timers: {}
         };
+
+        function clearSimTimer(key) {
+            if (sim.timers && sim.timers[key]) {
+                clearInterval(sim.timers[key]);
+                clearTimeout(sim.timers[key]);
+                delete sim.timers[key];
+            }
+        }
+
+        function clearAllSimTimers() {
+            if (!sim.timers) sim.timers = {};
+            for (let k in sim.timers) {
+                clearSimTimer(k);
+            }
+        }
 
         // Copia Stringa WeakAuras negli Appunti
         function copyImportString() {
@@ -1376,6 +1392,7 @@
         // Switch Modalità
         function setMode(mode) {
             stopAutoPlay();
+            clearAllSimTimers();
             sim.mode = mode;
             document.getElementById('btnModeScreenshot').className = 'nav-btn' + (mode === 'SCREENSHOT' ? ' active' : '');
             document.getElementById('btnModeIdle').className = 'nav-btn' + (mode === 'IDLE' ? ' active' : '');
@@ -1519,6 +1536,7 @@
 
         // Focus Magic State
         function setFmState(st) {
+            clearSimTimer('fm');
             sim.focusMagic = st;
             const box = document.getElementById('boxFocusMagic');
             const offTag = document.getElementById('tagFmOff');
@@ -1546,10 +1564,10 @@
                 timerTag.textContent = '10s';
 
                 let rem = 10.0;
-                let interval = setInterval(() => {
+                sim.timers['fm'] = setInterval(() => {
                     rem -= 0.1;
                     if (rem <= 0 || sim.focusMagic !== 'PROC') {
-                        clearInterval(interval);
+                        clearSimTimer('fm');
                         if (sim.focusMagic === 'PROC') setFmState('ALLY');
                     } else {
                         timerTag.textContent = rem <= 3 ? rem.toFixed(1) + 's' : Math.ceil(rem) + 's';
@@ -1606,6 +1624,7 @@
 
         // Proc Tier 10 (Pushing the Limit +12% Haste)
         function triggerT10() {
+            clearSimTimer('t10');
             sim.t10Active = true;
             updateProcsVisibility();
             renderStats();
@@ -1614,10 +1633,10 @@
             const t10Timer = document.getElementById('t10Timer');
             t10Timer.textContent = '5.0s';
             
-            const intv = setInterval(() => {
+            sim.timers['t10'] = setInterval(() => {
                 rem -= 0.1;
                 if (rem <= 0 || !sim.t10Active) {
-                    clearInterval(intv);
+                    clearSimTimer('t10');
                     sim.t10Active = false;
                     t10Timer.textContent = '';
                     updateProcsVisibility();
@@ -1630,6 +1649,7 @@
 
         // Proc Tier 8 (Praxis +350 SP)
         function triggerT8() {
+            clearSimTimer('t8');
             sim.t8Active = true;
             renderStats();
             spawnFCT('+350 SP (Praxis T8)!', true);
@@ -1638,10 +1658,10 @@
             swipe.classList.add('active');
             tagT8.textContent = '15.0s';
             let rem = 15.0;
-            const intv = setInterval(() => {
+            sim.timers['t8'] = setInterval(() => {
                 rem -= 0.5;
                 if (rem <= 0 || !sim.t8Active) {
-                    clearInterval(intv);
+                    clearSimTimer('t8');
                     sim.t8Active = false;
                     tagT8.textContent = '';
                     swipe.classList.remove('active');
@@ -1654,6 +1674,7 @@
 
         // Trinket 1: DFO (Dislodged Foreign Object)
         function useTrinket1() {
+            clearSimTimer('dfo');
             sim.dfoActive = true;
             renderStats();
             spawnFCT('+DFO Celestial Infusion!', true);
@@ -1663,11 +1684,11 @@
             
             let rem = 45;
             tag.textContent = rem + 's';
-            const intv = setInterval(() => {
+            sim.timers['dfo'] = setInterval(() => {
                 rem--;
                 if (rem <= 25) sim.dfoActive = false;
                 if (rem <= 0) {
-                    clearInterval(intv);
+                    clearSimTimer('dfo');
                     swipe.classList.remove('active');
                     tag.textContent = '';
                 } else {
@@ -1679,6 +1700,7 @@
 
         // Trinket 2: CTS (Charred Twilight Scale)
         function useTrinket2() {
+            clearSimTimer('cts');
             sim.ctsActive = true;
             renderStats();
             spawnFCT('+CTS Twilight Flame!', true);
@@ -1688,11 +1710,11 @@
 
             let rem = 45;
             tag.textContent = rem + 's';
-            const intv = setInterval(() => {
+            sim.timers['cts'] = setInterval(() => {
                 rem--;
                 if (rem <= 30) sim.ctsActive = false;
                 if (rem <= 0) {
-                    clearInterval(intv);
+                    clearSimTimer('cts');
                     swipe.classList.remove('active');
                     tag.textContent = '';
                 } else {
@@ -1704,22 +1726,25 @@
 
         // Trigger Cloak
         function triggerCloak() {
+            clearSimTimer('cloak');
             sim.cloakActive = true;
             spawnFCT('+Lightweave Embroidery (+295 SP)!', false);
             const swipe = document.getElementById('swipeCloak');
             const tag = document.getElementById('tagCloakTimer');
             swipe.classList.add('active');
             tag.textContent = '15s';
-            setTimeout(() => {
+            sim.timers['cloak'] = setTimeout(() => {
                 swipe.classList.remove('active');
                 tag.textContent = '';
                 sim.cloakActive = false;
+                clearSimTimer('cloak');
             }, 15000);
         }
 
         // Use Mana Gem
         function useManaGem() {
             if (sim.manaGems > 0) {
+                clearSimTimer('gem');
                 sim.manaGems--;
                 setManaPct(sim.manaPct + 25);
                 spawnFCT('+3300 Mana', false);
@@ -1731,10 +1756,10 @@
                 swipe.classList.add('active');
                 let rem = 120;
                 tag.textContent = '2:00';
-                const intv = setInterval(() => {
+                sim.timers['gem'] = setInterval(() => {
                     rem--;
                     if (rem <= 0) {
-                        clearInterval(intv);
+                        clearSimTimer('gem');
                         swipe.classList.remove('active');
                         tag.textContent = '';
                     } else {
@@ -1749,6 +1774,7 @@
         }
 
         function refillManaGems() {
+            clearSimTimer('gem');
             sim.manaGems = 3;
             document.getElementById('tagGemStack').textContent = '3';
             document.getElementById('tagGemStack').style.color = '#38bdf8';
@@ -1759,27 +1785,30 @@
 
         // Use Mirror Image
         function useMirrorImage() {
+            clearSimTimer('mirror');
             const swipe = document.getElementById('swipeMirror');
             const tag = document.getElementById('tagMirrorTimer');
             swipe.classList.add('active');
             tag.textContent = '3:00';
             spawnFCT('Mirror Image (3 Immagini Evocate)!', false);
-            setTimeout(() => {
+            sim.timers['mirror'] = setTimeout(() => {
                 swipe.classList.remove('active');
                 tag.textContent = '';
+                clearSimTimer('mirror');
             }, 10000);
         }
 
         // Apply Living Bomb
         function applyLivingBomb() {
+            clearSimTimer('lb');
             sim.lbActive = true;
             updateProcsVisibility();
             spawnFCT('Living Bomb Applicata!', false);
             let rem = 12.0;
-            const intv = setInterval(() => {
+            sim.timers['lb'] = setInterval(() => {
                 rem -= 1.0;
                 if (rem <= 0 || !sim.lbActive) {
-                    clearInterval(intv);
+                    clearSimTimer('lb');
                     if (sim.lbActive) {
                         spawnFCT('💥 LB EXPLOSION: 8,450', true);
                     }
