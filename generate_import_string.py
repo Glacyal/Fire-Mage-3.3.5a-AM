@@ -3350,7 +3350,7 @@ end"""
                 "internalVersion": 52,
                 "width": 278,
                 "height": 20,
-                "xOffset": 0,
+                "xOffset": -10,
                 "yOffset": 8,
                 "barColor": [0.0, 0.77, 1.0, 1.0],
                 "backgroundColor": [0.15, 0.15, 0.15, 0.8],
