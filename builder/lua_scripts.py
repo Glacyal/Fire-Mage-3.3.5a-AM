@@ -1652,7 +1652,7 @@ end"""
 
 def make_hotstreak_bg_trigger() -> str:
     return """function(event, ...)
-    _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
+    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
     _G.FMHUD_InitHotStreak(event, ...)
     return not UnitIsDeadOrGhost("player")
 end"""
@@ -1664,7 +1664,7 @@ end"""
 
 def make_hotstreak_seg1_trigger() -> str:
     return """function(event, ...)
-    _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
+    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
     _G.FMHUD_InitHotStreak(event, ...)
     local hs = _G.FMHUD_HS
     return (hs and hs.streak == 1)
