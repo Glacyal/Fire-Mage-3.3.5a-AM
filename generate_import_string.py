@@ -1660,7 +1660,6 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
             if spellId == 48108 or name == "Hot Streak" or name == "Buona sorte" or string.find(name, "Hot Streak") then
                 found = true
                 hs.hasBuff = true
-                hs.streak = 2
                 hs.duration = (dur and dur > 0) and dur or 10
                 hs.expirationTime = (expTime and expTime > 0) and expTime or (GetTime() + hs.duration)
                 break
@@ -1668,7 +1667,6 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         end
         if not found and hs.hasBuff then
             hs.hasBuff = false
-            hs.streak = 0
             hs.expirationTime = 0
         end
     end
@@ -1702,9 +1700,6 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                    spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
                    spellId == 42890 or spellId == 42891 or (spellName and (string.find(spellName, "Pyro") or string.find(spellName, "Piro"))) then
                     hs.hasBuff = false
-                    if hs.streak >= 2 then
-                        hs.streak = 0
-                    end
                     hs.expirationTime = 0
                     notifyWA()
                 end
@@ -1747,22 +1742,19 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                             local isCrit = (c19 == true or c18 == true or c20 == true or c19 == 1 or c18 == 1)
 
                             if isCrit then
-                                if not hs.hasBuff then
-                                    if hs.streak == 0 then
-                                        -- 1° Crit: illumina metà barretta sx (50%) in modo persistente
-                                        hs.streak = 1
-                                        notifyWA()
-                                    else
-                                        -- 2° Crit: i due segmenti diventano una barra unica da 264px con swipe 10s
-                                        hs.streak = 2
-                                        hs.hasBuff = true
-                                        hs.duration = 10.0
-                                        hs.expirationTime = GetTime() + 10.0
-                                        notifyWA()
-                                    end
+                                if hs.streak == 0 then
+                                    hs.streak = 1
+                                    notifyWA()
+                                else
+                                    -- 2nd Crit: Proc Hot Streak, and reset streak to 0
+                                    hs.streak = 0
+                                    hs.hasBuff = true
+                                    hs.duration = 10.0
+                                    hs.expirationTime = GetTime() + 10.0
+                                    notifyWA()
                                 end
                             else
-                                if not hs.hasBuff and hs.streak > 0 then
+                                if hs.streak > 0 then
                                     hs.streak = 0
                                     notifyWA()
                                 end
@@ -1812,13 +1804,13 @@ def make_hotstreak_seg1_trigger() -> str:
     _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
     _G.FMHUD_InitHotStreak(event, ...)
     local hs = _G.FMHUD_HS
-    return (hs and hs.streak >= 1)
+    return (hs and hs.streak == 1)
 end"""
 
 def make_hotstreak_seg1_untrigger() -> str:
     return """function(event, ...)
     local hs = _G.FMHUD_HS
-    return not (hs and hs.streak >= 1)
+    return not (hs and hs.streak == 1)
 end"""
 
 import copy
