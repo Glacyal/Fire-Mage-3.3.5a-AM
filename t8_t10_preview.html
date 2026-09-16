@@ -809,6 +809,13 @@
             background: linear-gradient(135deg, #cc1400, #ff3300);
             box-shadow: 0 0 12px rgba(255, 34, 0, 0.7);
         }
+        .btn-act.btn-pyro.disabled {
+            background: #1f1414;
+            color: #664444;
+            border: 1px solid #3a1a1a;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
 
         /* Guida Architetturale */
         .compare-box {
@@ -953,11 +960,14 @@
                     <!-- 5. Scorch / Improved Scorch (+5% Crit) -->
                     <div class="wa-box size-34" id="procScorch" onclick="toggleScorch()" title="Scorch (+5% Spell Crit Debuff)">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_soulburn.jpg" alt="Scorch">
+                        <div class="cd-swipe" id="swipeScorch"></div>
                         <div class="tag-timer" id="scorchTimer"></div>
                     </div>
-                    <!-- 6. Fire Blast / Incinerate -->
-                    <div class="wa-box size-34" id="procIncinerate" onclick="triggerIncinerate()" title="Incinerate / Fire Proc">
-                        <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_incinerate.jpg" alt="Incinerate">
+                    <!-- 6. Living Bomb -->
+                    <div class="wa-box size-34" id="procLivingBomb" onclick="applyLivingBomb()" title="Living Bomb">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_livingbomb.jpg" alt="Living Bomb">
+                        <div class="cd-swipe" id="swipeLb"></div>
+                        <div class="tag-timer" id="lbTimer"></div>
                     </div>
                     <!-- 7. Molten Fury (Target <= 35% HP in foto 1) -->
                     <div class="wa-box size-34 pixel-glow" id="procMoltenFury" onclick="toggleMoltenFury()" title="Molten Fury: Bersaglio <= 35% HP">
@@ -1368,24 +1378,33 @@
             const cc = document.getElementById('procClearcasting');
             const comb = document.getElementById('procCombustion');
             const scorch = document.getElementById('procScorch');
-            const inc = document.getElementById('procIncinerate');
+            const lb = document.getElementById('procLivingBomb');
             const fury = document.getElementById('procMoltenFury');
 
             t10.className = 'wa-box size-34' + (sim.t10Active ? ' pixel-glow' : ' proc-hidden');
             hs.className = 'wa-box size-34' + (sim.hotStreak === 2 ? ' pixel-glow' : ' proc-hidden');
             cc.className = 'wa-box size-34' + (sim.clearcastingActive ? ' pixel-glow' : ' proc-hidden');
             comb.className = 'wa-box size-34' + (sim.combustion > 0 || sim.mode === 'SCREENSHOT' ? ' pixel-glow' : ' proc-hidden');
-            scorch.className = 'wa-box size-34' + (sim.scorchActive ? '' : ' proc-hidden');
-            inc.className = 'wa-box size-34' + (sim.mode === 'SCREENSHOT' ? '' : ' proc-hidden');
+            scorch.className = 'wa-box size-34' + (sim.scorchActive ? ' pixel-glow' : ' proc-hidden');
+            lb.className = 'wa-box size-34' + (sim.lbActive ? ' pixel-glow' : ' proc-hidden');
             fury.className = 'wa-box size-34' + (sim.targetExecute ? ' pixel-glow' : ' proc-hidden');
 
             const procsBar = document.getElementById('procsBar');
-            const anyActive = sim.t10Active || sim.hotStreak === 2 || sim.clearcastingActive || (sim.combustion > 0) || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT';
+            const anyActive = sim.t10Active || sim.hotStreak === 2 || sim.clearcastingActive || (sim.combustion > 0) || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT' || sim.lbActive;
             
             if (anyActive && sim.mode !== 'IDLE') {
                 procsBar.classList.remove('hidden');
             } else {
                 procsBar.classList.add('hidden');
+            }
+            
+            const btnPyro = document.getElementById('btnPyroAct');
+            if (btnPyro) {
+                if (sim.hotStreak === 2) {
+                    btnPyro.classList.remove('disabled');
+                } else {
+                    btnPyro.classList.add('disabled');
+                }
             }
         }
 
@@ -1511,7 +1530,7 @@
                 tag.style.display = 'block';
                 tag.textContent = 'OFF';
             } else if (state === 'ACTIVE') {
-                box.className = 'wa-box';
+                box.className = 'wa-box proc-hidden';
                 tag.style.display = 'none';
             }
         }
@@ -1602,9 +1621,33 @@
 
         // Scorch Toggle
         function toggleScorch() {
+            clearSimTimer('scorch');
             sim.scorchActive = !sim.scorchActive;
             updateProcsVisibility();
             spawnFCT('Scorch Debuff: ' + (sim.scorchActive ? 'ON (+5% Crit)' : 'OFF'), false);
+            
+            const swipe = document.getElementById('swipeScorch');
+            const tag = document.getElementById('scorchTimer');
+            if (sim.scorchActive) {
+                swipe.classList.add('active');
+                let rem = 30.0;
+                tag.textContent = '30s';
+                sim.timers['scorch'] = setInterval(() => {
+                    rem -= 1.0;
+                    if (rem <= 0 || !sim.scorchActive) {
+                        clearSimTimer('scorch');
+                        sim.scorchActive = false;
+                        swipe.classList.remove('active');
+                        tag.textContent = '';
+                        updateProcsVisibility();
+                    } else {
+                        tag.textContent = rem.toFixed(0) + 's';
+                    }
+                }, 1000);
+            } else {
+                swipe.classList.remove('active');
+                tag.textContent = '';
+            }
         }
 
         // Molten Fury Toggle
@@ -1804,7 +1847,13 @@
             sim.lbActive = true;
             updateProcsVisibility();
             spawnFCT('Living Bomb Applicata!', false);
+            
+            const swipe = document.getElementById('swipeLb');
+            const tag = document.getElementById('lbTimer');
+            swipe.classList.add('active');
             let rem = 12.0;
+            tag.textContent = '12s';
+            
             sim.timers['lb'] = setInterval(() => {
                 rem -= 1.0;
                 if (rem <= 0 || !sim.lbActive) {
@@ -1812,6 +1861,12 @@
                     if (sim.lbActive) {
                         spawnFCT('💥 LB EXPLOSION: 8,450', true);
                     }
+                    sim.lbActive = false;
+                    swipe.classList.remove('active');
+                    tag.textContent = '';
+                    updateProcsVisibility();
+                } else {
+                    tag.textContent = rem.toFixed(0) + 's';
                 }
             }, 1000);
         }
