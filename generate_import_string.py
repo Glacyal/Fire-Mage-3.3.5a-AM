@@ -1867,7 +1867,6 @@ def build_wa_tree() -> dict:
                 "07 - Mana Bar",
                 "10 - Hot Streak Bar",
                 "08 - Castbar",
-                "09 - GCD",
                 "10 - Alerts",
                 "12 - Stats Panel"
             ],
@@ -3348,16 +3347,14 @@ end"""
                 "parent": "Fire Mage 3.3.5a AM",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 258,
+                "width": 278,
                 "height": 20,
                 "xOffset": 0,
                 "yOffset": 8,
                 "barColor": [0.0, 0.77, 1.0, 1.0],
                 "backgroundColor": [0.15, 0.15, 0.15, 0.8],
                 "texture": "Blizzard",
-                "icon": True,
-                "icon_side": "LEFT",
-                "iconSource": -1,
+                "icon": False,
                 "icon_color": [1, 1, 1, 1],
                 "triggers": {
                     1: {
@@ -3389,41 +3386,6 @@ end"""
                 ],
             },
 
-            # =================================================================
-            # 09 - GCD (Aurabar)
-            # =================================================================
-            {
-                "id": "09 - GCD",
-                "uid": "FMHUD_GCD",
-                "parent": "Fire Mage 3.3.5a AM",
-                "regionType": "aurabar",
-                "internalVersion": 52,
-                "width": 278,
-                "height": 3,
-                "xOffset": 0,
-                "yOffset": 0,
-                "barColor": [1.0, 1.0, 1.0, 0.8],
-                "backgroundColor": [0.0, 0.0, 0.0, 0.0],
-                "texture": "Interface\\TargetingFrame\\UI-StatusBar",
-                "triggers": {
-                    1: {
-                        "trigger": {
-                            "type": "spell",
-                            "event": "Cooldown Progress (Spell)",
-                            "spellName": 61304,
-                            "use_spellName": True,
-                            "genericShowOn": "showOnCooldown",
-                            "use_genericShowOn": True,
-                        },
-                        "untrigger": {}
-                    },
-                    "activeTriggerMode": -10,
-                },
-                "subRegions": [
-                    { "type": "subbackground" },
-                    { "type": "subforeground" },
-                ],
-            },
 
             # =================================================================
             # 10 - ALERTS (Group)
