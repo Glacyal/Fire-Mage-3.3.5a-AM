@@ -1685,11 +1685,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
             hs.hasBuff = false
             hs.expirationTime = 0
             notifyWA()
-        elseif ev == "PLAYER_REGEN_ENABLED" then
-            if not hs.hasBuff and hs.streak > 0 then
-                hs.streak = 0
-                notifyWA()
-            end
+
         elseif ev == "UNIT_AURA" then
             local unit = ...
             if unit == "player" then
@@ -1784,7 +1780,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         f:RegisterEvent("PLAYER_ENTERING_WORLD")
         f:RegisterEvent("PLAYER_DEAD")
         f:RegisterEvent("PLAYER_UNGHOST")
-        f:RegisterEvent("PLAYER_REGEN_ENABLED")
+
         f:RegisterEvent("UNIT_AURA")
         f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -3281,7 +3277,7 @@ end"""
                             "type": "custom",
                             "custom_type": "status",
                             "check": "event",
-                            "events": "FMHUD_HS_UPDATE,PLAYER_ENTERING_WORLD,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_REGEN_ENABLED,PLAYER_DEAD,PLAYER_ALIVE",
+                            "events": "FMHUD_HS_UPDATE,PLAYER_ENTERING_WORLD,UNIT_AURA,UNIT_SPELLCAST_SUCCEEDED,PLAYER_DEAD,PLAYER_ALIVE",
                             "custom": make_hotstreak_seg1_trigger(),
                         },
                         "untrigger": {
