@@ -23,6 +23,7 @@ PROJECT_DIR = os.path.dirname(TEST_DIR)
 
 # Elenco dei file di test dedicati
 TEST_SCRIPTS = [
+    "test_all_utility_cases.py",
     "test_equip_switch.py",
     "test_focus_magic.py",
     "test_lua.py",

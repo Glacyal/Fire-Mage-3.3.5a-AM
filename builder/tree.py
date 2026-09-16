@@ -19,11 +19,11 @@ from builder.components import (
 
 def build_wa_tree() -> dict:
     """
-    Costruisce e restituisce l'albero gerarchico completo delle 28 aure per WeakAuras 4.0.0 (internalVersion 52).
+    Costruisce e restituisce l'albero gerarchico completo delle 37 aure per WeakAuras 4.0.0 (internalVersion 52).
     Assembla modularmente i 7 componenti:
     1. Procs (Dynamic Group)
     2. Buffs (Molten Armor, Arcane Intellect, Focus Magic)
-    3. Utility Row (Trinket 1, Trinket 2, Cloak, Tier 8, Mana Gem, Combustion, Mirror Image)
+    3. Utility Row (Trinket 1, Trinket 2, Cloak, Tier 8, Gloves, Mana Gem, Combustion, Mirror Image, Boots)
     4. Bars (Mana Bar, Castbar)
     5. Hot Streak Bar (Background, Segment 1, Proc)
     6. Alerts (Hot Streak Alert)
@@ -55,9 +55,11 @@ def build_wa_tree() -> dict:
                 "05 - Trinket 2",
                 "06 - Cloak",
                 "06 - Tier 8",
+                "06 - Gloves",
                 "06 - Mana Gem",
                 "06 - Combustion",
                 "06 - Mirror Image",
+                "06 - Boots",
                 "07 - Mana Bar",
                 "10 - Hot Streak Bar",
                 "08 - Castbar",

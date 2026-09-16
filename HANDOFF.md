@@ -11,7 +11,7 @@ La suite è distribuita come **WeakAura autonoma** in formato compresso `!WA:1!`
 | Proprietà | Dettaglio |
 | :--- | :--- |
 | **Piattaforma Target** | World of Warcraft 3.3.5a (WotLK Build 12340) |
-| **Engine WeakAuras** | WeakAuras 2 / 3 Backport 3.3.5a (`internalVersion = 52`, header `!WA:1!`) |
+| **Engine WeakAuras** | WeakAuras 4.0.0 (`internalVersion = 52`, header `!WA:1!`). Tutti i test sono stati eseguiti su questa versione. |
 | **File di Distribuzione** | [`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt) |
 | **Simulatore Web** | [`docs/index.html`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/docs/index.html) |
 | **Live Demo Online** | [GitHub Pages Live Showcase](https://glacyal.github.io/FireMageHUD-335/) |
@@ -30,7 +30,7 @@ Fire Mage 3.3.5a AM/
 ├── GEMINI.md                        # Regole di progetto, comandi CP e MODELLO
 │
 ├── builder/                         # Pacchetto Python modulare per la generazione dell'HUD
-│   ├── tree.py                      # Assemblatore dell'albero gerarchico (28 nodi WeakAuras)
+│   ├── tree.py                      # Assemblatore dell'albero gerarchico (37 aure WeakAuras)
 │   ├── core/                        # Moduli core di serializzazione e codifica
 │   │   ├── constants.py             # Load conditions (Mage 68), texture, font Expressway
 │   │   ├── serializer.py            # Serializzatore AceSerializer-3.0 puro (^1...^^)
@@ -41,7 +41,7 @@ Fire Mage 3.3.5a AM/
 │       ├── hot_streak.py            # Barra Hot Streak a doppio segmento decoppiato
 │       ├── procs.py                 # Gruppo dinamico 01 - Procs (7 icone con Ignite)
 │       ├── buffs.py                 # 02 - Molten Armor, 03 - Arcane Intellect, 04 - Focus Magic
-│       ├── utility.py               # 06 - Utility Row (Combustion, DFO, CTS, Gemma, Copie, T8)
+│       ├── utility.py               # 06 - Utility Row (Combustion, Monili, Mantello, T8, Guanti, Gemma, Copie, Stivali)
 │       ├── bars.py                  # 08 - Castbar, 09 - Mana Bar, Global Cooldown (GCD)
 │       ├── stats.py                 # 07 - Stats (SP, Crit, Haste, Hit con cap resolution)
 │       └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
@@ -51,13 +51,14 @@ Fire Mage 3.3.5a AM/
 │
 └── tests/                           # Suite di test automatici e paralleli
     ├── run_parallel_tests.py        # Test runner parallelo multi-processore (ProcessPoolExecutor)
-    ├── test_components_integrity.py # Verifica integrità strutturale moduli
+    ├── test_all_utility_cases.py    # Verifica esaustiva 64 combinazioni riga utility
+    ├── test_components_integrity.py # Verifica integrità strutturale moduli (37 aure)
+    ├── test_equip_switch.py         # Test transizioni e centratura universale da 3 a 9 icone
     ├── test_hotstreak_decoupled.py  # Test logica Hot Streak persistente e decoppiata
     ├── test_html_simultaneous.py    # Stress test concorrenza simulatore web
     ├── test_showcase.py             # Audit 100% interattività e handler DOM
     ├── test_lua.py                  # Validazione sintassi codice Lua
     ├── test_tree_layout.py          # Verifica gerarchia e proporzioni albero WA
-    ├── test_equip_switch.py         # Test switch dinamico 6 vs 7 icone
     ├── test_focus_magic.py          # Test stati e transizioni Focus Magic
     └── test_stats_panel.py          # Test calcolo statistiche e conflitti raid
 ```
@@ -127,11 +128,21 @@ Per apportare modifiche alla suite o estendere la logica:
 - **Proc 10s Personale**: Quando l'alleato mette a segno un critico, compare con swipe e conto alla rovescia (+3% Crit per 10s).
 - **Allerta OFF**: Se il buff non è assegnato a nessuno o se l'alleato muore, compare l'icona desaturata con avviso `OFF` rosso.
 
-### 4.4 Switch Dinamico Tier 8 & Tier 10
-- **Tier 10 2P**: Collocato dinamicamente in `01 - Procs` a sinistra di Hot Streak.
-- **Tier 8 2P**: Gestito tramite riposizionamento globale nella riga utility in basso:
-  - Con $\ge 2$ pezzi T8 equipaggiati: layout a **7 icone** (passo 38px, span 256px) con *Praxis* (+350 SP con ICD 45s) al centro esatto (`x = 0`).
-  - Con $< 2$ pezzi T8 equipaggiati: layout standard a **6 icone** (passo 44px, span 248px) nascondendo *Praxis*.
+### 4.4 Centratura Dinamica Riga Utility (`06 - Utility Row`, da 3 a 9 Icone)
+- **Ordine rigoroso da sinistra a destra**:
+  `[Trinket 1] -> [Trinket 2] -> [Mantello] -> [Tier 8] -> [Guanti] -> [Gemma] -> [Combustione] -> [Copie] -> [Stivali]`
+- **Condizioni di visibilità e attivazione**:
+  - **Trinket 1 & 2 (Slot 13 e 14)**: Visibili solo se gli slot sono equipaggiati con un monile valido (nascosti se vuoti).
+  - **Mantello (Slot 15)**: Visibile solo se possiede un incanto con proc di potenziamento (*Lightweave*, *Darkglow*, *Swordguard*, *Flexweave*, ecc.).
+  - **Tier 8 2P (Praxis)**: Visibile solo con $\ge 2$ pezzi del set T8 Kirin Tor equipaggiati (+350 SP, 45s ICD).
+  - **Guanti (Slot 10)**: Visibili solo se equipaggiati con l'incanto Ingegneria *Acceleratori Ipersonici* (+340 Haste per 12s, 60s CD con filtro lockout condiviso < 45s).
+  - **Gemma del Mana**: Sempre visibile, con cariche effettive in borsa (`3`, `2`, `1` o `0` in rosso, senza prefisso `x`), icona nativa dinamica (Zaffiro/Smeraldo), cooldown di 2m e proc T7 Mana Surge.
+  - **Combustion**: Sempre visibile con icona nativa dell'incantesimo (`select(3, GetSpellInfo(11129))`), stato ON, stack critici e cooldown 2m.
+  - **Mirror Image**: Sempre visibile con icona nativa dell'incantesimo (`select(3, GetSpellInfo(55342))`), durata copie 30s, cooldown 3m e bonus 4P T10 *Quad Core* (+18% danno).
+  - **Stivali (Slot 8)**: Visibili solo se equipaggiati con un incanto che conferisce velocità di movimento (*Acceleratori a Nitro* per Ingegneria con indicatore dei Nitro attivi a 5s con Pixel Glow, countdown di cooldown a 180s e swipe con filtro lockout condiviso < 60s, oppure *Vitalità Tuskarr*, *Rapidità Felina*, *Velocità Superiore*, ecc.). Se non incantati con velocità o se lo slot è vuoto, non compaiono.
+  - **Disaccoppiamento Lockout Ingegneria**: In WotLK 3.3.5a l'attivazione di un tinker (es. Guanti) innesca un breve blocco condiviso (10-30s) sugli altri tinker (es. Stivali). Il motore di calcolo ignora questi blocchi temporanei su Guanti e Stivali, impedendo che l'attivazione dei guanti mostri falsi cooldown o swipe sui Nitro (e viceversa).
+- **Algoritmo di Centratura Dinamica**:
+  Ricalcola le coordinate orizzontali $X = \lfloor (i - (N+1)/2) \cdot \text{step} + 0.5 \rfloor$ attorno all'asse $X = 0$, scalando il passo tra 29px (9 icone) e 52px (3 icone), garantendo zero sovrapposizioni e confinamento perfetto entro 264px.
 
 ### 4.5 Risoluzione Conflitti Statistiche di Raid
 Il modulo `builder/components/stats.py` impedisce la duplicazione di buff raid della stessa categoria:

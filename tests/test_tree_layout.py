@@ -22,6 +22,8 @@ def test_tree_structure():
     print(f"Total children count: {len(children_ids)}")
     
     assert "06 - Tier 8" in children_ids, "06 - Tier 8 missing from tree!"
+    assert "06 - Gloves" in children_ids, "06 - Gloves missing from tree!"
+    assert "06 - Boots" in children_ids, "06 - Boots missing from tree!"
     assert "06 - Tier 10" not in children_ids, "06 - Tier 10 should no longer be in the utility row!"
     assert "Tier 10" in children_ids, "Tier 10 missing from 01 - Procs!"
     
@@ -34,17 +36,25 @@ def test_tree_structure():
     assert t10_idx < hotstreak_idx, f"Tier 10 ({t10_idx}) must precede Hot Streak ({hotstreak_idx}) in c array!"
     
     t8_idx = children_ids.index("06 - Tier 8")
+    gloves_idx = children_ids.index("06 - Gloves")
     gem_idx = children_ids.index("06 - Mana Gem")
     comb_idx = children_ids.index("06 - Combustion")
     mirror_idx = children_ids.index("06 - Mirror Image")
+    boots_idx = children_ids.index("06 - Boots")
     
-    print(f"Indices: T10={t10_idx}, HotStreak={hotstreak_idx}, T8={t8_idx}, Gem={gem_idx}, Comb={comb_idx}, Mirror={mirror_idx}")
-    assert t8_idx < gem_idx < comb_idx < mirror_idx, (
-        f"Utility ordering violation: expected T8 < Gem < Comb < Mirror, got {t8_idx}, {gem_idx}, {comb_idx}, {mirror_idx}"
+    print(f"Indices: T10={t10_idx}, HotStreak={hotstreak_idx}, T8={t8_idx}, Gloves={gloves_idx}, Gem={gem_idx}, Comb={comb_idx}, Mirror={mirror_idx}, Boots={boots_idx}")
+    assert t8_idx < gloves_idx < gem_idx < comb_idx < mirror_idx < boots_idx, (
+        f"Utility ordering violation: expected T8 < Gloves < Gem < Comb < Mirror < Boots, got {t8_idx}, {gloves_idx}, {gem_idx}, {comb_idx}, {mirror_idx}, {boots_idx}"
     )
     print("[OK] Tree ordering test: PASSED")
 
 def test_layout_math():
+    # Scenario 0: 9 componenti (Tutti attivi: T1, T2, Cloak, T8, Gloves, Gem, Comb, Mirror, Boots; passo 29px, w 28px)
+    pos_9 = [round((i - 5) * 29) for i in range(1, 10)]
+    total_span_9 = (pos_9[-1] + 14) - (pos_9[0] - 14)
+    print(f"[OK] 9-component span: {total_span_9}px (sotto la barra da 264px, margine: {264 - total_span_9}px)")
+    assert total_span_9 <= 264, f"Span {total_span_9} exceeds 264px bar!"
+
     # Scenario 1: 7 componenti (T8 equipaggiato, passo 38px, larghezza 28px)
     pos_7_t8 = [-114, -76, -38, 0, 38, 76, 114]
     diffs_7_t8 = [pos_7_t8[i+1] - pos_7_t8[i] for i in range(len(pos_7_t8)-1)]

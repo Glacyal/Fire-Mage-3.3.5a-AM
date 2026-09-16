@@ -1,0 +1,225 @@
+"""
+Test Suite Completa: Verifica Esauriente di Tutti i Casi della Riga Utility
+===========================================================================
+Verifica formalmente l'assenza totale di sovrapposizioni e la perfetta centratura
+dinamica per tutte le 64 combinazioni possibili (2^6) di equipaggiamento e proc:
+1. Monile 1 (Slot 13: Equipaggiato vs Vuoto)
+2. Monile 2 (Slot 14: Equipaggiato vs Vuoto)
+3. Mantello (Slot 15: Con Proc di Potenziamento vs Senza Proc)
+4. Tier 8 2P (Kirin Tor: Con Bonus vs Senza Bonus)
+5. Guanti Ingegneria (Slot 10: Acceleratori Ipersonici vs Senza Tinker)
+6. Stivali Ingegneria (Slot 8: Acceleratori a Nitro vs Senza Tinker)
+I 3 incantesimi base (Gemma del Mana, Combustione, Immagine Speculare) sono sempre attivi.
+"""
+import os
+import sys
+import unittest
+import itertools
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+from builder.components.utility import build_utility_auras
+
+
+def compute_utility_layout(active_ids):
+    """
+    Replica fedelmente la logica di calcolo delle coordinate di _G.FMHUD_UpdateUtilityRowPositions in Lua.
+    """
+    N = len(active_ids)
+    if N >= 9:
+        step = 29
+    elif N == 8:
+        step = 32
+    elif N == 7:
+        step = 38
+    elif N == 6:
+        step = 44
+    elif N == 5:
+        step = 48
+    else:
+        step = 52
+
+    positions = {}
+    for i, aid in enumerate(active_ids, 1):
+        target_x = round((i - (N + 1) / 2) * step)
+        positions[aid] = target_x
+    return positions, step
+
+
+class TestAllUtilityCases(unittest.TestCase):
+
+    def test_all_64_combinations_no_overlaps_and_centered(self):
+        """
+        Verifica tutte le 64 combinazioni combinatorie (2^6) di equipaggiamento.
+        Per ciascun caso:
+        - Nessuna coppia adiacente deve avere distanza < 28px (zero sovrapposizioni).
+        - La somma delle coordinate deve essere esattamente 0 (perfetta simmetria orizzontale).
+        - L'ampiezza totale non deve mai superare i 264px (sotto la barra del mana).
+        - L'ordine da sinistra a destra deve rispettare rigorosamente la sequenza definita.
+        """
+        OPTIONAL_FLAGS = ["T1", "T2", "Cloak", "T8", "Gloves", "Boots"]
+        tested_count = 0
+
+        for combo in itertools.product([True, False], repeat=len(OPTIONAL_FLAGS)):
+            flags = dict(zip(OPTIONAL_FLAGS, combo))
+            active = []
+            if flags["T1"]: active.append("05 - Trinket 1")
+            if flags["T2"]: active.append("05 - Trinket 2")
+            if flags["Cloak"]: active.append("06 - Cloak")
+            if flags["T8"]: active.append("06 - Tier 8")
+            if flags["Gloves"]: active.append("06 - Gloves")
+            active.append("06 - Mana Gem")
+            active.append("06 - Combustion")
+            active.append("06 - Mirror Image")
+            if flags["Boots"]: active.append("06 - Boots")
+
+            tested_count += 1
+            N = len(active)
+            self.assertGreaterEqual(N, 3, "Il numero minimo di icone deve essere >= 3")
+            self.assertLessEqual(N, 9, "Il numero massimo di icone deve essere <= 9")
+
+            positions, step = compute_utility_layout(active)
+            coords = [positions[aid] for aid in active]
+
+            # 1. Monotonia stretta e verifica sovrapposizioni (minima distanza >= 28px)
+            for j in range(len(coords) - 1):
+                diff = coords[j + 1] - coords[j]
+                self.assertGreaterEqual(
+                    diff, 28,
+                    f"SOVRAPPOSIZIONE RILEVATA nel caso N={N} ({active}) tra {active[j]} ({coords[j]}) e {active[j+1]} ({coords[j+1]}): delta={diff}px < 28px"
+                )
+
+            # 2. Perfetta simmetria centrale (somma coordinate == 0)
+            self.assertEqual(
+                sum(coords), 0,
+                f"Asimmetria rilevata nel caso N={N} ({active}): somma={sum(coords)} != 0"
+            )
+
+            # 3. Ampiezza totale confinata sotto la barra del mana (<= 264px)
+            span = (max(coords) + 14) - (min(coords) - 14)
+            self.assertLessEqual(
+                span, 264,
+                f"Ampiezza eccessiva nel caso N={N} ({active}): span={span}px > 264px"
+            )
+
+        self.assertEqual(tested_count, 64, "Devono essere testate esattamente 64 combinazioni")
+
+    def test_static_offsets_builder_integrity(self):
+        """
+        Verifica che i valori statici 'xOffset' generati da build_utility_auras() siano
+        TUTTI distinti tra loro e separati da almeno 28px, evitando collisioni di default.
+        """
+        auras = build_utility_auras()
+        self.assertEqual(len(auras), 9, "La riga utility deve produrre 9 aure")
+
+        offsets = {}
+        for a in auras:
+            aid = a["id"]
+            x = a["xOffset"]
+            offsets[aid] = x
+
+        # Controllo unicità assoluta
+        seen_x = {}
+        for aid, x in offsets.items():
+            self.assertNotIn(
+                x, seen_x,
+                f"Collisione di offset statico rilevata: {aid} condivide xOffset={x} con {seen_x.get(x)}"
+            )
+            seen_x[x] = aid
+
+        # Controllo specifico per Tier 8 e Guanti
+        self.assertNotEqual(
+            offsets["06 - Tier 8"], offsets["06 - Gloves"],
+            "06 - Tier 8 e 06 - Gloves non possono avere lo stesso xOffset statico!"
+        )
+
+        # Controllo specifico per Mirror Image e Boots
+        self.assertNotEqual(
+            offsets["06 - Mirror Image"], offsets["06 - Boots"],
+            "06 - Mirror Image e 06 - Boots non possono avere lo stesso xOffset statico!"
+        )
+
+        # Controllo che siano rigorosamente crescenti da sinistra a destra
+        expected_order = [
+            "05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8",
+            "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"
+        ]
+        ordered_x = [offsets[aid] for aid in expected_order]
+        for j in range(len(ordered_x) - 1):
+            diff = ordered_x[j + 1] - ordered_x[j]
+            self.assertGreaterEqual(
+                diff, 28,
+                f"Offset statici troppo vicini o invertiti tra {expected_order[j]} ({ordered_x[j]}) e {expected_order[j+1]} ({ordered_x[j+1]}): delta={diff}px"
+            )
+
+    def test_exact_coordinates_per_n_count(self):
+        """
+        Verifica analitica delle coordinate matematiche per ogni valore di N da 3 a 9.
+        """
+        expected_tables = {
+            9: [-116, -87, -58, -29, 0, 29, 58, 87, 116],
+            8: [-112, -80, -48, -16, 16, 48, 80, 112],
+            7: [-114, -76, -38, 0, 38, 76, 114],
+            6: [-110, -66, -22, 22, 66, 110],
+            5: [-96, -48, 0, 48, 96],
+            4: [-78, -26, 26, 78],
+            3: [-52, 0, 52],
+        }
+
+        dummy_ids = [f"Item_{i}" for i in range(9)]
+        for n, expected_xs in expected_tables.items():
+            pos, step = compute_utility_layout(dummy_ids[:n])
+            actual_xs = [pos[aid] for aid in dummy_ids[:n]]
+            self.assertEqual(
+                actual_xs, expected_xs,
+                f"Discrepanza coordinate per N={n}: attese {expected_xs}, calcolate {actual_xs}"
+            )
+            # Verifica passo costante
+            for j in range(len(actual_xs) - 1):
+                self.assertEqual(actual_xs[j + 1] - actual_xs[j], step)
+
+    def test_dynamic_transitions_simulation(self):
+        """
+        Simula transizioni dinamiche di cambio equipaggiamento in sequenza:
+        1. Base (3 icone) -> aggiunge T8 -> aggiunge Gloves -> aggiunge Boots -> aggiunge Cloak -> aggiunge Trinkets (fino a 9).
+        2. Dalle 9 complete -> rimuove Gloves -> rimuove Boots -> rimuove T8 -> rimuove Cloak (ritorno a 3).
+        In nessuno stato deve verificarsi una sovrapposizione.
+        """
+        history = [
+            # Inizio: solo abilità base
+            ["06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            # Equipaggia Tier 8 (4P)
+            ["06 - Tier 8", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            # Equipaggia Guanti con tinker
+            ["06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            # Equipaggia Stivali con nitro
+            ["06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            # Equipaggia Mantello con proc
+            ["06 - Cloak", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            # Equipaggia Trinket 1 e 2 (9 icone complete)
+            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            # Switch su gear senza T8 ma con guanti e stivali (8 icone)
+            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            # Rimuove guanti da ingegneria (7 icone classiche con stivali)
+            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            # Rimuove stivali (6 icone standard storiche)
+            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+        ]
+
+        for step_idx, active_list in enumerate(history):
+            pos, step = compute_utility_layout(active_list)
+            xs = [pos[aid] for aid in active_list]
+            for j in range(len(xs) - 1):
+                diff = xs[j + 1] - xs[j]
+                self.assertGreaterEqual(
+                    diff, 28,
+                    f"Transizione #{step_idx} fallita con sovrapposizione tra {active_list[j]} e {active_list[j+1]}: diff={diff}px"
+                )
+            self.assertEqual(sum(xs), 0, f"Transizione #{step_idx} ha perso la centratura")
+
+
+if __name__ == "__main__":
+    unittest.main()
+

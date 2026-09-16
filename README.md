@@ -1,7 +1,7 @@
 # Fire Mage 3.3.5a AM — WeakAuras Suite
 
 [![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/FireMageHUD-335)
-[![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0%20(Backport)-blue.svg)](https://github.com/Glacyal/FireMageHUD-335)
+[![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/FireMageHUD-335)
 [![Class](https://img.shields.io/badge/Class-Mage%20(Fire)-red.svg)](https://github.com/Glacyal/FireMageHUD-335)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Glacyal/FireMageHUD-335)
 [![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen.svg)](https://glacyal.github.io/FireMageHUD-335/)
@@ -53,14 +53,19 @@ Monitora costantemente le 4 statistiche chiave del Mago Fuoco, risolvendo automa
 - **Haste %**: Include rating ed è moltiplicato con Bloodlust (+30%), Totem (+5%), 3% raid, 2P T10 (+12%), Power Infusion e Berserking.
 - **Hit %**: Precisione con talenti (*Precision*), Draenei (*Heroic Presence*) e debuff boss (+3% *Misery* / *Improved Faerie Fire*), con indicatore verde **`(Cap)`** al 17% (o 14% con debuff).
 
-### 5. Riga Utility Adattiva & Monili End-Game (`06 - Utility Row`)
-- **Combustion**: Icona fissa nella riga delle utilità (`spell_fire_sealoffire.jpg`) che traccia il cooldown (2 minuti) e gli stack attivi (+10% crit a colpo).
-- **Layout Dinamico Tier 8**:
-  - Con **$\ge 2$ pezzi T8 equipaggiati**: attiva automaticamente il layout a **7 icone** con *Praxis* (+350 SP con ICD 45s) posizionato al centro esatto (`x = 0`).
-  - Con **$< 2$ pezzi T8**: si riconfigura a **6 icone** simmetriche a spaziatura espansa.
-- **Database Monili con ICD**: Riconoscimento e timer con swipe per *Dislodged Foreign Object* (DFO - ICD 45s), *Charred Twilight Scale* (CTS - ICD 45s) e incantamento mantello di ingegneria.
-- **Gemma del Mana**: Tracciamento delle cariche residue (3/3), cooldown di 2 minuti e bonus 2P T7 (+225 SP per 15s).
-- **Mirror Image**: Monitoraggio della durata delle copie e bonus 4P T10 (+18% danno per 30s).
+### 5. Riga Utility Adattiva Universale & Ingegneria (`06 - Utility Row`, da 3 a 9 Icone)
+La riga inferiore (`y = -45`) si adatta in tempo reale con **riposizionamento e centratura dinamica universale** in base all'equipaggiamento effettivo:
+- **Monili (`05 - Trinket 1` e `05 - Trinket 2`)**: Compaiono **solo se gli slot 13 e 14 sono equipaggiati** (nascosti se vuoti), con tracciamento di oltre 35 monili WotLK, timer ICD, swipe radiale e Pixel Glow dorato su proc attivo.
+- **Mantello con Proc (`06 - Cloak`)**: Compare **solo se il mantello possiede un incanto di potenziamento** (*Ricamo di Luce Intessuta* +295 SP, *Bagliore Oscuro*, *Spadatesta*, *Ragnatela Flessibile*). Se non incantato o privo di proc, non compare.
+- **Tier 8 2P (*Praxis*) (`06 - Tier 8`)**: Compare **solo con $\ge 2$ pezzi T8 Kirin Tor equipaggiati**, tracciando il proc +350 SP e l'ICD di 45s.
+- **Guanti Ingegneria (`06 - Gloves`)**: Posizionati **immediatamente a sinistra della Gemma del Mana**. Compaiono **solo se il mago ha Ingegneria con *Acceleratori Ipersonici*** (Hyperspeed Accelerators: +340 Haste per 12s, 60s CD).
+- **Gemma del Mana (`06 - Mana Gem`)**: Tracciamento delle cariche effettive in borsa (`3`, `2`, `1` o `0` in rosso se assente, senza prefisso `x`), icona nativa dinamica (Zaffiro/Smeraldo), cooldown di 2 minuti e bonus 2P T7 (+225 SP per 15s con Pixel Glow).
+- **Combustion (`06 - Combustion`)**: Traccia stato ON, cooldown (2 minuti) e stack critici residui (+10% crit a carica) con icona nativa dell'incantesimo.
+- **Mirror Image (`06 - Mirror Image`)**: Durata delle copie (30s), cooldown (3 min) e bonus 4P T10 (*Quad Core*, +18% danno).
+- **Stivali (`06 - Boots`)**: Posizionati **immediatamente a destra delle Copie (Mirror Image)**. Compaiono **solo se gli stivali hanno un incanto che conferisce velocità di movimento** (*Acceleratori a Nitro* / Nitro Boosts per Ingegneria con indicatore dei Nitro attivi a 5s con Pixel Glow, countdown di cooldown a 180s e swipe, oppure incanti passivi come *Vitalità Tuskarr* / Tuskarr's Vitality, *Rapidità Felina*, *Velocità Superiore*, ecc.). Se non incantati con velocità o con slot vuoto, non compaiono.
+- **Auto-Centratura Matematica**: L'ordine delle icone è:  
+  `[Trinket 1] -> [Trinket 2] -> [Mantello] -> [Tier 8] -> [Guanti] -> [Gemma] -> [Combustione] -> [Copie] -> [Stivali]`  
+  Qualsiasi combinazione di icone attive (da 3 a 9) viene ricalcolata e centrata simmetricamente attorno all'asse $X = 0$, confinandosi perfettamente entro la larghezza della barra superiore (264px).
 
 ### 6. Castbar & Mana Bar Integrate
 - **08 - Castbar**: Barra di lancio (larghezza 210px) con icona della spell attiva, nome incantesimo, tempo residuo al decimo di secondo e indicatore visivo di latenza.
@@ -85,19 +90,24 @@ Fire Mage 3.3.5a AM/
 │   │   ├── hot_streak.py            # Barra Hot Streak a 2 segmenti decoppiati & combat log
 │   │   ├── procs.py                 # Gruppo dinamico 01 - Procs (7 icone reattive)
 │   │   ├── buffs.py                 # Molten Armor, Arcane Intellect, Focus Magic
-│   │   ├── utility.py               # Combustion, Monili (DFO/CTS), Gemma, Copie, Tier 8
+│   │   ├── utility.py               # Combustion, Monili, Mantello, T8, Guanti, Gemma, Copie, Stivali
 │   │   ├── bars.py                  # Castbar, Mana Bar, Global Cooldown (GCD)
 │   │   ├── stats.py                 # Pannello 4 Statistiche (SP, Crit, Haste, Hit)
 │   │   └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
-│   └── tree.py                      # Assemblatore dell'albero gerarchico (28 aure WeakAuras)
+│   └── tree.py                      # Assemblatore dell'albero gerarchico (37 aure WeakAuras)
 ├── docs/
 │   └── index.html                   # Simulatore Web Interattivo (GitHub Pages 1:1)
 ├── tests/                           # Suite di test paralleli deterministici
 │   ├── run_parallel_tests.py        # Runner parallelo multi-processore
-│   ├── test_components_integrity.py # Verifica integrità strutturale moduli
+│   ├── test_all_utility_cases.py    # Verifica esaustiva 64 combinazioni riga utility
+│   ├── test_components_integrity.py # Verifica integrità strutturale moduli (37 aure)
+│   ├── test_equip_switch.py         # Test transizioni e centratura universale da 3 a 9 icone
 │   ├── test_hotstreak_decoupled.py  # Test logica Hot Streak persistente e decoppiata
 │   ├── test_html_simultaneous.py    # Stress test concorrenza simulatore web
-│   └── test_showcase.py             # Audit 100% interattività e handler DOM
+│   ├── test_lua.py                  # Validazione sintattica blocchi Lua embedded
+│   ├── test_showcase.py             # Audit 100% interattività e handler DOM
+│   ├── test_stats_panel.py          # Verifica formule e moltiplicatori pannello statistiche
+│   └── test_tree_layout.py          # Geometrie layout e albero WA
 ├── generate.py                      # Compilatore Python della stringa finale
 └── IMPORT_STRING.txt                # Stringa WeakAuras generata pronta all'uso
 ```
@@ -116,7 +126,7 @@ Fire Mage 3.3.5a AM/
 
 | Client / Piattaforma | Versione WeakAuras | Compatibilità | Note |
 | :--- | :--- | :---: | :--- |
-| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 2 / 3 (Backport)** | ✅ **100% Nativa** | Sviluppata e ottimizzata per server 3.3.5a (TrinityCore, AzerothCore, Warmane, Whitemane). |
+| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 4.0.0** | ✅ **100% Nativa** | Sviluppata e validata su WeakAuras 4.0.0 (`internalVersion: 52`). Tutti i test sono stati eseguiti su questa versione di WeakAuras. Importazione istantanea (<38 KB). |
 | **WotLK Classic / Cata Classic** | WeakAuras 5.x (Blizzard) | ⚠️ **Parziale** | Struttura importabile, ma richiede adattamento delle funzioni Lua del Combat Log (`CombatLogGetCurrentEventInfo`). |
 | **Retail (The War Within)** | WeakAuras 5.x | ❌ **Non Compatibile** | Meccaniche e incantesimi del Mago completamente differenti (*Heating Up* nativo, rotazione diversa). |
 
@@ -124,7 +134,7 @@ Fire Mage 3.3.5a AM/
 
 ## 🧪 Validazione & Test Suite
 
-Il progetto include una suite di 9 test automatici deterministici eseguibili in parallelo per sfruttare al massimo tutti i core della CPU:
+Il progetto include una suite di 10 test automatici deterministici eseguibili in parallelo per sfruttare al massimo tutti i core della CPU:
 
 ```bash
 # Esegui l'intera suite di test in parallelo (Multi-Core ProcessPoolExecutor)

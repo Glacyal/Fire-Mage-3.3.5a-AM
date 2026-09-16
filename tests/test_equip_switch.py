@@ -33,6 +33,27 @@ def simulate_check_t8(equipped_items, active_buffs):
 def get_layout(has_t8):
     return LAYOUT_T8 if has_t8 else LAYOUT_STD
 
+def calculate_dynamic_positions(active_ids):
+    N = len(active_ids)
+    if N >= 9:
+        step = 29
+    elif N == 8:
+        step = 32
+    elif N == 7:
+        step = 38
+    elif N == 6:
+        step = 44
+    elif N == 5:
+        step = 48
+    else:
+        step = 52
+    
+    positions = {}
+    for i, aid in enumerate(active_ids, 1):
+        target_x = round(((i - (N + 1) / 2) * step))
+        positions[aid] = target_x
+    return positions, step
+
 class TestDynamicEquipSwitch(unittest.TestCase):
     def test_scenarios(self):
         # Scenario 1: Solo T7 (0 pezzi T8) -> 6 icone
@@ -77,6 +98,35 @@ class TestDynamicEquipSwitch(unittest.TestCase):
             self.assertEqual(is_t8, expected)
             layout = get_layout(is_t8)
             self.assertEqual(len(layout), 7 if expected else 6)
+
+    def test_universal_dynamic_centering_and_spans(self):
+        """Verifica che per qualsiasi combinazione di icone (da 3 a 9), la riga sia centrata e <= 264px."""
+        all_possible = [
+            "05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8",
+            "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"
+        ]
+        # Test con tutti i 9 attivi
+        pos9, step9 = calculate_dynamic_positions(all_possible)
+        self.assertEqual(len(pos9), 9)
+        span9 = (max(pos9.values()) + 14) - (min(pos9.values()) - 14)
+        self.assertLessEqual(span9, 264)
+        self.assertEqual(sum(pos9.values()), 0) # Perfettamente centrata attorno a 0
+
+        # Test solo toolkit base (3 icone: Mana Gem, Combustion, Mirror Image)
+        base_only = ["06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"]
+        pos3, step3 = calculate_dynamic_positions(base_only)
+        self.assertEqual(len(pos3), 3)
+        span3 = (max(pos3.values()) + 14) - (min(pos3.values()) - 14)
+        self.assertLessEqual(span3, 264)
+        self.assertEqual(sum(pos3.values()), 0)
+
+        # Test senza mantello e senza trinket 2 (T1, T8, Gloves, Gem, Comb, Mirror, Boots = 7 icone)
+        combo7 = ["05 - Trinket 1", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"]
+        pos7, step7 = calculate_dynamic_positions(combo7)
+        self.assertEqual(len(pos7), 7)
+        span7 = (max(pos7.values()) + 14) - (min(pos7.values()) - 14)
+        self.assertLessEqual(span7, 264)
+        self.assertEqual(sum(pos7.values()), 0)
 
 if __name__ == "__main__":
     unittest.main()

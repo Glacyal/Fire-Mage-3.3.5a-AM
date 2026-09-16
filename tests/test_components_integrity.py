@@ -50,10 +50,10 @@ class TestComponentsIntegrity(unittest.TestCase):
                 self.assertIn("regionType", a, f"Elemento in {name} privo di 'regionType'")
 
     def test_total_aura_count_and_uniqueness(self):
-        """Verifica il conteggio totale delle aure (28) e l'unicità di ID e UID."""
+        """Verifica il conteggio totale delle aure (37) e l'unicità di ID e UID."""
         tree = build_wa_tree()
         children = tree["c"]
-        self.assertEqual(len(children), 35, f"Previste 35 aure, trovate {len(children)}")
+        self.assertEqual(len(children), 37, f"Previste 37 aure, trovate {len(children)}")
 
         seen_ids = set()
         seen_uids = set()
