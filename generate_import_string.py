@@ -1706,7 +1706,9 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                    spellId == 12524 or spellId == 12525 or spellId == 12526 or spellId == 33938 or
                    spellId == 42890 or spellId == 42891 or (spellName and (string.find(spellName, "Pyro") or string.find(spellName, "Piro"))) then
                     hs.hasBuff = false
-                    hs.streak = 0
+                    if hs.streak >= 2 then
+                        hs.streak = 0
+                    end
                     hs.expirationTime = 0
                     notifyWA()
                 end
@@ -1814,13 +1816,13 @@ def make_hotstreak_seg1_trigger() -> str:
     _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
     _G.FMHUD_InitHotStreak(event, ...)
     local hs = _G.FMHUD_HS
-    return (hs and hs.streak == 1 and not hs.hasBuff)
+    return (hs and hs.streak >= 1)
 end"""
 
 def make_hotstreak_seg1_untrigger() -> str:
     return """function(event, ...)
     local hs = _G.FMHUD_HS
-    return not (hs and hs.streak == 1 and not hs.hasBuff)
+    return not (hs and hs.streak >= 1)
 end"""
 
 import copy
@@ -3267,7 +3269,7 @@ end"""
                 "internalVersion": 52,
                 "width": 137,
                 "height": 5,
-                "xOffset": -70,
+                "xOffset": -70.5,
                 "yOffset": 0,
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
                 "color": [1.0, 0.55, 0.0, 1.0],
@@ -3296,9 +3298,9 @@ end"""
                 "parent": "10 - Hot Streak Bar",
                 "regionType": "aurabar",
                 "internalVersion": 52,
-                "width": 278,
+                "width": 137,
                 "height": 5,
-                "xOffset": 0,
+                "xOffset": 70.5,
                 "yOffset": 0,
                 "barColor": [1.0, 0.35, 0.0, 1.0],
                 "backgroundColor": [0.1, 0.1, 0.1, 0.8],
