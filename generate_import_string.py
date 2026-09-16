@@ -2392,7 +2392,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -190,
-                "yOffset": -4,
+                "yOffset": 0,
                 "controlledChildren": [
                     "Molten Armor - Active",
                     "Molten Armor - OFF"
@@ -2545,7 +2545,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -220,
-                "yOffset": -4,
+                "yOffset": 0,
                 "controlledChildren": [
                     "Arcane Intellect - Active",
                     "Arcane Intellect - OFF"
@@ -2701,7 +2701,7 @@ end"""
                 "regionType": "group",
                 "internalVersion": 52,
                 "xOffset": -160,
-                "yOffset": -4,
+                "yOffset": 0,
                 "controlledChildren": [
                     "Focus Magic - Active",
                     "Focus Magic - OFF"
@@ -3401,7 +3401,7 @@ end"""
                 "width": 278,
                 "height": 3,
                 "xOffset": 0,
-                "yOffset": -4,
+                "yOffset": 0,
                 "barColor": [1.0, 1.0, 1.0, 0.8],
                 "backgroundColor": [0.0, 0.0, 0.0, 0.0],
                 "texture": "Interface\\TargetingFrame\\UI-StatusBar",
