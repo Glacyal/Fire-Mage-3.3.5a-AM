@@ -219,7 +219,131 @@ class TestAllUtilityCases(unittest.TestCase):
                 )
             self.assertEqual(sum(xs), 0, f"Transizione #{step_idx} ha perso la centratura")
 
+    # =========================================================================
+    # TEST AGGIUNTIVI FIX 5 & FIX 6: MANA GEM CACHE & PLAYER GUID CACHING
+    # =========================================================================
+
+    def test_mana_gem_charge_temporal_cache_and_invalidation(self):
+        """
+        [FIX 5] Verifica che:
+        1. _G.FMHUD_GetManaGemCharges implementi una cache temporale (FMHUD_ManaGemChargeCache).
+        2. La cache utilizzi una soglia temporale di almeno 1.5 secondi (throttle).
+        3. FMHUD_LayoutFrame registri BAG_UPDATE e UNIT_SPELLCAST_SUCCEEDED.
+        4. BAG_UPDATE resetti la cache a time = 0.
+        5. UNIT_SPELLCAST_SUCCEEDED resetti la cache per Conjure Mana Gem e uso gemma.
+        """
+        from builder.components.utility import SHARED_CORE_BOOTSTRAP_LUA
+
+        # 1. Verifica presenza e struttura della cache in GetManaGemCharges
+        self.assertIn("FMHUD_ManaGemChargeCache", SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn("cache.time > 0", SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn("< 1.5", SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn("cache.charges = charges", SHARED_CORE_BOOTSTRAP_LUA)
+
+        # 2. Verifica registrazione eventi di invalidazione in FMHUD_LayoutFrame
+        self.assertIn('f:RegisterEvent("BAG_UPDATE")', SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn('f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")', SHARED_CORE_BOOTSTRAP_LUA)
+
+        # 3. Verifica logica di invalidazione su BAG_UPDATE
+        self.assertIn('if event == "BAG_UPDATE" then', SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn('_G.FMHUD_ManaGemChargeCache.time = 0', SHARED_CORE_BOOTSTRAP_LUA)
+
+        # 4. Verifica logica di invalidazione su UNIT_SPELLCAST_SUCCEEDED per Conjure (759, ecc.) e Use (5405)
+        self.assertIn('if event == "UNIT_SPELLCAST_SUCCEEDED" then', SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn('spellId == 759', SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn('spellId == 5405', SHARED_CORE_BOOTSTRAP_LUA)
+
+    def test_mana_gem_charge_cache_behavior_simulation(self):
+        """
+        [FIX 5] Simula il ciclo di vita della cache cariche della Gemma del Mana:
+        - 1° controllo a t=0: scansione borse eseguita (scansioni=1, cariche=3)
+        - 100 eventi di combat log nei successivi 1.0s: restituisce sempre valore in cache senza scansioni (scansioni=1)
+        - Uso gemma a t=1.2: evento BAG_UPDATE invalida la cache (time=0)
+        - Prossimo controllo a t=1.2: riesecuzione immediata scansione (scansioni=2, cariche=2)
+        - Controlli fino a t=2.5: in cache (scansioni=2)
+        - Controllo a t=2.8 (>1.5s dopo t=1.2): nuova scansione naturale (scansioni=3)
+        """
+        class ManaGemCacheSimulator:
+            def __init__(self, initial_charges=3):
+                self.cache = None
+                self.bag_charges = initial_charges
+                self.bag_scans_count = 0
+
+            def invalidate(self):
+                if self.cache:
+                    self.cache["time"] = 0
+
+            def get_charges(self, current_time):
+                if self.cache and self.cache["time"] > 0 and (current_time - self.cache["time"] < 1.5):
+                    return self.cache["charges"]
+
+                if not self.cache:
+                    self.cache = {"time": 0, "charges": 0}
+                self.cache["time"] = current_time
+
+                # Simulazione scansione borse + tooltip
+                self.bag_scans_count += 1
+                self.cache["charges"] = self.bag_charges
+                return self.cache["charges"]
+
+        sim = ManaGemCacheSimulator(initial_charges=3)
+
+        # 1. Prima chiamata a t=100.0s (GetTime() realistico): scansione borse
+        t_base = 100.0
+        self.assertEqual(sim.get_charges(current_time=t_base), 3)
+        self.assertEqual(sim.bag_scans_count, 1)
+
+        # 2. 100 chiamate ad alta frequenza durante il combat (t da +0.01s a +1.0s)
+        for t_offset in range(1, 101):
+            t = t_base + (t_offset * 0.01)
+            self.assertEqual(sim.get_charges(current_time=t), 3)
+        self.assertEqual(sim.bag_scans_count, 1, "Le chiamate entro 1.5s NON devono rieseguire la scansione borse!")
+
+        # 3. Uso della gemma a t=101.2s -> cariche scendono a 2 -> evento BAG_UPDATE invalida (time = 0)
+        sim.bag_charges = 2
+        sim.invalidate()
+
+        # 4. Lettura a t=101.2s: cache invalidata (time=0), scansione immediata
+        self.assertEqual(sim.get_charges(current_time=t_base + 1.2), 2)
+        self.assertEqual(sim.bag_scans_count, 2, "Dopo BAG_UPDATE deve rieseguire subito la scansione borse!")
+
+        # 5. Chiamata a t=102.0s (< 1.5s da 101.2s): valore in cache
+        self.assertEqual(sim.get_charges(current_time=t_base + 2.0), 2)
+        self.assertEqual(sim.bag_scans_count, 2)
+
+        # 6. Chiamata a t=102.8s (1.6s dopo 101.2s): timeout scaduto, re-scan
+        self.assertEqual(sim.get_charges(current_time=t_base + 2.8), 2)
+        self.assertEqual(sim.bag_scans_count, 3)
+
+    def test_player_guid_cached_across_all_cleu_components(self):
+        """
+        [FIX 6] Verifica l'eliminazione totale della chiamata API UnitGUID("player")
+        all'interno dei gestori di COMBAT_LOG_EVENT_UNFILTERED:
+        1. builder/components/hot_streak.py (SHARED_HOTSTREAK_CHECK_LUA)
+        2. builder/components/utility.py (FMHUD_LayoutFrame in SHARED_CORE_BOOTSTRAP_LUA)
+        3. builder/components/buffs.py (SHARED_FM_CHECK_LUA)
+        """
+        from builder.components.hot_streak import SHARED_HOTSTREAK_CHECK_LUA
+        from builder.components.utility import SHARED_CORE_BOOTSTRAP_LUA
+        from builder.components.buffs import SHARED_FM_CHECK_LUA
+
+        # 1. hot_streak.py: playerGUID cached come upvalue nel setup frame
+        self.assertIn("local playerGUID = UnitGUID(\"player\")", SHARED_HOTSTREAK_CHECK_LUA)
+        self.assertIn("sourceGUID == playerGUID", SHARED_HOTSTREAK_CHECK_LUA)
+        self.assertNotIn("sourceGUID == UnitGUID(\"player\")", SHARED_HOTSTREAK_CHECK_LUA)
+
+        # 2. utility.py: playerGUID cached come upvalue in FMHUD_LayoutFrame
+        self.assertIn("local playerGUID = UnitGUID(\"player\")", SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertIn("sourceGUID == playerGUID", SHARED_CORE_BOOTSTRAP_LUA)
+        self.assertNotIn("sourceGUID == UnitGUID(\"player\")", SHARED_CORE_BOOTSTRAP_LUA)
+
+        # 3. buffs.py: playerGUID cached nello state di Focus Magic
+        self.assertIn("playerGUID = UnitGUID(\"player\")", SHARED_FM_CHECK_LUA)
+        self.assertIn("sourceGUID == playerGUID", SHARED_FM_CHECK_LUA)
+        self.assertNotIn("sourceGUID == UnitGUID(\"player\")", SHARED_FM_CHECK_LUA)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

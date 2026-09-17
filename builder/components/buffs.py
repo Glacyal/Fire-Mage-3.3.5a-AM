@@ -50,8 +50,13 @@ end"""
 SHARED_FM_CHECK_LUA = """function(event, ...)
     local state = _G.FMHUD_FMState
     if not state then
-        state = { targetGUID = nil, targetName = nil, expires = 0 }
+        state = { targetGUID = nil, targetName = nil, expires = 0, playerGUID = UnitGUID("player") }
         _G.FMHUD_FMState = state
+    end
+    local playerGUID = state.playerGUID
+    if not playerGUID then
+        playerGUID = UnitGUID("player")
+        state.playerGUID = playerGUID
     end
 
     local now = GetTime()
@@ -67,7 +72,7 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
         local isRelevant = false
-        if sourceGUID == UnitGUID("player") and (spellId == 54646 or spellName == "Focus Magic" or spellName == "Focalizzazione Magica") then
+        if sourceGUID == playerGUID and (spellId == 54646 or spellName == "Focus Magic" or spellName == "Focalizzazione Magica") then
             isRelevant = true
             if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
                 state.targetName = destName
@@ -196,6 +201,7 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
         end
     end
 
+    -- [OTTIMIZZAZIONE FIX 6]: Cache di playerGUID nello state di Focus Magic per azzerare le chiamate a UnitGUID("player") su ogni riga di COMBAT_LOG_EVENT_UNFILTERED.
     return hasProc, allyActive, procRem, procDur, procExp
 end"""
 

@@ -31,6 +31,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     if not f then
         f = CreateFrame("Frame", "FMHUD_HSFrame")
         _G.FMHUD_HSFrame = f
+        local playerGUID = UnitGUID("player")
 
         _G.FMHUD_QualifyingSpells = _G.FMHUD_QualifyingSpells or {
             [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
@@ -69,7 +70,8 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
                 if subEvent ~= "SPELL_DAMAGE" then return end
 
                 local sourceGUID = select(3, ...)
-                local isPlayer = (sourceGUID == UnitGUID("player"))
+                if not playerGUID then playerGUID = UnitGUID("player") end
+                local isPlayer = (sourceGUID == playerGUID)
                 if not isPlayer then
                     local sourceName = select(4, ...)
                     if sourceName and sourceName == UnitName("player") then
@@ -134,6 +136,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
         _G.FMHUD_HandleHSEvent(event, ...)
     end
     -- [OTTIMIZZAZIONE FIX 1]: Setup frame, eventi e closure eseguito una sola volta per sessione nel blocco 'if not f', azzerando riallocazioni inutili di closure e chiamate f:RegisterEvent per ogni frame o trigger.
+    -- [OTTIMIZZAZIONE FIX 6]: Cache locale/upvalue playerGUID per evitare chiamate ripetute a UnitGUID("player") su ogni riga di COMBAT_LOG_EVENT_UNFILTERED del raid.
     return hs
 end"""
 

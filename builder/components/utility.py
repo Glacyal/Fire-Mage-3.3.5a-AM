@@ -789,6 +789,14 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
     end
 
     _G.FMHUD_GetManaGemCharges = function()
+        local now_c = GetTime()
+        _G.FMHUD_ManaGemChargeCache = _G.FMHUD_ManaGemChargeCache or { time = 0, charges = 0 }
+        local cache = _G.FMHUD_ManaGemChargeCache
+        if cache.time and cache.time > 0 and (now_c - cache.time < 1.5) then
+            return cache.charges
+        end
+        cache.time = now_c
+
         -- Identificativi di tutte le gemme del mana conjurate (Zaffiro, Smeraldo, Rubino, Citrino, Giada, Agata)
         local gemIDs = { [33312] = true, [22044] = true, [8008] = true, [8007] = true, [5513] = true, [5514] = true }
         local foundGem = false
@@ -814,7 +822,11 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
                         local txt = line and line:GetText()
                         if txt then
                             local ch = txt:match("%((%d+)%s+[^%)]+%)") or txt:match("(%d+)%s+[Cc]harg") or txt:match("(%d+)%s+[Cc]aric") or txt:match("(%d+)%s+[Aa]uflad")
-                            if ch then return tonumber(ch) end
+                            if ch then
+                                local charges = tonumber(ch)
+                                cache.charges = charges
+                                return charges
+                            end
                         end
                     end
                 end
@@ -825,13 +837,16 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
         for id in pairs(gemIDs) do
             local c = GetItemCount(id, false, true)
             if c and c > 0 then
+                cache.charges = c
                 return c
             end
         end
 
-        if foundGem then return 1 end
-        return 0
+        local res = foundGem and 1 or 0
+        cache.charges = res
+        return res
     end
+    -- [OTTIMIZZAZIONE FIX 5]: Cache temporale a 1.5s su FMHUD_ManaGemChargeCache per evitare la pesante scansione di tutte le borse e il parsing del tooltip ad ogni evento ad altissima frequenza (es. CLEU in raid).
 
     _G.FMHUD_CheckManaGem = function()
         local now = GetTime()
@@ -945,6 +960,7 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
 
     if not _G.FMHUD_LayoutFrame then
         local f = CreateFrame("Frame", "FMHUD_LayoutFrame")
+        local playerGUID = UnitGUID("player")
         f:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
         f:RegisterEvent("UNIT_INVENTORY_CHANGED")
         f:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -953,12 +969,15 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
         f:RegisterEvent("SPELL_UPDATE_COOLDOWN")
         f:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
         f:RegisterEvent("BAG_UPDATE_COOLDOWN")
+        f:RegisterEvent("BAG_UPDATE")
+        f:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         f.pendingUpdates = 0
         f:SetScript("OnEvent", function(self, event, ...)
             if event == "COMBAT_LOG_EVENT_UNFILTERED" then
                 local _, subEvent, _, sourceGUID, _, _, _, _, _, _, _, spellId, spellName = ...
-                if sourceGUID == UnitGUID("player") then
+                if not playerGUID then playerGUID = UnitGUID("player") end
+                if sourceGUID == playerGUID then
                     if subEvent == "SPELL_CAST_SUCCESS" or subEvent == "SPELL_AURA_APPLIED" then
                         local now = GetTime()
                         if spellId == 54861 or spellId == 54858 or spellId == 55016 or spellName == "Nitro Boosts" or spellName == "Acceleratori a Nitro" then
@@ -984,6 +1003,33 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
                 local unit = ...
                 if unit ~= "player" then return end
             end
+            if event == "BAG_UPDATE" then
+                if _G.FMHUD_ManaGemChargeCache then
+                    _G.FMHUD_ManaGemChargeCache.time = 0
+                end
+                if WeakAuras and WeakAuras.ScanEvents then
+                    WeakAuras.ScanEvents("FMHUD_ROW_UPDATE")
+                end
+                return
+            end
+            if event == "UNIT_SPELLCAST_SUCCEEDED" then
+                local unit, spellName, _, _, spellId = ...
+                if unit == "player" then
+                    if spellId == 759 or spellId == 3552 or spellId == 10053 or spellId == 10054 or spellId == 27101 or spellId == 42985 or spellId == 5405 or
+                       (spellName and (spellName:find("Mana Gem") or spellName:find("Gemma del Mana") or spellName:find("Gemme di Mana"))) then
+                        if _G.FMHUD_ManaGemChargeCache then
+                            _G.FMHUD_ManaGemChargeCache.time = 0
+                        end
+                        if WeakAuras and WeakAuras.ScanEvents then
+                            WeakAuras.ScanEvents("FMHUD_ROW_UPDATE")
+                        end
+                    end
+                end
+                return
+            end
+            if _G.FMHUD_ManaGemChargeCache then
+                _G.FMHUD_ManaGemChargeCache.time = 0
+            end
             _G.FMHUD_BuffCache = nil
             _G.FMHUD_T8_EquipCache = nil
             _G.FMHUD_SlotEquipCache = nil
@@ -1003,6 +1049,7 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
         end)
         _G.FMHUD_LayoutFrame = f
     end
+    -- [OTTIMIZZAZIONE FIX 6]: Cache dell'upvalue playerGUID in FMHUD_LayoutFrame per evitare chiamate a UnitGUID("player") su ogni riga di COMBAT_LOG_EVENT_UNFILTERED.
 
     _G.FMHUD_CoreInitDone = true
 end"""
