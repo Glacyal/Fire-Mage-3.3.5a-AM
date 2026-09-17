@@ -4,7 +4,7 @@ Modulo Componente: 12 - Stats Panel
 Gestisce il pannello delle statistiche in tempo reale (88x48px a x = -190, y = -45):
 - Mostra 4 righe di statistiche dinamiche calcolate all'istante:
   1. Spell Power (Fuoco)
-  2. Spell Crit (Fuoco, con talenti, debuff sul target come Scorch +5% e Totem +3%, e Combustion stack)
+  2. Spell Crit (Fuoco, con talenti, Combustion integrato da GetSpellCritChance(3), e debuff sul target come Scorch +5% e Totem +3%)
   3. Spell Haste (con Bloodlust, Totem Wrath of Air +5%, Swift Retrib +3%, Tier 10 2P +12%, PI, Berserking)
   4. Spell Hit (con rating, Precisione talento, presenza Draenei e Miseria/Faerie Fire +3% sul target, con indicatore verde Cap a 17%)
 """
@@ -77,11 +77,11 @@ def make_stats_custom_text() -> str:
         local name, _, _, count, _, _, _, _, _, _, spellId = UnitBuff("player", i)
         if not name then break end
 
-        -- Combustion (+10% Fire crit per stack)
+        -- Combustion (SpellID 11129): GetSpellCritChance(3) include già nativamente
+        -- il bonus di critico del buff (+10% per stack) allo stesso modo di Molten Armor.
+        -- Non va quindi sommato manualmente per evitare un doppio conteggio.
         if not hasCombustion and (spellId == 11129 or name == "Combustion" or name == "Combustione") then
             hasCombustion = true
-            local stacks = (count and count > 0) and count or 1
-            crit = crit + (stacks * 10)
         end
 
         -- Bloodlust / Heroism (+30% Haste)
@@ -306,3 +306,15 @@ def build_stats_auras() -> list[dict]:
             },
         },
     ]
+
+
+# =============================================================================
+# NOTA CORREZIONE CALCOLO STATISTICHE (FIX 4):
+# - Correzione Doppio Conteggio Critico Combustion:
+#   In World of Warcraft 3.3.5a, la funzione nativa GetSpellCritChance(3) include
+#   già nella percentuale restituita tutti gli aura-mod attivi del giocatore per
+#   la scuola Fuoco (come Molten Armor e Combustion). Sommare manualmente
+#   (stacks * 10) causava un raddoppio fittizio dell'incremento di critico (+20%,
+#   +40%, +60% invece di +10%, +20%, +30%). Con questa modifica, il valore mostrato
+#   nel pannello FMHUD rimane perfettamente coerente con la scheda del personaggio.
+# =============================================================================
