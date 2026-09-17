@@ -33,6 +33,7 @@ TEST_SCRIPTS = [
     "test_html_simultaneous.py",
     "test_components_integrity.py",
     "test_hotstreak_decoupled.py",
+    "test_string_sync.py",
 ]
 
 def run_single_test_script(script_name):

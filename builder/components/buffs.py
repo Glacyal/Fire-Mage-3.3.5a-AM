@@ -31,7 +31,9 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
         end
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local _, subEvent, sourceGUID, _, _, destGUID, destName, _, spellId, spellName = ...
+        local isRelevant = false
         if sourceGUID == UnitGUID("player") and (spellId == 54646 or spellName == "Focus Magic" or spellName == "Focalizzazione Magica") then
+            isRelevant = true
             if subEvent == "SPELL_AURA_APPLIED" or subEvent == "SPELL_AURA_REFRESH" or subEvent == "SPELL_CAST_SUCCESS" then
                 state.targetName = destName
                 state.targetGUID = destGUID
@@ -43,10 +45,15 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
             end
         elseif subEvent == "UNIT_DIED" then
             if (state.targetGUID and destGUID == state.targetGUID) or (state.targetName and destName == state.targetName) then
+                isRelevant = true
                 state.targetName = nil
                 state.targetGUID = nil
                 state.expires = 0
             end
+        end
+        if not isRelevant then
+            local isAllyActive = (state.expires and state.expires > now) or false
+            return state.lastHasProc or false, isAllyActive, state.lastProcRem or 0, 10, 0
         end
     end
 
@@ -66,6 +73,8 @@ SHARED_FM_CHECK_LUA = """function(event, ...)
             break
         end
     end
+    state.lastHasProc = hasProc
+    state.lastProcRem = procRem
 
     -- 3. Verifica se l'alleato registrato ha ancora il buff ed e vivo
     if state.expires and state.expires > now then

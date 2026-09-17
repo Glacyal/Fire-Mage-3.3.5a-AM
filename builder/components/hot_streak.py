@@ -27,7 +27,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     }
     local hs = _G.FMHUD_HS
 
-    local QUALIFYING_SPELLS = {
+    _G.FMHUD_QualifyingSpells = _G.FMHUD_QualifyingSpells or {
         [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
         [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
         [2948]=true,[8444]=true,[8445]=true,[8446]=true,[10205]=true,[10206]=true,[10207]=true,[27073]=true,[27074]=true,[42858]=true,[42859]=true, -- Scorch
@@ -36,7 +36,7 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     }
 
     local function isQualifying(spellId, spellName)
-        if spellId and QUALIFYING_SPELLS[spellId] then return true end
+        if spellId and _G.FMHUD_QualifyingSpells[spellId] then return true end
         if spellName then
             if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
                string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
@@ -61,49 +61,51 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
             notifyWA()
         elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
             local subEvent = select(2, ...)
-            if subEvent == "SPELL_DAMAGE" then
-                local sourceGUID = select(3, ...)
-                local sourceName = select(4, ...)
-                local sourceFlags = select(5, ...)
+            if subEvent ~= "SPELL_DAMAGE" then return end
 
-                local isPlayer = (sourceGUID == UnitGUID("player")) or (sourceName and sourceName == UnitName("player"))
-                if not isPlayer and sourceFlags and bit and bit.band then
-                    if bit.band(sourceFlags, 0x00000001) > 0 then
+            local sourceGUID = select(3, ...)
+            local isPlayer = (sourceGUID == UnitGUID("player"))
+            if not isPlayer then
+                local sourceName = select(4, ...)
+                if sourceName and sourceName == UnitName("player") then
+                    isPlayer = true
+                else
+                    local sourceFlags = select(5, ...)
+                    if sourceFlags and bit and bit.band and bit.band(sourceFlags, 0x00000001) > 0 then
                         isPlayer = true
                     end
                 end
+            end
+            if not isPlayer then return end
 
-                if isPlayer then
-                    local spellId = select(9, ...)
-                    local spellName = select(10, ...)
-                    if not isQualifying(spellId, spellName) then
-                        spellId = select(10, ...)
-                        spellName = select(11, ...)
-                    end
+            local spellId = select(9, ...)
+            local spellName = select(10, ...)
+            if not isQualifying(spellId, spellName) then
+                spellId = select(10, ...)
+                spellName = select(11, ...)
+            end
 
-                    if isQualifying(spellId, spellName) then
-                        local timestamp = select(1, ...)
-                        local destGUID = select(6, ...) or ""
-                        local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
+            if isQualifying(spellId, spellName) then
+                local timestamp = select(1, ...)
+                local destGUID = select(6, ...) or ""
+                local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
 
-                        if hs.lastEventKey ~= eventKey then
-                            hs.lastEventKey = eventKey
+                if hs.lastEventKey ~= eventKey then
+                    hs.lastEventKey = eventKey
 
-                            local c18, c19, c20 = select(18, ...)
-                            local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
+                    local c18, c19, c20 = select(18, ...)
+                    local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
 
-                            if isCrit then
-                                if hs.streak == 0 then
-                                    hs.streak = 1
-                                else
-                                    hs.streak = 0
-                                end
-                            else
-                                hs.streak = 0
-                            end
-                            notifyWA()
+                    if isCrit then
+                        if hs.streak == 0 then
+                            hs.streak = 1
+                        else
+                            hs.streak = 0
                         end
+                    else
+                        hs.streak = 0
                     end
+                    notifyWA()
                 end
             end
         end
@@ -137,8 +139,8 @@ end"""
 def make_hotstreak_bg_trigger() -> str:
     """Trigger di stato per il Background Frame di Hot Streak."""
     return """function(event, ...)
-    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    _G.FMHUD_InitHotStreak(event, ...)
+    _G.FMHUD_InitHotStreak = _G.FMHUD_InitHotStreak or (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
+    if _G.FMHUD_InitHotStreak then _G.FMHUD_InitHotStreak(event, ...) end
     return not UnitIsDeadOrGhost("player")
 end"""
 
@@ -153,8 +155,9 @@ end"""
 def make_hotstreak_seg1_trigger() -> str:
     """Trigger per la mezza barra sinistra (1° Critico): attiva se hs.streak == 1."""
     return """function(event, ...)
-    _G.FMHUD_InitHotStreak = (""" + SHARED_HOTSTREAK_CHECK_LUA + """)
-    _G.FMHUD_InitHotStreak(event, ...)
+    if _G.FMHUD_InitHotStreak then
+        _G.FMHUD_InitHotStreak(event, ...)
+    end
     local hs = _G.FMHUD_HS
     return (hs and hs.streak == 1)
 end"""

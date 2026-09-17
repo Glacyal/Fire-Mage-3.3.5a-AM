@@ -391,12 +391,12 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
             local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
             if not name then break end
             local isMatch = false
-            local cName = string.lower(name):gsub("[%s%p%c]", "")
 
             if slot == 15 then
                 if spellId and _G.FMHUD_CloakSpellIds and _G.FMHUD_CloakSpellIds[spellId] then
                     isMatch = true
                 else
+                    local cName = string.lower(name):gsub("[%s%p%c]", "")
                     for _, kw in ipairs(_G.FMHUD_CloakKeywords) do
                         local kwClean = kw:lower():gsub("[%s%p%c]", "")
                         if cName:find(kwClean, 1, true) then isMatch = true break end
@@ -406,6 +406,7 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
                 if spellId and _G.FMHUD_GlovesSpellIds and _G.FMHUD_GlovesSpellIds[spellId] then
                     isMatch = true
                 else
+                    local cName = string.lower(name):gsub("[%s%p%c]", "")
                     for _, kw in ipairs(_G.FMHUD_GlovesKeywords) do
                         local kwClean = kw:lower():gsub("[%s%p%c]", "")
                         if cName:find(kwClean, 1, true) then isMatch = true break end
@@ -417,31 +418,32 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
                     isMatch = true
                 end
             else
-                if entry then
-                    if spellId and entry.spellIds and entry.spellIds[spellId] then
-                        isMatch = true
-                    elseif entry.keywords then
+                if entry and spellId and entry.spellIds and entry.spellIds[spellId] then
+                    isMatch = true
+                else
+                    local cName = string.lower(name):gsub("[%s%p%c]", "")
+                    if entry and entry.keywords then
                         for _, kw in ipairs(entry.keywords) do
                             if cName:find(kw, 1, true) then isMatch = true break end
                         end
                     end
-                end
 
-                if not isMatch then
-                    local isOther = false
-                    if otherEntry then
-                        if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
-                            isOther = true
-                        elseif otherEntry.keywords then
-                            for _, kw in ipairs(otherEntry.keywords) do
-                                if cName:find(kw, 1, true) then isOther = true break end
+                    if not isMatch then
+                        local isOther = false
+                        if otherEntry then
+                            if spellId and otherEntry.spellIds and otherEntry.spellIds[spellId] then
+                                isOther = true
+                            elseif otherEntry.keywords then
+                                for _, kw in ipairs(otherEntry.keywords) do
+                                    if cName:find(kw, 1, true) then isOther = true break end
+                                end
                             end
                         end
-                    end
 
-                    if not isOther then
-                        for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
-                            if cName:find(kw, 1, true) then isMatch = true break end
+                        if not isOther then
+                            for _, kw in ipairs(_G.FMHUD_AllCasterKeywords) do
+                                if cName:find(kw, 1, true) then isMatch = true break end
+                            end
                         end
                     end
                 end
@@ -896,12 +898,14 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
             end
             _G.FMHUD_UpdateUtilityRowPositions(true)
             self.pendingUpdates = 5
-        end)
-        f:SetScript("OnUpdate", function(self, elapsed)
-            if self.pendingUpdates and self.pendingUpdates > 0 then
-                self.pendingUpdates = self.pendingUpdates - 1
-                _G.FMHUD_UpdateUtilityRowPositions(true)
-            end
+            self:SetScript("OnUpdate", function(sf, el)
+                if sf.pendingUpdates and sf.pendingUpdates > 0 then
+                    sf.pendingUpdates = sf.pendingUpdates - 1
+                    _G.FMHUD_UpdateUtilityRowPositions(true)
+                else
+                    sf:SetScript("OnUpdate", nil)
+                end
+            end)
         end)
         _G.FMHUD_LayoutFrame = f
     end
