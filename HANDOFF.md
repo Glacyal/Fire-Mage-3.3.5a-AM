@@ -14,8 +14,8 @@ La suite è distribuita come **WeakAura autonoma** in formato compresso `!WA:1!`
 | **Engine WeakAuras** | WeakAuras 4.0.0 (`internalVersion = 52`, header `!WA:1!`). Tutti i test sono stati eseguiti su questa versione. |
 | **File di Distribuzione** | [`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt) |
 | **Simulatore Web** | [`docs/index.html`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/docs/index.html) |
-| **Live Demo Online** | [GitHub Pages Live Showcase](https://glacyal.github.io/FireMageHUD-335/) |
-| **Controllo Versione** | Git su GitHub: [Glacyal/FireMageHUD-335](https://github.com/Glacyal/FireMageHUD-335) (branch: `main`) |
+| **Live Demo Online** | [GitHub Pages Live Showcase](https://glacyal.github.io/Fire-Mage-3.3.5a-AM/) |
+| **Controllo Versione** | Git su GitHub: [Glacyal/Fire-Mage-3.3.5a-AM](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM) (branch: `main`) |
 
 ---
 

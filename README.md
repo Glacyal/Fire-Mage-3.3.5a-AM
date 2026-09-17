@@ -1,10 +1,10 @@
 # Fire Mage 3.3.5a AM — WeakAuras Suite
 
-[![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/FireMageHUD-335)
-[![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/FireMageHUD-335)
-[![Class](https://img.shields.io/badge/Class-Mage%20(Fire)-red.svg)](https://github.com/Glacyal/FireMageHUD-335)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Glacyal/FireMageHUD-335)
-[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen.svg)](https://glacyal.github.io/FireMageHUD-335/)
+[![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
+[![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
+[![Class](https://img.shields.io/badge/Class-Mage%20(Fire)-red.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen.svg)](https://glacyal.github.io/Fire-Mage-3.3.5a-AM/)
 
 Suite WeakAuras completa, ingegnerizzata a livello enterprise, modulare ed ergonomica per **Mago Fuoco Livello 80** in World of Warcraft 3.3.5a (*Wrath of the Lich King - Build 12340*).  
 Progettata per garantire prestazioni estreme in raid, latenza Lua minima, tracciamento chirurgico dei proc e un'interfaccia "Zero-Clutter" focalizzata sull'ottimizzazione del DPS.
@@ -14,7 +14,7 @@ Progettata per garantire prestazioni estreme in raid, latenza Lua minima, tracci
 ## 🌐 Anteprima Online (Live Simulator)
 
 Visualizza e interagisci con l'HUD direttamente dal browser senza installare nulla:  
-👉 **[Apri il Simulatore Web su GitHub Pages](https://glacyal.github.io/FireMageHUD-335/)**  
+👉 **[Apri il Simulatore Web su GitHub Pages](https://glacyal.github.io/Fire-Mage-3.3.5a-AM/)**  
 *(Disponibile anche in locale nel file [`docs/index.html`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/docs/index.html))*
 
 ---
@@ -152,4 +152,4 @@ python generate.py
 ## 📄 Licenza
 
 Distribuito sotto licenza **MIT**. Consulta il file per ulteriori dettagli.  
-Repository: [Glacyal/FireMageHUD-335](https://github.com/Glacyal/FireMageHUD-335)
+Repository: [Glacyal/Fire-Mage-3.3.5a-AM](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
