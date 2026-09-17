@@ -21,7 +21,7 @@ Visualizza e interagisci con l'HUD direttamente dal browser senza installare nul
 
 ## 🌟 Caratteristiche Principali
 
-### 1. Barra Hot Streak a Doppio Segmento Decoppiato (Rolling Streak)
+### 1. Barra Hot Streak a Doppio Segmento
 La barra centrale (278px totali a `y = -25`) è suddivisa in **due metà completamente indipendenti**:
 - **Mezza Barra Sinistra (Segment 1 — 137px a x = -70.5)**:
   - **Stato Binario (0 o 1 critico)**: Si accende in arancione brillante al primo critico diretto (*Fireball, Scorch, Fire Blast, Frostfire Bolt, esplosione di Living Bomb*).
