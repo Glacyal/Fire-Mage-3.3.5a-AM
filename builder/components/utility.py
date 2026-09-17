@@ -23,6 +23,37 @@ from builder.core.helpers import make_subtext
 # LOGICA LUA CONDIVISA CENTRALIZZATA (BOOTSTRAP UNIFICATO)
 # =============================================================================
 SHARED_CORE_BOOTSTRAP_LUA = r"""function()
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or function()
+        local now_b = GetTime()
+        local c = _G.FMHUD_BuffCache
+        if c and c.time == now_b then
+            return c
+        end
+        c = { time = now_b, bySpellId = {}, byName = {}, list = {} }
+        for i = 1, 40 do
+            local name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId = UnitBuff("player", i)
+            if not name then break end
+            local b = {
+                name = name,
+                rank = rank,
+                icon = icon,
+                count = count,
+                debuffType = debuffType,
+                duration = duration,
+                expirationTime = expirationTime,
+                unitCaster = unitCaster,
+                isStealable = isStealable,
+                shouldConsolidate = shouldConsolidate,
+                spellId = spellId,
+            }
+            c.list[#c.list + 1] = b
+            if spellId then c.bySpellId[spellId] = b end
+            if name then c.byName[name] = b end
+        end
+        _G.FMHUD_BuffCache = c
+        return c
+    end
+
     if _G.FMHUD_CoreInitDone then return end
 
     _G.FMHUD_ICD = _G.FMHUD_ICD or {
@@ -219,12 +250,26 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
 
         -- Slot 10 (Gloves): must have Hyperspeed Accelerators (enchant 3604 or buff 54758 or keyword)
         if s == 10 then
-            for i = 1, 40 do
-                local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-                if not name then break end
-                if spellId == 54758 or (name and (name:find("Hyperspeed") or name:find("Ipersonic"))) then
+            local buffs = _G.FMHUD_GetPlayerBuffs and _G.FMHUD_GetPlayerBuffs()
+            if buffs then
+                if buffs.bySpellId[54758] then
                     cache.isEquipped = true
                     return true
+                end
+                for _, b in ipairs(buffs.list) do
+                    if b.name and (b.name:find("Hyperspeed") or b.name:find("Ipersonic")) then
+                        cache.isEquipped = true
+                        return true
+                    end
+                end
+            else
+                for i = 1, 40 do
+                    local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+                    if not name then break end
+                    if spellId == 54758 or (name and (name:find("Hyperspeed") or name:find("Ipersonic"))) then
+                        cache.isEquipped = true
+                        return true
+                    end
                 end
             end
             if enchantID == 3604 then
@@ -241,12 +286,26 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
 
         -- Slot 8 (Boots): must have speed enchant (Nitro Boosts, Tuskarr's, Cat's Swiftness, Greater Speed, or buff)
         if s == 8 then
-            for i = 1, 40 do
-                local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-                if not name then break end
-                if (spellId and _G.FMHUD_BootsSpellIds and _G.FMHUD_BootsSpellIds[spellId]) or (name and (name:find("Nitro") or name:find("Boosts"))) then
+            local buffs = _G.FMHUD_GetPlayerBuffs and _G.FMHUD_GetPlayerBuffs()
+            if buffs then
+                if (_G.FMHUD_BootsSpellIds and (buffs.bySpellId[54861] or buffs.bySpellId[54858] or buffs.bySpellId[55016])) then
                     cache.isEquipped = true
                     return true
+                end
+                for _, b in ipairs(buffs.list) do
+                    if (b.spellId and _G.FMHUD_BootsSpellIds and _G.FMHUD_BootsSpellIds[b.spellId]) or (b.name and (b.name:find("Nitro") or b.name:find("Boosts"))) then
+                        cache.isEquipped = true
+                        return true
+                    end
+                end
+            else
+                for i = 1, 40 do
+                    local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+                    if not name then break end
+                    if (spellId and _G.FMHUD_BootsSpellIds and _G.FMHUD_BootsSpellIds[spellId]) or (name and (name:find("Nitro") or name:find("Boosts"))) then
+                        cache.isEquipped = true
+                        return true
+                    end
                 end
             end
             if enchantID and _G.FMHUD_BootsEnchantIDs and _G.FMHUD_BootsEnchantIDs[enchantID] then
@@ -263,12 +322,24 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
 
         -- Slot 15 (Cloak): must have an empowerment proc enchant (Lightweave, Darkglow, Swordguard, Springy, Flexweave)
         if s == 15 then
-            for i = 1, 40 do
-                local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
-                if not name then break end
-                if spellId and _G.FMHUD_CloakSpellIds and _G.FMHUD_CloakSpellIds[spellId] then
-                    cache.isEquipped = true
-                    return true
+            local buffs = _G.FMHUD_GetPlayerBuffs and _G.FMHUD_GetPlayerBuffs()
+            if buffs then
+                if _G.FMHUD_CloakSpellIds then
+                    for id, _ in pairs(_G.FMHUD_CloakSpellIds) do
+                        if buffs.bySpellId[id] then
+                            cache.isEquipped = true
+                            return true
+                        end
+                    end
+                end
+            else
+                for i = 1, 40 do
+                    local name, _, _, _, _, _, _, _, _, _, spellId = UnitBuff("player", i)
+                    if not name then break end
+                    if spellId and _G.FMHUD_CloakSpellIds and _G.FMHUD_CloakSpellIds[spellId] then
+                        cache.isEquipped = true
+                        return true
+                    end
                 end
             end
             if enchantID and _G.FMHUD_CloakEnchantIDs and _G.FMHUD_CloakEnchantIDs[enchantID] then
@@ -387,9 +458,31 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
         local durBuff = 0
         local buffIcon = nil
 
-        for i = 1, 40 do
-            local name, _, icon, count, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-            if not name then break end
+        local buffs = _G.FMHUD_GetPlayerBuffs and _G.FMHUD_GetPlayerBuffs()
+        local buffList = buffs and buffs.list
+        local numBuffs = buffList and #buffList or 40
+
+        for i = 1, numBuffs do
+            local name, icon, count, duration, expirationTime, spellId
+            if buffList then
+                local b = buffList[i]
+                if not b then break end
+                name = b.name
+                icon = b.icon
+                count = b.count
+                duration = b.duration
+                expirationTime = b.expirationTime
+                spellId = b.spellId
+            else
+                local n, _, ic, ct, _, dur, exp, _, _, _, spId = UnitBuff("player", i)
+                if not n then break end
+                name = n
+                icon = ic
+                count = ct
+                duration = dur
+                expirationTime = exp
+                spellId = spId
+            end
             local isMatch = false
 
             if slot == 15 then
@@ -891,6 +984,7 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
                 local unit = ...
                 if unit ~= "player" then return end
             end
+            _G.FMHUD_BuffCache = nil
             _G.FMHUD_T8_EquipCache = nil
             _G.FMHUD_SlotEquipCache = nil
             if WeakAuras and WeakAuras.ScanEvents then
@@ -1689,3 +1783,17 @@ end"""
             ],
         },
     ]
+
+
+# =============================================================================
+# NOTA OTTIMIZZAZIONE CPU/GC (FIX 3):
+# - Integrazione Cache Buffs Condivisa (_G.FMHUD_GetPlayerBuffs):
+#   All'interno di FMHUD_CheckSlotEquipped (slot 10, slot 8, slot 15) e in
+#   FMHUD_CheckSlot, la ricerca dell'equipaggiamento attivo e dei proc di buff
+#   sfrutta la cache centralizzata _G.FMHUD_GetPlayerBuffs().
+#   Questo elimina scansioni multiple e concorrenti di UnitBuff("player", i) ad
+#   ogni ciclo di ridisegno o cambio equipaggiamento, condividendo un'unica lista
+#   indicizzata per spellId e nome con timestamp GetTime().
+#   La cache viene invalidata istantaneamente su UNIT_AURA per il player
+#   all'interno di FMHUD_LayoutFrame.
+# =============================================================================

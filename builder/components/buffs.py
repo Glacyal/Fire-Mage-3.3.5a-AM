@@ -10,6 +10,41 @@ from builder.core.helpers import make_subtext
 
 
 # =============================================================================
+# LOGICA LUA CONDIVISA: CACHE BUFF PLAYER UNIFICATA (FIX 3)
+# =============================================================================
+SHARED_GET_PLAYER_BUFFS_LUA = r"""function()
+    local now_b = GetTime()
+    local c = _G.FMHUD_BuffCache
+    if c and c.time == now_b then
+        return c
+    end
+    c = { time = now_b, bySpellId = {}, byName = {}, list = {} }
+    for i = 1, 40 do
+        local name, rank, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId = UnitBuff("player", i)
+        if not name then break end
+        local b = {
+            name = name,
+            rank = rank,
+            icon = icon,
+            count = count,
+            debuffType = debuffType,
+            duration = duration,
+            expirationTime = expirationTime,
+            unitCaster = unitCaster,
+            isStealable = isStealable,
+            shouldConsolidate = shouldConsolidate,
+            spellId = spellId,
+        }
+        c.list[#c.list + 1] = b
+        if spellId then c.bySpellId[spellId] = b end
+        if name then c.byName[name] = b end
+    end
+    _G.FMHUD_BuffCache = c
+    return c
+end"""
+
+
+# =============================================================================
 # LOGICA LUA CONDIVISA: FOCUS MAGIC
 # =============================================================================
 SHARED_FM_CHECK_LUA = """function(event, ...)
@@ -230,6 +265,204 @@ end"""
 
 
 # =============================================================================
+# LOGICA LUA CONDIVISA: MOLTEN ARMOR (FIX 2 & FIX 3)
+# =============================================================================
+def make_ma_custom_text() -> str:
+    """Conto alla rovescia formattato per Molten Armor (visibile quando rem <= 300)."""
+    return f"""function()
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[43046] or c.bySpellId[43045] or c.bySpellId[30482] or c.byName["Molten Armor"] or c.byName["Armatura di Forgia"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - GetTime()
+        if rem > 60 then
+            local m = math.floor(rem / 60)
+            local s = math.floor(rem % 60)
+            return string.format("|cFFFFFF00%d:%02d|r", m, s)
+        elseif rem > 0 then
+            return string.format("|cFFFF4444%.0fs|r", rem)
+        end
+    end
+    return ""
+end"""
+
+
+def make_ma_trigger() -> str:
+    """Trigger Lua per Molten Armor Active con schedulazione C_Timer.After su soglia 300s."""
+    return f"""function(event, ...)
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local now = GetTime()
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[43046] or c.bySpellId[43045] or c.bySpellId[30482] or c.byName["Molten Armor"] or c.byName["Armatura di Forgia"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - now
+        if rem > 300 then
+            local delay = rem - 300
+            if _G.FMHUD_MA_ScheduledExp ~= b.expirationTime then
+                _G.FMHUD_MA_ScheduledExp = b.expirationTime
+                _G.FMHUD_MA_TimerSeq = (_G.FMHUD_MA_TimerSeq or 0) + 1
+                local mySeq = _G.FMHUD_MA_TimerSeq
+                local timerAfter = (C_Timer and C_Timer.After) or (_G.C_Timer and _G.C_Timer.After)
+                if timerAfter then
+                    timerAfter(delay, function()
+                        if _G.FMHUD_MA_TimerSeq == mySeq and WeakAuras and WeakAuras.ScanEvents then
+                            WeakAuras.ScanEvents("FMHUD_MA_THRESHOLD")
+                        end
+                    end)
+                end
+            end
+            return false
+        elseif rem > 0 then
+            _G.FMHUD_MA_ScheduledExp = nil
+            return true
+        end
+    end
+    _G.FMHUD_MA_ScheduledExp = nil
+    _G.FMHUD_MA_TimerSeq = (_G.FMHUD_MA_TimerSeq or 0) + 1
+    return false
+end"""
+
+
+def make_ma_custom_duration() -> str:
+    """Durata e scadenza per lo swipe cooldown di Molten Armor."""
+    return f"""function()
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[43046] or c.bySpellId[43045] or c.bySpellId[30482] or c.byName["Molten Armor"] or c.byName["Armatura di Forgia"]
+    if b then
+        return b.duration or 1800, b.expirationTime
+    end
+    return 0, 0
+end"""
+
+
+def make_ma_untrigger() -> str:
+    """Untrigger Lua per Molten Armor Active."""
+    return f"""function(event, ...)
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local now = GetTime()
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[43046] or c.bySpellId[43045] or c.bySpellId[30482] or c.byName["Molten Armor"] or c.byName["Armatura di Forgia"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - now
+        return not (rem > 0 and rem <= 300)
+    end
+    return true
+end"""
+
+
+# =============================================================================
+# LOGICA LUA CONDIVISA: ARCANE INTELLECT (FIX 2 & FIX 3)
+# =============================================================================
+def make_ai_custom_text() -> str:
+    """Conto alla rovescia formattato per Arcane Intellect (visibile quando rem <= 300)."""
+    return f"""function()
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[42995] or c.bySpellId[43002] or c.bySpellId[27126] or c.bySpellId[27127]
+        or c.bySpellId[1459] or c.bySpellId[1460] or c.bySpellId[1461]
+        or c.bySpellId[10156] or c.bySpellId[10157] or c.bySpellId[23028]
+        or c.bySpellId[61024] or c.bySpellId[61316] or c.bySpellId[54034] or c.bySpellId[57567]
+        or c.byName["Arcane Intellect"] or c.byName["Arcane Brilliance"]
+        or c.byName["Dalaran Intellect"] or c.byName["Dalaran Brilliance"]
+        or c.byName["Fel Intelligence"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - GetTime()
+        if rem > 60 then
+            local m = math.floor(rem / 60)
+            local s = math.floor(rem % 60)
+            return string.format("|cFFFFFF00%d:%02d|r", m, s)
+        elseif rem > 0 then
+            return string.format("|cFFFF4444%.0fs|r", rem)
+        end
+    end
+    return ""
+end"""
+
+
+def make_ai_trigger() -> str:
+    """Trigger Lua per Arcane Intellect Active con schedulazione C_Timer.After su soglia 300s."""
+    return f"""function(event, ...)
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local now = GetTime()
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[42995] or c.bySpellId[43002] or c.bySpellId[27126] or c.bySpellId[27127]
+        or c.bySpellId[1459] or c.bySpellId[1460] or c.bySpellId[1461]
+        or c.bySpellId[10156] or c.bySpellId[10157] or c.bySpellId[23028]
+        or c.bySpellId[61024] or c.bySpellId[61316] or c.bySpellId[54034] or c.bySpellId[57567]
+        or c.byName["Arcane Intellect"] or c.byName["Arcane Brilliance"]
+        or c.byName["Dalaran Intellect"] or c.byName["Dalaran Brilliance"]
+        or c.byName["Fel Intelligence"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - now
+        if rem > 300 then
+            local delay = rem - 300
+            if _G.FMHUD_AI_ScheduledExp ~= b.expirationTime then
+                _G.FMHUD_AI_ScheduledExp = b.expirationTime
+                _G.FMHUD_AI_TimerSeq = (_G.FMHUD_AI_TimerSeq or 0) + 1
+                local mySeq = _G.FMHUD_AI_TimerSeq
+                local timerAfter = (C_Timer and C_Timer.After) or (_G.C_Timer and _G.C_Timer.After)
+                if timerAfter then
+                    timerAfter(delay, function()
+                        if _G.FMHUD_AI_TimerSeq == mySeq and WeakAuras and WeakAuras.ScanEvents then
+                            WeakAuras.ScanEvents("FMHUD_AI_THRESHOLD")
+                        end
+                    end)
+                end
+            end
+            return false
+        elseif rem > 0 then
+            _G.FMHUD_AI_ScheduledExp = nil
+            return true
+        end
+    end
+    _G.FMHUD_AI_ScheduledExp = nil
+    _G.FMHUD_AI_TimerSeq = (_G.FMHUD_AI_TimerSeq or 0) + 1
+    return false
+end"""
+
+
+def make_ai_custom_duration() -> str:
+    """Durata e scadenza per lo swipe cooldown di Arcane Intellect."""
+    return f"""function()
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[42995] or c.bySpellId[43002] or c.bySpellId[27126] or c.bySpellId[27127]
+        or c.bySpellId[1459] or c.bySpellId[1460] or c.bySpellId[1461]
+        or c.bySpellId[10156] or c.bySpellId[10157] or c.bySpellId[23028]
+        or c.bySpellId[61024] or c.bySpellId[61316] or c.bySpellId[54034] or c.bySpellId[57567]
+        or c.byName["Arcane Intellect"] or c.byName["Arcane Brilliance"]
+        or c.byName["Dalaran Intellect"] or c.byName["Dalaran Brilliance"]
+        or c.byName["Fel Intelligence"]
+    if b then
+        return b.duration or 3600, b.expirationTime
+    end
+    return 0, 0
+end"""
+
+
+def make_ai_untrigger() -> str:
+    """Untrigger Lua per Arcane Intellect Active."""
+    return f"""function(event, ...)
+    _G.FMHUD_GetPlayerBuffs = _G.FMHUD_GetPlayerBuffs or {SHARED_GET_PLAYER_BUFFS_LUA}
+    local now = GetTime()
+    local c = _G.FMHUD_GetPlayerBuffs()
+    local b = c.bySpellId[42995] or c.bySpellId[43002] or c.bySpellId[27126] or c.bySpellId[27127]
+        or c.bySpellId[1459] or c.bySpellId[1460] or c.bySpellId[1461]
+        or c.bySpellId[10156] or c.bySpellId[10157] or c.bySpellId[23028]
+        or c.bySpellId[61024] or c.bySpellId[61316] or c.bySpellId[54034] or c.bySpellId[57567]
+        or c.byName["Arcane Intellect"] or c.byName["Arcane Brilliance"]
+        or c.byName["Dalaran Intellect"] or c.byName["Dalaran Brilliance"]
+        or c.byName["Fel Intelligence"]
+    if b and b.expirationTime and b.expirationTime > 0 then
+        local rem = b.expirationTime - now
+        return not (rem > 0 and rem <= 300)
+    end
+    return true
+end"""
+
+
+# =============================================================================
 # BUILDER: AURE WEAKAURAS PER LA COLONNA BUFF
 # =============================================================================
 def build_buffs_auras() -> list[dict]:
@@ -273,83 +506,22 @@ def build_buffs_auras() -> list[dict]:
             "cooldownTextDisabled": True,
             "inverse": False,
             "customTextUpdate": "update",
-            "customText": """function()
-    for i = 1, 40 do
-        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 60 then
-                local m = math.floor(rem / 60)
-                local s = math.floor(rem % 60)
-                return string.format("|cFFFFFF00%d:%02d|r", m, s)
-            elseif rem > 0 then
-                return string.format("|cFFFF4444%.0fs|r", rem)
-            end
-        end
-    end
-    return ""
-end""",
+            "customText": make_ma_custom_text(),
             "triggers": {
                 1: {
                     "trigger": {
                         "type": "custom",
                         "custom_type": "status",
                         "check": "event",
-                        "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
-                        "custom": """function(event, ...)
-    local now = GetTime()
-    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastMATime or 0)) < 0.25 then
-        return _G.FMHUD_LastMAActive or false
-    end
-    _G.FMHUD_LastMATime = now
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
-            local active = rem > 0 and rem <= 300
-            _G.FMHUD_LastMAActive = active
-            return active
-        end
-    end
-    _G.FMHUD_LastMAActive = false
-    return false
-end""",
-                        "customDuration": """function()
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            return duration or 1800, expirationTime
-        end
-    end
-    return 0, 0
-end""",
+                        "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FMHUD_MA_THRESHOLD",
+                        "custom": make_ma_trigger(),
+                        "customDuration": make_ma_custom_duration(),
                         "customIcon": """function()
     return "Interface\\\\Icons\\\\Ability_Mage_MoltenArmor"
 end""",
                     },
                     "untrigger": {
-                        "custom": """function(event, ...)
-    local now = GetTime()
-    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastMAUntrigTime or 0)) < 0.25 then
-        return _G.FMHUD_LastMAUntrig or false
-    end
-    _G.FMHUD_LastMAUntrigTime = now
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 43046 or spellId == 43045 or spellId == 30482 or name == "Molten Armor" or name == "Armatura di Forgia" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
-            local untrig = not (rem > 0 and rem <= 300)
-            _G.FMHUD_LastMAUntrig = untrig
-            return untrig
-        end
-    end
-    _G.FMHUD_LastMAUntrig = true
-    return true
-end"""
+                        "custom": make_ma_untrigger(),
                     }
                 },
                 "activeTriggerMode": -10,
@@ -424,80 +596,19 @@ end"""
             "cooldownTextDisabled": True,
             "inverse": False,
             "customTextUpdate": "update",
-            "customText": """function()
-    for i = 1, 40 do
-        local name, _, _, _, _, _, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - GetTime()) or 0
-            if rem > 60 then
-                local m = math.floor(rem / 60)
-                local s = math.floor(rem % 60)
-                return string.format("|cFFFFFF00%d:%02d|r", m, s)
-            elseif rem > 0 then
-                return string.format("|cFFFF4444%.0fs|r", rem)
-            end
-        end
-    end
-    return ""
-end""",
+            "customText": make_ai_custom_text(),
             "triggers": {
                 1: {
                     "trigger": {
                         "type": "custom",
                         "custom_type": "status",
                         "check": "event",
-                        "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FRAME_UPDATE",
-                        "custom": """function(event, ...)
-    local now = GetTime()
-    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastAITime or 0)) < 0.25 then
-        return _G.FMHUD_LastAIActive or false
-    end
-    _G.FMHUD_LastAITime = now
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
-            local active = rem > 0 and rem <= 300
-            _G.FMHUD_LastAIActive = active
-            return active
-        end
-    end
-    _G.FMHUD_LastAIActive = false
-    return false
-end""",
-                        "customDuration": """function()
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            return duration or 3600, expirationTime
-        end
-    end
-    return 0, 0
-end""",
+                        "events": "UNIT_AURA,PLAYER_ENTERING_WORLD,FMHUD_AI_THRESHOLD",
+                        "custom": make_ai_trigger(),
+                        "customDuration": make_ai_custom_duration(),
                     },
                     "untrigger": {
-                        "custom": """function(event, ...)
-    local now = GetTime()
-    if event == "FRAME_UPDATE" and (now - (_G.FMHUD_LastAIUntrigTime or 0)) < 0.25 then
-        return _G.FMHUD_LastAIUntrig or false
-    end
-    _G.FMHUD_LastAIUntrigTime = now
-    for i = 1, 40 do
-        local name, _, _, _, _, duration, expirationTime, _, _, _, spellId = UnitBuff("player", i)
-        if not name then break end
-        if spellId == 1459 or spellId == 1460 or spellId == 1461 or spellId == 10156 or spellId == 10157 or spellId == 27126 or spellId == 42995 or spellId == 23028 or spellId == 27127 or spellId == 43002 or spellId == 61024 or spellId == 61316 or spellId == 54034 or spellId == 57567 or name == "Arcane Intellect" or name == "Arcane Brilliance" or name == "Dalaran Intellect" or name == "Dalaran Brilliance" or name == "Fel Intelligence" then
-            local rem = expirationTime and expirationTime > 0 and (expirationTime - now) or 0
-            local untrig = not (rem > 0 and rem <= 300)
-            _G.FMHUD_LastAIUntrig = untrig
-            return untrig
-        end
-    end
-    _G.FMHUD_LastAIUntrig = true
-    return true
-end"""
+                        "custom": make_ai_untrigger(),
                     }
                 },
                 "activeTriggerMode": -10,
@@ -635,3 +746,20 @@ end""",
             ],
         },
     ]
+
+
+# =============================================================================
+# NOTA OTTIMIZZAZIONE CPU/GC (FIX 2 & FIX 3):
+# - Fix 2 (Schedulazione Timer vs Polling): Rimossa la registrazione a FRAME_UPDATE
+#   e il relativo throttling a 0.25s per Molten Armor e Arcane Intellect. Quando
+#   il buff è attivo con più di 300s (5 min) rimanenti, viene schedulato un timer
+#   C_Timer.After(delay) con delay = rem - 300 che spara l'evento dedicato
+#   FMHUD_MA_THRESHOLD o FMHUD_AI_THRESHOLD esattamente allo scadere della soglia.
+#   In questo modo, per il 90% del tempo di gioco con i buff attivi, viene eseguito
+#   zero codice Lua sui frame.
+# - Fix 3 (Cache Buffs Player Condivisa): Creata la funzione globale
+#   _G.FMHUD_GetPlayerBuffs() che esegue la scansione delle aure del giocatore
+#   una sola volta per frame-tick (GetTime()) memorizzandole indicizzate per
+#   spellId, nome e lista ordinata. Evita cicli ridondanti di 40 iterazioni
+#   tra Molten Armor, Arcane Intellect e i vari slot della utility row.
+# =============================================================================

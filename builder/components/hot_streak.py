@@ -27,111 +27,113 @@ SHARED_HOTSTREAK_CHECK_LUA = r"""function(event, ...)
     }
     local hs = _G.FMHUD_HS
 
-    _G.FMHUD_QualifyingSpells = _G.FMHUD_QualifyingSpells or {
-        [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
-        [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
-        [2948]=true,[8444]=true,[8445]=true,[8446]=true,[10205]=true,[10206]=true,[10207]=true,[27073]=true,[27074]=true,[42858]=true,[42859]=true, -- Scorch
-        [44614]=true,[47610]=true, -- Frostfire Bolt
-        [44461]=true,[55361]=true,[55362]=true,[44457]=true,[55359]=true,[55360]=true, -- Living Bomb
-    }
-
-    local function isQualifying(spellId, spellName)
-        if spellId and _G.FMHUD_QualifyingSpells[spellId] then return true end
-        if spellName then
-            if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
-               string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
-               string.find(spellName, "Scorch") or string.find(spellName, "Bruciatura") or
-               string.find(spellName, "Frostfire") or string.find(spellName, "Fuocogelo") or
-               string.find(spellName, "Living Bomb") or string.find(spellName, "Bomba Vivente") then
-                return true
-            end
-        end
-        return false
-    end
-
-    local function notifyWA()
-        if WeakAuras and WeakAuras.ScanEvents then
-            WeakAuras.ScanEvents("FMHUD_HS_UPDATE")
-        end
-    end
-
-    local function handleEvent(ev, ...)
-        if ev == "PLAYER_ENTERING_WORLD" or ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
-            hs.streak = 0
-            notifyWA()
-        elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
-            local subEvent = select(2, ...)
-            if subEvent ~= "SPELL_DAMAGE" then return end
-
-            local sourceGUID = select(3, ...)
-            local isPlayer = (sourceGUID == UnitGUID("player"))
-            if not isPlayer then
-                local sourceName = select(4, ...)
-                if sourceName and sourceName == UnitName("player") then
-                    isPlayer = true
-                else
-                    local sourceFlags = select(5, ...)
-                    if sourceFlags and bit and bit.band and bit.band(sourceFlags, 0x00000001) > 0 then
-                        isPlayer = true
-                    end
-                end
-            end
-            if not isPlayer then return end
-
-            local spellId = select(9, ...)
-            local spellName = select(10, ...)
-            if not isQualifying(spellId, spellName) then
-                spellId = select(10, ...)
-                spellName = select(11, ...)
-            end
-
-            if isQualifying(spellId, spellName) then
-                local timestamp = select(1, ...)
-                local destGUID = select(6, ...) or ""
-                local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
-
-                if hs.lastEventKey ~= eventKey then
-                    hs.lastEventKey = eventKey
-
-                    local c18, c19, c20 = select(18, ...)
-                    local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
-
-                    if isCrit then
-                        if hs.streak == 0 then
-                            hs.streak = 1
-                        else
-                            hs.streak = 0
-                        end
-                    else
-                        hs.streak = 0
-                    end
-                    notifyWA()
-                end
-            end
-        end
-    end
-
-    _G.FMHUD_HandleHSEvent = handleEvent
-
     local f = _G.FMHUD_HSFrame
     if not f then
         f = CreateFrame("Frame", "FMHUD_HSFrame")
         _G.FMHUD_HSFrame = f
-    end
-    f:UnregisterAllEvents()
-    f:RegisterEvent("PLAYER_ENTERING_WORLD")
-    f:RegisterEvent("PLAYER_DEAD")
-    f:RegisterEvent("PLAYER_UNGHOST")
-    f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-    f:SetScript("OnEvent", function(self, ev, ...)
-        if _G.FMHUD_HandleHSEvent then
-            _G.FMHUD_HandleHSEvent(ev, ...)
-        end
-    end)
 
-    if event then
-        handleEvent(event, ...)
+        _G.FMHUD_QualifyingSpells = _G.FMHUD_QualifyingSpells or {
+            [133]=true,[143]=true,[145]=true,[3140]=true,[8400]=true,[8401]=true,[8402]=true,[10148]=true,[10149]=true,[10150]=true,[10151]=true,[25306]=true,[27070]=true,[38692]=true,[42832]=true,[42833]=true, -- Fireball
+            [2136]=true,[2137]=true,[2138]=true,[8412]=true,[8413]=true,[10197]=true,[10199]=true,[27078]=true,[27079]=true,[42872]=true,[42873]=true, -- Fire Blast
+            [2948]=true,[8444]=true,[8445]=true,[8446]=true,[10205]=true,[10206]=true,[10207]=true,[27073]=true,[27074]=true,[42858]=true,[42859]=true, -- Scorch
+            [44614]=true,[47610]=true, -- Frostfire Bolt
+            [44461]=true,[55361]=true,[55362]=true,[44457]=true,[55359]=true,[55360]=true, -- Living Bomb
+        }
+
+        local function isQualifying(spellId, spellName)
+            if spellId and _G.FMHUD_QualifyingSpells[spellId] then return true end
+            if spellName then
+                if string.find(spellName, "Fireball") or string.find(spellName, "Palla di Fuoco") or
+                   string.find(spellName, "Fire Blast") or string.find(spellName, "Deflagrazione") or
+                   string.find(spellName, "Scorch") or string.find(spellName, "Bruciatura") or
+                   string.find(spellName, "Frostfire") or string.find(spellName, "Fuocogelo") or
+                   string.find(spellName, "Living Bomb") or string.find(spellName, "Bomba Vivente") then
+                    return true
+                end
+            end
+            return false
+        end
+
+        local function notifyWA()
+            if WeakAuras and WeakAuras.ScanEvents then
+                WeakAuras.ScanEvents("FMHUD_HS_UPDATE")
+            end
+        end
+
+        local function handleEvent(ev, ...)
+            if ev == "PLAYER_ENTERING_WORLD" or ev == "PLAYER_DEAD" or ev == "PLAYER_UNGHOST" then
+                hs.streak = 0
+                notifyWA()
+            elseif ev == "COMBAT_LOG_EVENT_UNFILTERED" then
+                local subEvent = select(2, ...)
+                if subEvent ~= "SPELL_DAMAGE" then return end
+
+                local sourceGUID = select(3, ...)
+                local isPlayer = (sourceGUID == UnitGUID("player"))
+                if not isPlayer then
+                    local sourceName = select(4, ...)
+                    if sourceName and sourceName == UnitName("player") then
+                        isPlayer = true
+                    else
+                        local sourceFlags = select(5, ...)
+                        if sourceFlags and bit and bit.band and bit.band(sourceFlags, 0x00000001) > 0 then
+                            isPlayer = true
+                        end
+                    end
+                end
+                if not isPlayer then return end
+
+                local spellId = select(9, ...)
+                local spellName = select(10, ...)
+                if not isQualifying(spellId, spellName) then
+                    spellId = select(10, ...)
+                    spellName = select(11, ...)
+                end
+
+                if isQualifying(spellId, spellName) then
+                    local timestamp = select(1, ...)
+                    local destGUID = select(6, ...) or ""
+                    local eventKey = tostring(timestamp) .. "_" .. tostring(spellId) .. "_" .. tostring(destGUID)
+
+                    if hs.lastEventKey ~= eventKey then
+                        hs.lastEventKey = eventKey
+
+                        local c18, c19, c20 = select(18, ...)
+                        local isCrit = (c18 == true or c18 == 1 or c19 == true or c19 == 1 or c20 == true or c20 == 1)
+
+                        if isCrit then
+                            if hs.streak == 0 then
+                                hs.streak = 1
+                            else
+                                hs.streak = 0
+                            end
+                        else
+                            hs.streak = 0
+                        end
+                        notifyWA()
+                    end
+                end
+            end
+        end
+
+        _G.FMHUD_HandleHSEvent = handleEvent
+
+        f:UnregisterAllEvents()
+        f:RegisterEvent("PLAYER_ENTERING_WORLD")
+        f:RegisterEvent("PLAYER_DEAD")
+        f:RegisterEvent("PLAYER_UNGHOST")
+        f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        f:SetScript("OnEvent", function(self, ev, ...)
+            if _G.FMHUD_HandleHSEvent then
+                _G.FMHUD_HandleHSEvent(ev, ...)
+            end
+        end)
     end
+
+    if _G.FMHUD_HandleHSEvent and event then
+        _G.FMHUD_HandleHSEvent(event, ...)
+    end
+    -- [OTTIMIZZAZIONE FIX 1]: Setup frame, eventi e closure eseguito una sola volta per sessione nel blocco 'if not f', azzerando riallocazioni inutili di closure e chiamate f:RegisterEvent per ogni frame o trigger.
     return hs
 end"""
 
