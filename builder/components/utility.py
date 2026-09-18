@@ -914,14 +914,14 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
 
         local activeOrder = {}
         if hasT1 then table.insert(activeOrder, "05 - Trinket 1") end
-        if hasT2 then table.insert(activeOrder, "05 - Trinket 2") end
-        if hasCloak then table.insert(activeOrder, "06 - Cloak") end
-        if hasT8 then table.insert(activeOrder, "06 - Tier 8") end
-        if hasGloves then table.insert(activeOrder, "06 - Gloves") end
-        table.insert(activeOrder, "06 - Mana Gem")
-        table.insert(activeOrder, "06 - Combustion")
-        table.insert(activeOrder, "06 - Mirror Image")
-        if hasBoots then table.insert(activeOrder, "06 - Boots") end
+        if hasT2 then table.insert(activeOrder, "06 - Trinket 2") end
+        if hasCloak then table.insert(activeOrder, "07 - Cloak") end
+        if hasT8 then table.insert(activeOrder, "08 - Tier 8") end
+        if hasGloves then table.insert(activeOrder, "09 - Gloves") end
+        table.insert(activeOrder, "10 - Mana Gem")
+        table.insert(activeOrder, "11 - Combustion")
+        table.insert(activeOrder, "12 - Mirror Image")
+        if hasBoots then table.insert(activeOrder, "13 - Boots") end
 
         local N = #activeOrder
         local step = 38
@@ -1404,14 +1404,14 @@ def build_utility_auras() -> list[dict]:
     """
     Costruisce e restituisce le 9 aure che compongono la fila utility inferiore:
     - 05 - Trinket 1 (Icon, Slot 13)
-    - 05 - Trinket 2 (Icon, Slot 14)
-    - 06 - Cloak (Icon, Slot 15)
-    - 06 - Tier 8 (Icon, T8 2P)
-    - 06 - Gloves (Icon, Slot 10 - Acceleratori Ipersonici Ingegneria)
-    - 06 - Mana Gem (Icon, Gemma del Mana + Proc T7)
-    - 06 - Combustion (Icon, Combustione)
-    - 06 - Mirror Image (Icon, Copie + Bonus T10 4P)
-    - 06 - Boots (Icon, Slot 8 - Acceleratori a Nitro o incanto speed)
+    - 06 - Trinket 2 (Icon, Slot 14)
+    - 07 - Cloak (Icon, Slot 15)
+    - 08 - Tier 8 (Icon, T8 2P)
+    - 09 - Gloves (Icon, Slot 10 - Acceleratori Ipersonici Ingegneria)
+    - 10 - Mana Gem (Icon, Gemma del Mana + Proc T7)
+    - 11 - Combustion (Icon, Combustione)
+    - 12 - Mirror Image (Icon, Copie + Bonus T10 4P)
+    - 13 - Boots (Icon, Slot 8 - Acceleratori a Nitro o incanto speed)
     """
     events_list = "PLAYER_EQUIPMENT_CHANGED,UNIT_INVENTORY_CHANGED,PLAYER_ENTERING_WORLD,ZONE_CHANGED_NEW_AREA,UNIT_AURA,SPELL_UPDATE_COOLDOWN,ACTIONBAR_UPDATE_COOLDOWN,BAG_UPDATE_COOLDOWN,COMBAT_LOG_EVENT_UNFILTERED,FMHUD_ROW_UPDATE"
 
@@ -1457,9 +1457,9 @@ def build_utility_auras() -> list[dict]:
             ],
         },
 
-        # 05 - Trinket 2 (Slot 14)
+        # 06 - Trinket 2 (Slot 14)
         {
-            "id": "05 - Trinket 2",
+            "id": "06 - Trinket 2",
             "uid": "FMHUD_TRINKET2",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1498,9 +1498,9 @@ def build_utility_auras() -> list[dict]:
             ],
         },
 
-        # 06 - Cloak (Slot 15)
+        # 07 - Cloak (Slot 15)
         {
-            "id": "06 - Cloak",
+            "id": "07 - Cloak",
             "uid": "FMHUD_CLOAK",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1540,9 +1540,9 @@ def build_utility_auras() -> list[dict]:
             ],
         },
 
-        # 06 - Tier 8
+        # 08 - Tier 8
         {
-            "id": "06 - Tier 8",
+            "id": "08 - Tier 8",
             "uid": "FMHUD_TIER8",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1589,9 +1589,9 @@ end"""
             ],
         },
 
-        # 06 - Gloves (Slot 10 - Hyperspeed Accelerators)
+        # 09 - Gloves (Slot 10 - Hyperspeed Accelerators)
         {
-            "id": "06 - Gloves",
+            "id": "09 - Gloves",
             "uid": "FMHUD_GLOVES",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1631,9 +1631,9 @@ end"""
             ],
         },
 
-        # 06 - Mana Gem
+        # 10 - Mana Gem
         {
-            "id": "06 - Mana Gem",
+            "id": "10 - Mana Gem",
             "uid": "FMHUD_MANAGEM",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1698,9 +1698,9 @@ end"""
             ],
         },
 
-        # 06 - Combustion
+        # 11 - Combustion
         {
-            "id": "06 - Combustion",
+            "id": "11 - Combustion",
             "uid": "FMHUD_COMBUSTION",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1743,9 +1743,9 @@ end"""
             ],
         },
 
-        # 06 - Mirror Image
+        # 12 - Mirror Image
         {
-            "id": "06 - Mirror Image",
+            "id": "12 - Mirror Image",
             "uid": "FMHUD_MIRRORIMAGE",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",
@@ -1788,9 +1788,9 @@ end"""
             ],
         },
 
-        # 06 - Boots (Slot 8 - Nitro Boosts o Incanto Speed)
+        # 13 - Boots (Slot 8 - Nitro Boosts o Incanto Speed)
         {
-            "id": "06 - Boots",
+            "id": "13 - Boots",
             "uid": "FMHUD_BOOTS",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "icon",

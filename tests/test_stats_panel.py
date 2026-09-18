@@ -211,7 +211,7 @@ class TestStatsPanel(unittest.TestCase):
         auras = build_stats_auras()
         self.assertEqual(len(auras), 3, "Previste 3 aure nel componente Stats Panel")
         ids = [a["id"] for a in auras]
-        self.assertIn("12 - Stats Panel", ids)
+        self.assertIn("18 - Stats Panel", ids)
         self.assertIn("Stats Panel - Background", ids)
         self.assertIn("Stats Panel - Text", ids)
 

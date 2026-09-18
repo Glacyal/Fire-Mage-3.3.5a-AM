@@ -21,9 +21,9 @@ def test_tree_structure():
     children_ids = [c['id'] for c in tree['c']]
     print(f"Total children count: {len(children_ids)}")
     
-    assert "06 - Tier 8" in children_ids, "06 - Tier 8 missing from tree!"
-    assert "06 - Gloves" in children_ids, "06 - Gloves missing from tree!"
-    assert "06 - Boots" in children_ids, "06 - Boots missing from tree!"
+    assert "08 - Tier 8" in children_ids, "08 - Tier 8 missing from tree!"
+    assert "09 - Gloves" in children_ids, "09 - Gloves missing from tree!"
+    assert "13 - Boots" in children_ids, "13 - Boots missing from tree!"
     assert "06 - Tier 10" not in children_ids, "06 - Tier 10 should no longer be in the utility row!"
     assert "Tier 10" in children_ids, "Tier 10 missing from 01 - Procs!"
     
@@ -35,12 +35,12 @@ def test_tree_structure():
     hotstreak_idx = children_ids.index("Hot Streak")
     assert t10_idx < hotstreak_idx, f"Tier 10 ({t10_idx}) must precede Hot Streak ({hotstreak_idx}) in c array!"
     
-    t8_idx = children_ids.index("06 - Tier 8")
-    gloves_idx = children_ids.index("06 - Gloves")
-    gem_idx = children_ids.index("06 - Mana Gem")
-    comb_idx = children_ids.index("06 - Combustion")
-    mirror_idx = children_ids.index("06 - Mirror Image")
-    boots_idx = children_ids.index("06 - Boots")
+    t8_idx = children_ids.index("08 - Tier 8")
+    gloves_idx = children_ids.index("09 - Gloves")
+    gem_idx = children_ids.index("10 - Mana Gem")
+    comb_idx = children_ids.index("11 - Combustion")
+    mirror_idx = children_ids.index("12 - Mirror Image")
+    boots_idx = children_ids.index("13 - Boots")
     
     print(f"Indices: T10={t10_idx}, HotStreak={hotstreak_idx}, T8={t8_idx}, Gloves={gloves_idx}, Gem={gem_idx}, Comb={comb_idx}, Mirror={mirror_idx}, Boots={boots_idx}")
     assert t8_idx < gloves_idx < gem_idx < comb_idx < mirror_idx < boots_idx, (

@@ -1,5 +1,5 @@
 """
-Modulo Componente: 10 - Alerts
+Modulo Componente: 17 - Alerts
 ==============================
 Gestisce gli avvisi testuali contestuali centrali (a y = 105):
 - Alert - Hot Streak: Scritta a due righe in centro schermo quando Hot Streak è attivo
@@ -10,12 +10,12 @@ Gestisce gli avvisi testuali contestuali centrali (a y = 105):
 def build_alerts_auras() -> list[dict]:
     """
     Costruisce e restituisce le aure del gruppo Alerts:
-    - 10 - Alerts (Group)
+    - 17 - Alerts (Group)
     - Alert - Hot Streak (Text)
     """
     return [
         {
-            "id": "10 - Alerts",
+            "id": "17 - Alerts",
             "uid": "FMHUD_ALERTS_GRP",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "group",
@@ -29,7 +29,7 @@ def build_alerts_auras() -> list[dict]:
         {
             "id": "Alert - Hot Streak",
             "uid": "FMHUD_ALERT_HS",
-            "parent": "10 - Alerts",
+            "parent": "17 - Alerts",
             "regionType": "text",
             "internalVersion": 52,
             "displayText": "|cFFFF5500HOT STREAK!|r\\n|cFFFFFF00PYROBLAST READY!|r",

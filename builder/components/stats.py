@@ -1,5 +1,5 @@
 """
-Modulo Componente: 12 - Stats Panel
+Modulo Componente: 18 - Stats Panel
 ===================================
 Gestisce il pannello delle statistiche in tempo reale (88x48px a x = -190, y = -45):
 - Mostra 4 righe di statistiche dinamiche calcolate all'istante:
@@ -219,13 +219,13 @@ end"""
 def build_stats_auras() -> list[dict]:
     """
     Costruisce e restituisce le 3 aure che compongono il componente Stats Panel:
-    - 12 - Stats Panel (Group)
+    - 18 - Stats Panel (Group)
     - Stats Panel - Background (Texture 88x48px)
     - Stats Panel - Text (Text con le 4 righe formattate)
     """
     return [
         {
-            "id": "12 - Stats Panel",
+            "id": "18 - Stats Panel",
             "uid": "FMHUD_STATS_GRP",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "group",
@@ -242,7 +242,7 @@ def build_stats_auras() -> list[dict]:
         {
             "id": "Stats Panel - Background",
             "uid": "FMHUD_STATS_BG",
-            "parent": "12 - Stats Panel",
+            "parent": "18 - Stats Panel",
             "regionType": "texture",
             "internalVersion": 52,
             "xOffset": 0,
@@ -272,7 +272,7 @@ def build_stats_auras() -> list[dict]:
         {
             "id": "Stats Panel - Text",
             "uid": "FMHUD_STATS_TXT",
-            "parent": "12 - Stats Panel",
+            "parent": "18 - Stats Panel",
             "regionType": "text",
             "internalVersion": 52,
             "xOffset": 2,

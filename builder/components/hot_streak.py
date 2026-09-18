@@ -1,7 +1,7 @@
 """
-Modulo Componente: 10 - Hot Streak Bar (Doppio Segmento Decoppiato)
+Modulo Componente: 15 - Hot Streak Bar (Doppio Segmento Decoppiato)
 ===================================================================
-Gestisce la barra orizzontale centrale di Hot Streak (278px totali a y = -25):
+Gestisce la barra orizzontale centrale di Hot Streak (sopra la barra del mana a y = -3):
 1. Background Frame (278x7px)
 2. Mezza Barra Sinistra (Segment 1 - 137x5px a x = -70.5):
    - Stato binario 0 o 1.
@@ -182,7 +182,7 @@ end"""
 def build_hotstreak_auras() -> list[dict]:
     """
     Costruisce e restituisce le 4 aure che compongono il componente Hot Streak:
-    - 10 - Hot Streak Bar (Group)
+    - 15 - Hot Streak Bar (Group)
     - Hot Streak Bar - Background (Texture 278x7px)
     - Hot Streak Bar - Segment 1 (Texture 137x5px a x = -70.5)
     - Hot Streak Bar - Proc (Aurabar 137x5px a x = +70.5 con Pixel Glow)
@@ -190,13 +190,13 @@ def build_hotstreak_auras() -> list[dict]:
     return [
         # Gruppo contenitore
         {
-            "id": "10 - Hot Streak Bar",
+            "id": "15 - Hot Streak Bar",
             "uid": "FMHUD_HOTSTREAK_BAR_GRP",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "group",
             "internalVersion": 52,
             "xOffset": 0,
-            "yOffset": -25,
+            "yOffset": -3,
             "anchorPoint": "CENTER",
             "selfPoint": "CENTER",
             "controlledChildren": [
@@ -209,7 +209,7 @@ def build_hotstreak_auras() -> list[dict]:
         {
             "id": "Hot Streak Bar - Background",
             "uid": "FMHUD_HSBAR_BG",
-            "parent": "10 - Hot Streak Bar",
+            "parent": "15 - Hot Streak Bar",
             "regionType": "texture",
             "internalVersion": 52,
             "xOffset": 0,
@@ -240,7 +240,7 @@ def build_hotstreak_auras() -> list[dict]:
         {
             "id": "Hot Streak Bar - Segment 1",
             "uid": "FMHUD_HSBAR_SEG1",
-            "parent": "10 - Hot Streak Bar",
+            "parent": "15 - Hot Streak Bar",
             "regionType": "texture",
             "internalVersion": 52,
             "width": 137,
@@ -271,7 +271,7 @@ def build_hotstreak_auras() -> list[dict]:
         {
             "id": "Hot Streak Bar - Proc",
             "uid": "FMHUD_HSBAR_SEG2",
-            "parent": "10 - Hot Streak Bar",
+            "parent": "15 - Hot Streak Bar",
             "regionType": "aurabar",
             "internalVersion": 52,
             "width": 137,

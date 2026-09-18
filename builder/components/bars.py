@@ -1,11 +1,11 @@
 """
-Modulo Componente: 07 - Mana Bar & 08 - Castbar
+Modulo Componente: 14 - Mana Bar & 16 - Castbar
 ================================================
 Gestisce le barre centrali sincronizzate a 278px di larghezza:
-1. 07 - Mana Bar (278x14px a y = -15):
+1. 14 - Mana Bar (278x14px a y = -15):
    - Barra percentuale del mana con cambio colore dinamico in rosso se mana <= 20%.
    - Testo centrale: % mana con due decimali (%1.percentpower%%).
-2. 08 - Castbar (278x20px a y = +8):
+2. 16 - Castbar (278x20px a y = +14):
    - Barra di lancio nativa WeakAuras (texture Blizzard, colore azzurro [0.0, 0.77, 1.0]).
    - Mostra il nome dell'incantesimo a sinistra (%n) e il tempo rimanente a destra (%p).
    - Icona della spell attiva a sinistra (icon: True, icon_side: LEFT, iconSource: -1).
@@ -17,15 +17,15 @@ from builder.core.constants import TEXTURE_STATUSBAR
 def build_bars_auras() -> list[dict]:
     """
     Costruisce e restituisce le 2 barre principali dell'HUD:
-    - 07 - Mana Bar (Aurabar)
-    - 08 - Castbar (Aurabar)
+    - 14 - Mana Bar (Aurabar)
+    - 16 - Castbar (Aurabar)
     """
     return [
         # =====================================================================
-        # 07 - MANA BAR
+        # 14 - MANA BAR
         # =====================================================================
         {
-            "id": "07 - Mana Bar",
+            "id": "14 - Mana Bar",
             "uid": "FMHUD_MANABAR",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "aurabar",
@@ -86,10 +86,10 @@ def build_bars_auras() -> list[dict]:
         },
 
         # =====================================================================
-        # 08 - CASTBAR
+        # 16 - CASTBAR
         # =====================================================================
         {
-            "id": "08 - Castbar",
+            "id": "16 - Castbar",
             "uid": "FMHUD_CASTBAR",
             "parent": "Fire Mage 3.3.5a AM",
             "regionType": "aurabar",
@@ -97,7 +97,7 @@ def build_bars_auras() -> list[dict]:
             "width": 278,
             "height": 20,
             "xOffset": 0,
-            "yOffset": 8,
+            "yOffset": 14,
             "barColor": [0.0, 0.77, 1.0, 1.0],
             "backgroundColor": [0.15, 0.15, 0.15, 0.8],
             "texture": "Blizzard",

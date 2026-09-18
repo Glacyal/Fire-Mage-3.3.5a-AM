@@ -66,14 +66,14 @@ class TestAllUtilityCases(unittest.TestCase):
             flags = dict(zip(OPTIONAL_FLAGS, combo))
             active = []
             if flags["T1"]: active.append("05 - Trinket 1")
-            if flags["T2"]: active.append("05 - Trinket 2")
-            if flags["Cloak"]: active.append("06 - Cloak")
-            if flags["T8"]: active.append("06 - Tier 8")
-            if flags["Gloves"]: active.append("06 - Gloves")
-            active.append("06 - Mana Gem")
-            active.append("06 - Combustion")
-            active.append("06 - Mirror Image")
-            if flags["Boots"]: active.append("06 - Boots")
+            if flags["T2"]: active.append("06 - Trinket 2")
+            if flags["Cloak"]: active.append("07 - Cloak")
+            if flags["T8"]: active.append("08 - Tier 8")
+            if flags["Gloves"]: active.append("09 - Gloves")
+            active.append("10 - Mana Gem")
+            active.append("11 - Combustion")
+            active.append("12 - Mirror Image")
+            if flags["Boots"]: active.append("13 - Boots")
 
             tested_count += 1
             N = len(active)
@@ -131,20 +131,20 @@ class TestAllUtilityCases(unittest.TestCase):
 
         # Controllo specifico per Tier 8 e Guanti
         self.assertNotEqual(
-            offsets["06 - Tier 8"], offsets["06 - Gloves"],
-            "06 - Tier 8 e 06 - Gloves non possono avere lo stesso xOffset statico!"
+            offsets["08 - Tier 8"], offsets["09 - Gloves"],
+            "08 - Tier 8 e 09 - Gloves non possono avere lo stesso xOffset statico!"
         )
 
         # Controllo specifico per Mirror Image e Boots
         self.assertNotEqual(
-            offsets["06 - Mirror Image"], offsets["06 - Boots"],
-            "06 - Mirror Image e 06 - Boots non possono avere lo stesso xOffset statico!"
+            offsets["12 - Mirror Image"], offsets["13 - Boots"],
+            "12 - Mirror Image e 13 - Boots non possono avere lo stesso xOffset statico!"
         )
 
         # Controllo che siano rigorosamente crescenti da sinistra a destra
         expected_order = [
-            "05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8",
-            "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"
+            "05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "08 - Tier 8",
+            "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"
         ]
         ordered_x = [offsets[aid] for aid in expected_order]
         for j in range(len(ordered_x) - 1):
@@ -189,23 +189,23 @@ class TestAllUtilityCases(unittest.TestCase):
         """
         history = [
             # Inizio: solo abilità base
-            ["06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            ["10 - Mana Gem", "11 - Combustion", "12 - Mirror Image"],
             # Equipaggia Tier 8 (4P)
-            ["06 - Tier 8", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            ["08 - Tier 8", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image"],
             # Equipaggia Guanti con tinker
-            ["06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            ["08 - Tier 8", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image"],
             # Equipaggia Stivali con nitro
-            ["06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            ["08 - Tier 8", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"],
             # Equipaggia Mantello con proc
-            ["06 - Cloak", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            ["07 - Cloak", "08 - Tier 8", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"],
             # Equipaggia Trinket 1 e 2 (9 icone complete)
-            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            ["05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "08 - Tier 8", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"],
             # Switch su gear senza T8 ma con guanti e stivali (8 icone)
-            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            ["05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"],
             # Rimuove guanti da ingegneria (7 icone classiche con stivali)
-            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"],
+            ["05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"],
             # Rimuove stivali (6 icone standard storiche)
-            ["05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"],
+            ["05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image"],
         ]
 
         for step_idx, active_list in enumerate(history):

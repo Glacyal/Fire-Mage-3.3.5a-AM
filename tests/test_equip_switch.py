@@ -102,8 +102,8 @@ class TestDynamicEquipSwitch(unittest.TestCase):
     def test_universal_dynamic_centering_and_spans(self):
         """Verifica che per qualsiasi combinazione di icone (da 3 a 9), la riga sia centrata e <= 264px."""
         all_possible = [
-            "05 - Trinket 1", "05 - Trinket 2", "06 - Cloak", "06 - Tier 8",
-            "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"
+            "05 - Trinket 1", "06 - Trinket 2", "07 - Cloak", "08 - Tier 8",
+            "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"
         ]
         # Test con tutti i 9 attivi
         pos9, step9 = calculate_dynamic_positions(all_possible)
@@ -113,7 +113,7 @@ class TestDynamicEquipSwitch(unittest.TestCase):
         self.assertEqual(sum(pos9.values()), 0) # Perfettamente centrata attorno a 0
 
         # Test solo toolkit base (3 icone: Mana Gem, Combustion, Mirror Image)
-        base_only = ["06 - Mana Gem", "06 - Combustion", "06 - Mirror Image"]
+        base_only = ["10 - Mana Gem", "11 - Combustion", "12 - Mirror Image"]
         pos3, step3 = calculate_dynamic_positions(base_only)
         self.assertEqual(len(pos3), 3)
         span3 = (max(pos3.values()) + 14) - (min(pos3.values()) - 14)
@@ -121,7 +121,7 @@ class TestDynamicEquipSwitch(unittest.TestCase):
         self.assertEqual(sum(pos3.values()), 0)
 
         # Test senza mantello e senza trinket 2 (T1, T8, Gloves, Gem, Comb, Mirror, Boots = 7 icone)
-        combo7 = ["05 - Trinket 1", "06 - Tier 8", "06 - Gloves", "06 - Mana Gem", "06 - Combustion", "06 - Mirror Image", "06 - Boots"]
+        combo7 = ["05 - Trinket 1", "08 - Tier 8", "09 - Gloves", "10 - Mana Gem", "11 - Combustion", "12 - Mirror Image", "13 - Boots"]
         pos7, step7 = calculate_dynamic_positions(combo7)
         self.assertEqual(len(pos7), 7)
         span7 = (max(pos7.values()) + 14) - (min(pos7.values()) - 14)

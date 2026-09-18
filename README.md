@@ -6,8 +6,8 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
 [![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen.svg)](https://glacyal.github.io/Fire-Mage-3.3.5a-AM/)
 
-Suite WeakAuras completa, ingegnerizzata a livello enterprise, modulare ed ergonomica per **Mago Fuoco Livello 80** in World of Warcraft 3.3.5a (*Wrath of the Lich King - Build 12340*).  
-Progettata per garantire prestazioni estreme in raid, latenza Lua minima, tracciamento chirurgico dei proc e un'interfaccia "Zero-Clutter" focalizzata sull'ottimizzazione del DPS.
+Suite WeakAuras completa, modulare e ordinata per **Mago Fuoco Livello 80** in World of Warcraft 3.3.5a (*Wrath of the Lich King - Build 12340*).  
+Progettata per garantire un'elevata fluidità in combattimento, un consumo ridotto di risorse CPU, un monitoraggio chiaro e affidabile dei proc e un'interfaccia pulita senza elementi superflui, orientata all'ottimizzazione del DPS.
 
 ---
 
@@ -21,104 +21,107 @@ Visualizza e interagisci con l'HUD direttamente dal browser senza installare nul
 
 ## 🌟 Caratteristiche Principali
 
-### 1. Barra Hot Streak a Doppio Segmento
-La barra centrale (278px totali a `y = -25`) è suddivisa in **due metà completamente indipendenti**:
-- **Mezza Barra Sinistra (Segment 1 — 137px a x = -70.5)**:
-  - **Stato Binario (0 o 1 critico)**: Si accende in arancione brillante al primo critico diretto (*Fireball, Scorch, Fire Blast, Frostfire Bolt, esplosione di Living Bomb*).
-  - **Persistente nel Tempo e Fuori dal Combat**: Non decade mai, nemmeno uscendo dal combattimento, finché non si lancia un altro colpo diretto.
-  - **Reset Mirato**: Si azzera a `0` solo quando avviene il 2° critico consecutivo (che fa accendere il proc a destra) oppure se il colpo andato a segno è un non-critico.
-  - **NON si azzera lanciando la Pyroblast!**: Questo consente il tracciamento fluido del critico successivo anche mentre il buff di Hot Streak è attivo (*Rolling Hot Streak*).
-- **Mezza Barra Destra (Proc — 137px a x = +70.5)**:
-  - Tracciamento nativo del buff **Hot Streak** (Spell ID 48108) con **conto alla rovescia di 10 secondi**, swipe radiale e **Pixel Glow dorato**.
-  - Si spegne solo quando il buff viene consumato (lancio della Pyroblast istantanea) o alla scadenza naturale. Se il buff scade o viene rimosso, l'eventuale critico registrato sulla barra di sinistra rimane intatto!
+Tutti i componenti del pacchetto sono organizzati con una numerazione sequenziale ordinata (da **01** a **18**):
+
+### 1. Barra Hot Streak a Doppio Segmento (`15 - Hot Streak Bar`)
+Posizionata visivamente a schermo subito sopra la barra del mana, è suddivisa in **due metà indipendenti**:
+- **Mezza Barra Sinistra (Segment 1)**:
+  - Si illumina in arancione al primo colpo critico diretto (*Fireball, Scorch, Fire Blast, Frostfire Bolt, esplosione di Living Bomb*).
+  - Rimane memorizzata nel tempo anche al termine del combattimento, finché non si mette a segno un nuovo colpo diretto.
+  - Si azzera solo al secondo critico consecutivo (che attiva il proc) oppure in caso di colpo non critico. Non si azzera lanciando Pyroblast (*Rolling Hot Streak*).
+- **Mezza Barra Destra (Proc)**:
+  - Mostra il buff **Hot Streak** (Spell ID 48108) con conto alla rovescia di 10 secondi e bordo luminoso dorato.
+  - Si spegne quando il buff viene consumato dal lancio della Pyroblast istantanea o alla scadenza naturale. Se il buff scade, l'eventuale singolo critico registrato a sinistra rimane salvato.
 
 ### 2. Gruppo Dinamico Procs (`01 - Procs`)
-Posizionato sopra la Castbar (`y = 42`), il gruppo dinamico orizzontale accoglie fino a 7 icone (34x34px) con contrazione automatica dello spazio:
-1. **Tier 10 2P (*Pushing the Limit*)**: +12% Haste per 5s con Pixel Glow dorato su proc di Hot Streak.
-2. **Hot Streak**: Icona del proc con timer e swipe.
-3. **Clearcasting**: Lancio a costo zero di mana con timer e swipe.
-4. **Living Bomb**: Monitoraggio del debuff sul bersaglio con conto alla rovescia e swipe per il refresh ottimale.
-5. **Ignite**: Debuff di 4 secondi rolling generato sul bersaglio dai colpi critici.
-6. **Improved Scorch**: Monitoraggio del debuff +5% crit magico sul bersaglio.
-7. **Molten Fury**: Icona attiva in fase di Execute (bersaglio con HP < 35%, +12% danno aumentato).
+Posizionato nella parte superiore dell'HUD, gestisce fino a 7 icone con riposizionamento orizzontale automatico:
+1. **Tier 10 2P (*Pushing the Limit*)**: +12% Haste per 5s con animazione dorata su proc di Hot Streak.
+2. **Hot Streak**: Icona del proc con timer e swipe circolare.
+3. **Clearcasting**: Lancio gratuito del prossimo incantesimo con timer.
+4. **Living Bomb**: Monitoraggio del debuff sul bersaglio con conto alla rovescia per il rinnovo ottimale.
+5. **Ignite**: Durata residua del danno periodico da critico sul bersaglio.
+6. **Improved Scorch**: Tracciamento del debuff +5% critico magico sul bersaglio.
+7. **Molten Fury**: Attivo durante la fase di Execute (bersaglio con salute inferiore al 35%).
 
-### 3. Filosofia "Zero Clutter" (Schermo Pulito)
-- **Molten Armor & Arcane Intellect**: Completamente **nascosti durante il combattimento** se hanno più di 5 minuti residui. Mostrano lo swipe radiale solo negli ultimi 5 minuti e l'allerta rossa **`OFF`** se scaduti o assenti.
-- **Focus Magic Intelligente**: Nascosto fintanto che è attivo su un alleato vivo. Si attiva all'istante con swipe e countdown solo durante il **proc personale di 10 secondi (+3% Crit)**, per poi tornare nascosto. Segnala **`OFF`** se non assegnato o se il compagno muore.
+### 3. Schermo Pulito ("Zero Clutter")
+- **02 - Molten Armor & 03 - Arcane Intellect**: Rimangono nascosti durante il combattimento se hanno più di 5 minuti residui; mostrano il timer solo in scadenza e un avviso visivo in rosso se assenti.
+- **04 - Focus Magic**: Nascosto se attivo su un compagno vivo; compare solo se non assegnato, se l'alleato muore, oppure durante il proc personale di 10 secondi (+3% Crit).
 
-### 4. Pannello Statistiche in Tempo Reale (`07 - Stats`)
-Monitora costantemente le 4 statistiche chiave del Mago Fuoco, risolvendo automaticamente i conflitti tra buff di raid non cumulabili:
-- **SP (Spell Power)**: Valore effettivo aggiornato con equipaggiamento, gemme, flask, buff raid e bonus 2P T8 (*Praxis*).
-- **Crit %**: Include Molten Armor, talenti, Combustion e debuff boss (+5% Scorch/Winter's Chill e +3% Crusader/Poisoner) senza doppi conteggi.
-- **Haste %**: Include rating ed è moltiplicato con Bloodlust (+30%), Totem (+5%), 3% raid, 2P T10 (+12%), Power Infusion e Berserking.
-- **Hit %**: Precisione con talenti (*Precision*), Draenei (*Heroic Presence*) e debuff boss (+3% *Misery* / *Improved Faerie Fire*), con indicatore verde **`(Cap)`** al 17% (o 14% con debuff).
+### 4. Barre Centrali & Avvisi
+- **14 - Mana Bar**: Barra orizzontale con visualizzazione della percentuale numerica e cambio di colore in rosso sotto il 20% di mana.
+- **15 - Hot Streak Bar**: Barra centrale posizionata graficamente sopra la barra del mana.
+- **16 - Castbar**: Barra di lancio con icona dell'incantesimo attivo, nome, tempo residuo e indicatore di latenza.
+- **17 - Alerts**: Messaggio testuale visibile a centro schermo all'attivazione di Hot Streak.
 
-### 5. Riga Utility Adattiva Universale & Ingegneria (`06 - Utility Row`, da 3 a 9 Icone)
-La riga inferiore (`y = -45`) si adatta in tempo reale con **riposizionamento e centratura dinamica universale** in base all'equipaggiamento effettivo:
-- **Monili (`05 - Trinket 1` e `05 - Trinket 2`)**: Compaiono **solo se gli slot 13 e 14 sono equipaggiati** (nascosti se vuoti), con tracciamento di oltre 35 monili WotLK, timer ICD, swipe radiale e Pixel Glow dorato su proc attivo.
-- **Mantello con Proc (`06 - Cloak`)**: Compare **solo se il mantello possiede un incanto di potenziamento** (*Ricamo di Luce Intessuta* +295 SP, *Bagliore Oscuro*, *Spadatesta*, *Ragnatela Flessibile*). Se non incantato o privo di proc, non compare.
-- **Tier 8 2P (*Praxis*) (`06 - Tier 8`)**: Compare **solo con $\ge 2$ pezzi T8 Kirin Tor equipaggiati**, tracciando il proc +350 SP e l'ICD di 45s.
-- **Guanti Ingegneria (`06 - Gloves`)**: Posizionati **immediatamente a sinistra della Gemma del Mana**. Compaiono **solo se il mago ha Ingegneria con *Acceleratori Ipersonici*** (Hyperspeed Accelerators: +340 Haste per 12s, 60s CD).
-- **Gemma del Mana (`06 - Mana Gem`)**: Tracciamento delle cariche effettive in borsa (`3`, `2`, `1` o `0` in rosso se assente, senza prefisso `x`), icona nativa dinamica (Zaffiro/Smeraldo), cooldown di 2 minuti e bonus 2P T7 (+225 SP per 15s con Pixel Glow).
-- **Combustion (`06 - Combustion`)**: Traccia stato ON, cooldown (2 minuti) e stack critici residui (+10% crit a carica) con icona nativa dell'incantesimo.
-- **Mirror Image (`06 - Mirror Image`)**: Durata delle copie (30s), cooldown (3 min) e bonus 4P T10 (*Quad Core*, +18% danno).
-- **Stivali (`06 - Boots`)**: Posizionati **immediatamente a destra delle Copie (Mirror Image)**. Compaiono **solo se gli stivali hanno un incanto che conferisce velocità di movimento** (*Acceleratori a Nitro* / Nitro Boosts per Ingegneria con indicatore dei Nitro attivi a 5s con Pixel Glow, countdown di cooldown a 180s e swipe, oppure incanti passivi come *Vitalità Tuskarr* / Tuskarr's Vitality, *Rapidità Felina*, *Velocità Superiore*, ecc.). Se non incantati con velocità o con slot vuoto, non compaiono.
-- **Auto-Centratura Matematica**: L'ordine delle icone è:  
-  `[Trinket 1] -> [Trinket 2] -> [Mantello] -> [Tier 8] -> [Guanti] -> [Gemma] -> [Combustione] -> [Copie] -> [Stivali]`  
-  Qualsiasi combinazione di icone attive (da 3 a 9) viene ricalcolata e centrata simmetricamente attorno all'asse $X = 0$, confinandosi perfettamente entro la larghezza della barra superiore (264px).
+### 5. Riga Utility Adattiva (`05` - `13`, da 3 a 9 Icone)
+La riga inferiore si adatta in tempo reale con centratura automatica in base all'equipaggiamento indossato:
+- **05 - Trinket 1** e **06 - Trinket 2**: Visibili solo se gli slot sono equipaggiati, con timer del recupero interno (ICD) e bordo luminoso su proc attivo.
+- **07 - Cloak**: Compare solo se il mantello ha un incanto con proc attivo (es. *Ricamo di Luce Intessuta*).
+- **08 - Tier 8**: Compare solo equipaggiando almeno 2 pezzi del set T8, tracciando il bonus +350 Spell Power.
+- **09 - Gloves**: Compare solo se i guanti possiedono gli *Acceleratori Ipersonici* di Ingegneria.
+- **10 - Mana Gem**: Mostra le cariche effettive in borsa, il tempo di ricarica e l'attivazione del bonus 2P T7.
+- **11 - Combustion**: Monitora stato attivo, tempo di recupero e cariche critiche residue (+10% a carica).
+- **12 - Mirror Image**: Durata delle copie, tempo di recupero e bonus 4P T10 (+18% danno).
+- **13 - Boots**: Compare solo con incanto di velocità attivo o *Acceleratori a Nitro* di Ingegneria.
+- **Centratura Automatica**: Qualsiasi combinazione di icone attive viene allineata in modo simmetrico ed equilibrato rispetto al centro.
 
-### 6. Castbar & Mana Bar Integrate
-- **08 - Castbar**: Barra di lancio (larghezza 210px) con icona della spell attiva, nome incantesimo, tempo residuo al decimo di secondo e indicatore visivo di latenza.
-- **09 - Mana Bar**: Barra orizzontale con visualizzazione della percentuale numerica e allerta colorata sotto il 20% di mana.
+### 6. Pannello Statistiche in Tempo Reale (`18 - Stats Panel`)
+Aggiorna in tempo reale i valori effettivi tenendo conto di equipaggiamento, talenti, consumabili e sinergie di raid:
+- **Spell Power**: Potenza magica Fuoco totale aggiornata con buff e proc.
+- **Crit %**: Include Molten Armor, Combustion nativo e debuff sul bersaglio (*Scorch*, *Totem*) senza conteggi duplicati.
+- **Haste %**: Calcola il valore reale combinando rating, *Bloodlust*, totem, talenti e bonus set.
+- **Hit %**: Precisione con talenti, aura Draenei e debuff boss, con indicatore verde **`(Cap)`** al raggiungimento del 17%.
 
 ---
 
-## ⚙️ Architettura del Software Modulare (`builder/`)
+## ⚙️ Struttura Modulare del Progetto (`builder/`)
 
-Il codice sorgente è interamente modularizzato secondo i principi di **Ingegneria del Software**, separando la logica di serializzazione e compressione da ciascun componente dell'interfaccia:
+Il codice sorgente separa la compilazione della stringa dalla definizione di ciascun componente dell'interfaccia:
 
 ```text
 Fire Mage 3.3.5a AM/
 ├── builder/
-│   ├── core/                        # Engine di Serializzazione e Compressione
-│   │   ├── constants.py             # Costanti globali, load conditions (Mage 68), texture
-│   │   ├── serializer.py            # Protocollo AceSerializer-3.0 puro (^1...^^)
-│   │   ├── deflate.py               # Compressione Deflate RFC 1951 + LibDeflate print encoding
-│   │   ├── encoder.py               # Generatore stringa WeakAuras (!WA:1!)
-│   │   └── helpers.py               # Costruttori di sottotesti, formattazione e utility
-│   ├── components/                  # Moduli Funzionali dell'HUD
-│   │   ├── hot_streak.py            # Barra Hot Streak a 2 segmenti decoppiati & combat log
-│   │   ├── procs.py                 # Gruppo dinamico 01 - Procs (7 icone reattive)
-│   │   ├── buffs.py                 # Molten Armor, Arcane Intellect, Focus Magic
-│   │   ├── utility.py               # Combustion, Monili, Mantello, T8, Guanti, Gemma, Copie, Stivali
-│   │   ├── bars.py                  # Castbar, Mana Bar, Global Cooldown (GCD)
-│   │   ├── stats.py                 # Pannello 4 Statistiche (SP, Crit, Haste, Hit)
-│   │   └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
-│   └── tree.py                      # Assemblatore dell'albero gerarchico (37 aure WeakAuras)
+│   ├── core/                        # Compressione e codifica stringa WeakAuras
+│   │   ├── constants.py             # Costanti, condizioni di caricamento e texture
+│   │   ├── serializer.py            # Serializzazione compatibile AceSerializer-3.0
+│   │   ├── deflate.py               # Compressione Deflate e codifica LibDeflate
+│   │   ├── encoder.py               # Generatore del formato !WA:1!
+│   │   └── helpers.py               # Funzioni di supporto per testi e formattazione
+│   ├── components/                  # Moduli funzionali dell'HUD
+│   │   ├── hot_streak.py            # 15 - Hot Streak Bar (doppio segmento e combat log)
+│   │   ├── procs.py                 # 01 - Procs (gruppo dinamico superiore)
+│   │   ├── buffs.py                 # 02/03/04 - Molten Armor, Arcane Intellect, Focus Magic
+│   │   ├── utility.py               # 05-13 - Monili, Mantello, T8, Guanti, Gemma, Combustion, Copie, Stivali
+│   │   ├── bars.py                  # 14 - Mana Bar & 16 - Castbar
+│   │   ├── alerts.py                # 17 - Alerts (avvisi testuali centrali)
+│   │   └── stats.py                 # 18 - Stats Panel (pannello statistiche in tempo reale)
+│   └── tree.py                      # Albero complessivo del gruppo (18 nodi principali, 37 aure)
 ├── docs/
-│   └── index.html                   # Simulatore Web Interattivo (GitHub Pages 1:1)
-├── tests/                           # Suite di test paralleli deterministici
-│   ├── run_parallel_tests.py        # Runner parallelo multi-processore
-│   ├── test_all_utility_cases.py    # Verifica esaustiva 64 combinazioni riga utility
-│   ├── test_components_integrity.py # Verifica integrità strutturale moduli (37 aure)
-│   ├── test_equip_switch.py         # Test transizioni e centratura universale da 3 a 9 icone
-│   ├── test_hotstreak_decoupled.py  # Test logica Hot Streak persistente e decoppiata
-│   ├── test_html_simultaneous.py    # Stress test concorrenza simulatore web
-│   ├── test_lua.py                  # Validazione sintattica blocchi Lua embedded
-│   ├── test_showcase.py             # Audit 100% interattività e handler DOM
-│   ├── test_stats_panel.py          # Verifica formule e moltiplicatori pannello statistiche
-│   └── test_tree_layout.py          # Geometrie layout e albero WA
-├── generate.py                      # Compilatore Python della stringa finale
-└── IMPORT_STRING.txt                # Stringa WeakAuras generata pronta all'uso
+│   └── index.html                   # Simulatore web interattivo
+├── tests/                           # Suite di test automatici
+│   ├── run_parallel_tests.py        # Esecutore parallelo multi-core
+│   ├── test_all_utility_cases.py    # Test esaustivo su tutte le combinazioni della riga utility
+│   ├── test_components_integrity.py # Verifica integrità strutturale e numerazione 01-18
+│   ├── test_equip_switch.py         # Test centratura dinamica durante i cambi di equipaggiamento
+│   ├── test_hotstreak_decoupled.py  # Test logica di persistenza Hot Streak e posizionamento
+│   ├── test_html_simultaneous.py    # Test di consistenza del simulatore web
+│   ├── test_lua.py                  # Controllo sintassi dei blocchi Lua inclusi
+│   ├── test_showcase.py             # Controllo interattività del simulatore
+│   ├── test_stats_panel.py          # Verifica formule e moltiplicatori del pannello statistiche
+│   ├── test_string_sync.py          # Verifica corrispondenza tra builder e IMPORT_STRING.txt
+│   └── test_tree_layout.py          # Verifica gerarchia e ordinamento dell'albero
+├── generate.py                      # Script di compilazione della stringa finale
+├── IMPORT_STRING.txt                # Stringa WeakAuras pronta per l'importazione
+└── ANALISI_DIMENSIONE_STRINGA.txt   # Analisi tecnica di peso e tempi di importazione
 ```
 
 ---
 
 ## 🚀 Installazione in Gioco (3 Passaggi)
 
-1. **Copia la Stringa**: Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt)** e copia tutto il testo (`Ctrl+A`, poi `Ctrl+C`).
-2. **Apri WeakAuras**: In World of Warcraft, digita `/wa` nella chat di gioco.
-3. **Importa**: Clicca su **Import** (o Importa) in alto a sinistra, incolla il testo con `Ctrl+V` e conferma cliccando su **Import** (o Aggiorna se sovrascrivi una versione precedente).
+1. **Copia la Stringa**: Apri il file **[`IMPORT_STRING.txt`](file:///d:/0Progetti/Fire%20Mage%203.3.5a%20AM/IMPORT_STRING.txt)** e copia l'intero contenuto (`Ctrl+A`, poi `Ctrl+C`).
+2. **Apri WeakAuras**: In gioco, digita il comando `/wa` nella chat.
+3. **Importa**: Clicca su **Import** in alto a sinistra, incolla il testo con `Ctrl+V` e conferma l'importazione.
 
 ---
 
@@ -126,24 +129,24 @@ Fire Mage 3.3.5a AM/
 
 | Client / Piattaforma | Versione WeakAuras | Compatibilità | Note |
 | :--- | :--- | :---: | :--- |
-| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 4.0.0** | ✅ **100% Nativa** | Sviluppata e validata su WeakAuras 4.0.0 (`internalVersion: 52`). Tutti i test sono stati eseguiti su questa versione di WeakAuras. Importazione istantanea (<38 KB). |
-| **WotLK Classic / Cata Classic** | WeakAuras 5.x (Blizzard) | ⚠️ **Parziale** | Struttura importabile, ma richiede adattamento delle funzioni Lua del Combat Log (`CombatLogGetCurrentEventInfo`). |
-| **Retail (The War Within)** | WeakAuras 5.x | ❌ **Non Compatibile** | Meccaniche e incantesimi del Mago completamente differenti (*Heating Up* nativo, rotazione diversa). |
+| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 4.0.0** | ✅ **100% Nativa** | Sviluppata e collaudata su WeakAuras 4.0.0 (`internalVersion: 52`). Importazione rapida e priva di blocchi (~43 KB). |
+| **WotLK Classic / Cata Classic** | WeakAuras 5.x (Blizzard) | ⚠️ **Parziale** | Struttura compatibile, ma richiede l'adattamento delle chiamate Lua del Combat Log (`CombatLogGetCurrentEventInfo`). |
+| **Retail** | WeakAuras 5.x | ❌ **Non Compatibile** | Meccaniche e abilità della classe sostanzialmente differenti. |
 
 ---
 
 ## 🧪 Validazione & Test Suite
 
-Il progetto include una suite di 10 test automatici deterministici eseguibili in parallelo per sfruttare al massimo tutti i core della CPU:
+Il progetto include una suite di 11 test automatici eseguibili sia in parallelo per una verifica rapida, sia in modalità standard:
 
 ```bash
-# Esegui l'intera suite di test in parallelo (Multi-Core ProcessPoolExecutor)
+# Esecuzione parallela multi-core della suite completa
 python tests/run_parallel_tests.py
 
-# In alternativa, esegui i test standard via unittest
+# Esecuzione standard tramite unittest
 python -m unittest discover tests
 
-# Per ricompilare la stringa di importazione dopo qualsiasi modifica al builder:
+# Ricompilazione della stringa di importazione
 python generate.py
 ```
 
@@ -151,5 +154,5 @@ python generate.py
 
 ## 📄 Licenza
 
-Distribuito sotto licenza **MIT**. Consulta il file per ulteriori dettagli.  
+Distribuito sotto licenza **MIT**.  
 Repository: [Glacyal/Fire-Mage-3.3.5a-AM](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
