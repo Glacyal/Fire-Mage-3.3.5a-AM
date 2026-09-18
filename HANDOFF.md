@@ -38,13 +38,13 @@ Fire Mage 3.3.5a AM/
 │   │   ├── encoder.py               # Generatore stringa finale (!WA:1!...)
 │   │   └── helpers.py               # Generatori di subtext e helper grafici
 │   └── components/                  # Moduli dedicati ai singoli componenti dell'HUD
-│       ├── hot_streak.py            # Barra Hot Streak a doppio segmento decoppiato
-│       ├── procs.py                 # Gruppo dinamico 01 - Procs (7 icone con Ignite)
+│       ├── hot_streak.py            # 15 - Hot Streak Bar (doppio segmento e combat log)
+│       ├── procs.py                 # 01 - Procs (gruppo dinamico superiore)
 │       ├── buffs.py                 # 02 - Molten Armor, 03 - Arcane Intellect, 04 - Focus Magic
-│       ├── utility.py               # 06 - Utility Row (Combustion, Monili, Mantello, T8, Guanti, Gemma, Copie, Stivali)
-│       ├── bars.py                  # 08 - Castbar, 09 - Mana Bar, Global Cooldown (GCD)
-│       ├── stats.py                 # 07 - Stats (SP, Crit, Haste, Hit con cap resolution)
-│       └── alerts.py                # Allerte visive testuali a centro schermo (HOT STREAK! / PYROBLAST READY!)
+│       ├── utility.py               # 05-13 - Utility Row (Monili, Mantello, T8, Guanti, Gemma, Combustion, Copie, Stivali)
+│       ├── bars.py                  # 14 - Mana Bar & 16 - Castbar
+│       ├── alerts.py                # 17 - Alerts (avvisi testuali centrali)
+│       └── stats.py                 # 18 - Stats Panel (SP, Crit, Haste, Hit con cap resolution)
 │
 ├── docs/                            # Documentazione e anteprima interattiva per GitHub Pages
 │   └── index.html                   # Simulatore interattivo HTML/CSS/JS (proporzioni 1:1)
@@ -99,8 +99,8 @@ Per apportare modifiche alla suite o estendere la logica:
 
 ## 4. Specifiche Architetturali Chiave
 
-### 4.1 Barra Hot Streak Decoppiata (`10 - Hot Streak Bar`)
-- **Posizione**: Subito sotto la barra del Mana (`y = -25`, larghezza totale 278px, altezza 7px).
+### 4.1 Barra Hot Streak Decoppiata (`15 - Hot Streak Bar`)
+- **Posizione**: Subito sopra la barra del Mana (`y = -7`, larghezza totale 278px, altezza 7px).
 - **Architettura a Due Segmenti Decoppiati**:
   1. **Segment 1 (Metà Sinistra, 137x5px a x = -70.5)**:
      - Traccia lo stato binario `0` o `1` del 1° colpo critico andato a segno (*Fireball, Scorch, Fire Blast, Frostfire Bolt, esplosione Living Bomb*).
@@ -112,7 +112,7 @@ Per apportare modifiche alla suite o estendere la logica:
      - È completamente svincolato dal segmento di sinistra: si spegne al consumo o scadenza del buff.
 
 ### 4.2 Gruppo Dinamico Procs (`01 - Procs`)
-- **Posizione**: Sopra la Castbar a `y = 42`.
+- **Posizione**: Sopra la Castbar a `y = 52`.
 - **Icone Reattive (fino a 7 contemporanee)**:
   1. `Tier 10 (Pushing the Limit)`: +12% Haste per 5s con Pixel Glow dorato.
   2. `Hot Streak`: Icona proc con timer.
@@ -121,16 +121,16 @@ Per apportare modifiche alla suite o estendere la logica:
   5. `Ignite`: Debuff di 4s rolling sul target da spell critiche.
   6. `Improved Scorch`: Debuff +5% spell crit sul target.
   7. `Molten Fury`: Bersaglio con salute < 35% (+12% danno aumentato).
-- **Combustion**: Collocata **esclusivamente** nella riga utility (`06 - Utility Row`), evitando duplicazioni nel gruppo procs.
+- **Combustion**: Collocata **esclusivamente** nella riga utility (`11 - Combustion`), evitando duplicazioni nel gruppo procs.
 
 ### 4.3 Focus Magic Anti-Clutter (`04 - Focus Magic`)
 - **Invisibile di base**: Se il buff è attivo su un alleato vivo, l'icona è nascosta per preservare la pulizia dello schermo.
 - **Proc 10s Personale**: Quando l'alleato mette a segno un critico, compare con swipe e conto alla rovescia (+3% Crit per 10s).
 - **Allerta OFF**: Se il buff non è assegnato a nessuno o se l'alleato muore, compare l'icona desaturata con avviso `OFF` rosso.
 
-### 4.4 Centratura Dinamica Riga Utility (`06 - Utility Row`, da 3 a 9 Icone)
+### 4.4 Centratura Dinamica Riga Utility (`05` - `13`, da 3 a 9 Icone)
 - **Ordine rigoroso da sinistra a destra**:
-  `[Trinket 1] -> [Trinket 2] -> [Mantello] -> [Tier 8] -> [Guanti] -> [Gemma] -> [Combustione] -> [Copie] -> [Stivali]`
+  `[05 - Trinket 1] -> [06 - Trinket 2] -> [07 - Cloak] -> [08 - Tier 8] -> [09 - Gloves] -> [10 - Mana Gem] -> [11 - Combustion] -> [12 - Mirror Image] -> [13 - Boots]`
 - **Condizioni di visibilità e attivazione**:
   - **Trinket 1 & 2 (Slot 13 e 14)**: Visibili solo se gli slot sono equipaggiati con un monile valido (nascosti se vuoti).
   - **Mantello (Slot 15)**: Visibile solo se possiede un incanto con proc di potenziamento (*Lightweave*, *Darkglow*, *Swordguard*, *Flexweave*, ecc.).

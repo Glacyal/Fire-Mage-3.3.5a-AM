@@ -2,10 +2,10 @@
 Modulo Componente: 14 - Mana Bar & 16 - Castbar
 ================================================
 Gestisce le barre centrali sincronizzate a 278px di larghezza:
-1. 14 - Mana Bar (278x14px a y = -15):
+1. 14 - Mana Bar (278x14px a y = -20):
    - Barra percentuale del mana con cambio colore dinamico in rosso se mana <= 20%.
    - Testo centrale: % mana con due decimali (%1.percentpower%%).
-2. 16 - Castbar (278x20px a y = +14):
+2. 16 - Castbar (278x20px a y = +8):
    - Barra di lancio nativa WeakAuras (texture Blizzard, colore azzurro [0.0, 0.77, 1.0]).
    - Mostra il nome dell'incantesimo a sinistra (%n) e il tempo rimanente a destra (%p).
    - Icona della spell attiva a sinistra (icon: True, icon_side: LEFT, iconSource: -1).
@@ -33,7 +33,7 @@ def build_bars_auras() -> list[dict]:
             "width": 278,
             "height": 14,
             "xOffset": 0,
-            "yOffset": -15,
+            "yOffset": -20,
             "barColor": [0.09, 0.55, 1.0, 1.0],
             "backgroundColor": [0.1, 0.1, 0.1, 0.8],
             "texture": TEXTURE_STATUSBAR,
@@ -97,7 +97,7 @@ def build_bars_auras() -> list[dict]:
             "width": 278,
             "height": 20,
             "xOffset": 0,
-            "yOffset": 14,
+            "yOffset": 8,
             "barColor": [0.0, 0.77, 1.0, 1.0],
             "backgroundColor": [0.15, 0.15, 0.15, 0.8],
             "texture": "Blizzard",

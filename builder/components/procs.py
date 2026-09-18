@@ -489,24 +489,46 @@ end"""
                         "check": "event",
                         "events": "UNIT_HEALTH,UNIT_MAXHEALTH,PLAYER_TARGET_CHANGED,PLAYER_ENTERING_WORLD",
                         "custom": """function(event, ...)
+    -- Filtro sull'unità: evita rivalutazioni inutili su ogni cambio di vita nel raid che non riguarda il bersaglio
+    local unit = ...
+    if (event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH") and unit ~= "target" then
+        return _G.FMHUD_MF_Active == true
+    end
     if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
+        _G.FMHUD_MF_Active = false
         return false
     end
     local maxHP = UnitHealthMax("target") or 0
-    if maxHP <= 0 then return false end
+    if maxHP <= 0 then
+        _G.FMHUD_MF_Active = false
+        return false
+    end
     local curHP = UnitHealth("target") or 0
-    return ((curHP / maxHP) * 100) <= 35.0
+    local isLow = ((curHP / maxHP) * 100) <= 35.0
+    _G.FMHUD_MF_Active = isLow
+    return isLow
 end""",
                     },
                     "untrigger": {
                         "custom": """function(event, ...)
+    -- Filtro sull'unità: evita rivalutazioni inutili su ogni cambio di vita nel raid che non riguarda il bersaglio
+    local unit = ...
+    if (event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH") and unit ~= "target" then
+        return not _G.FMHUD_MF_Active
+    end
     if not UnitExists("target") or UnitIsDeadOrGhost("target") or not UnitCanAttack("player", "target") then
+        _G.FMHUD_MF_Active = false
         return true
     end
     local maxHP = UnitHealthMax("target") or 0
-    if maxHP <= 0 then return true end
+    if maxHP <= 0 then
+        _G.FMHUD_MF_Active = false
+        return true
+    end
     local curHP = UnitHealth("target") or 0
-    return ((curHP / maxHP) * 100) > 35.0
+    local isHigh = ((curHP / maxHP) * 100) > 35.0
+    _G.FMHUD_MF_Active = not isHigh
+    return isHigh
 end"""
                     }
                 },

@@ -1,7 +1,7 @@
 """
 Modulo Componente: 15 - Hot Streak Bar (Doppio Segmento Decoppiato)
 ===================================================================
-Gestisce la barra orizzontale centrale di Hot Streak (sopra la barra del mana a y = -3):
+Gestisce la barra orizzontale centrale di Hot Streak (sopra la barra del mana a y = -7):
 1. Background Frame (278x7px)
 2. Mezza Barra Sinistra (Segment 1 - 137x5px a x = -70.5):
    - Stato binario 0 o 1.
@@ -196,7 +196,7 @@ def build_hotstreak_auras() -> list[dict]:
             "regionType": "group",
             "internalVersion": 52,
             "xOffset": 0,
-            "yOffset": -3,
+            "yOffset": -7,
             "anchorPoint": "CENTER",
             "selfPoint": "CENTER",
             "controlledChildren": [

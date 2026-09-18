@@ -3,7 +3,7 @@
 [![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
 [![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
 [![Class](https://img.shields.io/badge/Class-Mage%20(Fire)-red.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-gray.svg?logo=paypal&logoColor=white&labelColor=0079c1)](https://www.paypal.me/TUO_USERNAME)
 [![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-brightgreen.svg)](https://glacyal.github.io/Fire-Mage-3.3.5a-AM/)
 
 Suite WeakAuras completa, modulare e ordinata per **Mago Fuoco Livello 80** in World of Warcraft 3.3.5a (*Wrath of the Lich King - Build 12340*).  

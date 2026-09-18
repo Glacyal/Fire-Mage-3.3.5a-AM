@@ -34,10 +34,10 @@ class TestHotStreakDecoupled(unittest.TestCase):
         self.assertIn("Hot Streak Bar - Proc", ids)
 
     def test_hotstreak_bar_group_yoffset_above_mana(self):
-        """Verifica che la barra Hot Streak sia posizionata visivamente sopra la barra del mana (yOffset = -3)."""
+        """Verifica che la barra Hot Streak sia posizionata visivamente sopra la barra del mana (yOffset = -7)."""
         auras = {a["id"]: a for a in build_hotstreak_auras()}
         grp = auras["15 - Hot Streak Bar"]
-        self.assertEqual(grp["yOffset"], -3, "Hot Streak Bar deve avere yOffset = -3 per posizionarsi sopra il mana (-15)")
+        self.assertEqual(grp["yOffset"], -7, "Hot Streak Bar deve avere yOffset = -7 per posizionarsi sopra il mana (-20)")
 
     def test_segment1_dimensions_and_position(self):
         """Verifica che la mezza barra sinistra sia esattamente 137x5px a x = -70.5."""

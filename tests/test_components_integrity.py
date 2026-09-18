@@ -102,6 +102,53 @@ class TestComponentsIntegrity(unittest.TestCase):
                 f"Elemento {i} non inizia con il prefisso atteso '{expected_prefix}': trovato '{child_id}'"
             )
 
+    def test_molten_fury_unit_filter_in_lua_code(self):
+        """
+        [FIX 7] Verifica statica della presenza del filtro sull'unità nel trigger e untrigger di Molten Fury:
+        1. Entrambe le funzioni devono estrarre l'unità (local unit = ...)
+        2. Entrambe le funzioni devono avere l'early return se unit ~= "target" per UNIT_HEALTH/UNIT_MAXHEALTH
+        3. Entrambe devono preservare la soglia del 35% HP
+        4. Nessuna chiamata UnitExists/UnitHealth deve essere eseguita prima del filtro unit
+        """
+        auras = build_procs_auras()
+        mf_aura = next((a for a in auras if a.get("id") == "Molten Fury"), None)
+        self.assertIsNotNone(mf_aura, "Aura 'Molten Fury' non trovata in procs.py")
+
+        trigger_data = mf_aura["triggers"][1]["trigger"]
+        untrigger_data = mf_aura["triggers"][1]["untrigger"]
+
+        custom_code = trigger_data["custom"]
+        untrigger_code = untrigger_data["custom"]
+
+        # 1. Verifica estrazione unità e controllo early return in custom
+        self.assertIn("local unit = ...", custom_code, "custom di Molten Fury deve estrarre l'unità con 'local unit = ...'")
+        self.assertIn('event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH"', custom_code)
+        self.assertIn('unit ~= "target"', custom_code)
+        self.assertIn("_G.FMHUD_MF_Active", custom_code)
+
+        # 2. Verifica estrazione unità e controllo early return in untrigger
+        self.assertIn("local unit = ...", untrigger_code, "untrigger di Molten Fury deve estrarre l'unità con 'local unit = ...'")
+        self.assertIn('event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH"', untrigger_code)
+        self.assertIn('unit ~= "target"', untrigger_code)
+        self.assertIn("_G.FMHUD_MF_Active", untrigger_code)
+
+        # 3. Verifica presenza del commento esplicativo in italiano
+        self.assertIn("Filtro sull'unità", custom_code, "custom deve includere il commento in italiano sul filtro unità")
+        self.assertIn("Filtro sull'unità", untrigger_code, "untrigger deve includere il commento in italiano sul filtro unità")
+
+        # 4. Verifica che il controllo UnitExists avvenga DOPO il controllo unit
+        unit_filter_pos_custom = custom_code.find('unit ~= "target"')
+        unit_exists_pos_custom = custom_code.find('UnitExists("target")')
+        self.assertLess(unit_filter_pos_custom, unit_exists_pos_custom, "In custom, il filtro sull'unità deve precedere UnitExists('target')")
+
+        unit_filter_pos_untrigger = untrigger_code.find('unit ~= "target"')
+        unit_exists_pos_untrigger = untrigger_code.find('UnitExists("target")')
+        self.assertLess(unit_filter_pos_untrigger, unit_exists_pos_untrigger, "In untrigger, il filtro sull'unità deve precedere UnitExists('target')")
+
+        # 5. Verifica che la soglia del 35% sia inalterata
+        self.assertIn("35.0", custom_code)
+        self.assertIn("35.0", untrigger_code)
+
 
 if __name__ == "__main__":
     unittest.main()
