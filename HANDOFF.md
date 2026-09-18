@@ -100,19 +100,20 @@ Per apportare modifiche alla suite o estendere la logica:
 ## 4. Specifiche Architetturali Chiave
 
 ### 4.1 Barra Hot Streak Decoppiata (`15 - Hot Streak Bar`)
-- **Posizione**: Subito sopra la barra del Mana (`y = -7`, larghezza totale 278px, altezza 7px).
+- **Posizione**: Subito sopra la barra del Mana, perfettamente allineata all'ingombro orizzontale dell'HUD.
 - **Architettura a Due Segmenti Decoppiati**:
-  1. **Segment 1 (Metà Sinistra, 137x5px a x = -70.5)**:
+  1. **Segment 1 (Metà Sinistra)**:
      - Traccia lo stato binario `0` o `1` del 1° colpo critico andato a segno (*Fireball, Scorch, Fire Blast, Frostfire Bolt, esplosione Living Bomb*).
      - **Persistenza**: Non scade nel tempo e non decade uscendo dal combattimento.
      - **Reset**: Si azzera a `0` solo al 2° critico consecutivo (che innesca il proc) o se la spell qualificabile successiva non critta.
      - **Non azzerato da Pyroblast**: Il lancio di Pyroblast non resetta questo segmento, permettendo la gestione del *Rolling Hot Streak*.
-  2. **Proc (Metà Destra, 137x5px a x = +70.5)**:
+  2. **Proc (Metà Destra)**:
      - Traccia nativamente il buff `Hot Streak` (Spell ID 48108) con conto alla rovescia di 10 secondi, swipe circolare e Pixel Glow dorato.
      - È completamente svincolato dal segmento di sinistra: si spegne al consumo o scadenza del buff.
 
 ### 4.2 Gruppo Dinamico Procs (`01 - Procs`)
-- **Posizione**: Sopra la Castbar a `y = 52`.
+- **Posizione**: Disposto orizzontalmente sopra la Castbar.
+- **Ottimizzazione CPU & Filtraggio Eventi**: I trigger custom con ascolto ad alta frequenza (come `Molten Fury` registrato su `UNIT_HEALTH` e `UNIT_MAXHEALTH`) implementano un early-return immediato se l'unità che ha generato l'evento non è `"target"`. Questo evita interrogazioni ridondanti dello stato del bersaglio durante i cambi di vita degli altri membri del raid o dei mob, preservando il framerate anche nelle situazioni di carico massimo.
 - **Icone Reattive (fino a 7 contemporanee)**:
   1. `Tier 10 (Pushing the Limit)`: +12% Haste per 5s con Pixel Glow dorato.
   2. `Hot Streak`: Icona proc con timer.
@@ -142,7 +143,7 @@ Per apportare modifiche alla suite o estendere la logica:
   - **Stivali (Slot 8)**: Visibili solo se equipaggiati con un incanto che conferisce velocità di movimento (*Acceleratori a Nitro* per Ingegneria con indicatore dei Nitro attivi a 5s con Pixel Glow, countdown di cooldown a 180s e swipe con filtro lockout condiviso < 60s, oppure *Vitalità Tuskarr*, *Rapidità Felina*, *Velocità Superiore*, ecc.). Se non incantati con velocità o se lo slot è vuoto, non compaiono.
   - **Disaccoppiamento Lockout Ingegneria**: In WotLK 3.3.5a l'attivazione di un tinker (es. Guanti) innesca un breve blocco condiviso (10-30s) sugli altri tinker (es. Stivali). Il motore di calcolo ignora questi blocchi temporanei su Guanti e Stivali, impedendo che l'attivazione dei guanti mostri falsi cooldown o swipe sui Nitro (e viceversa).
 - **Algoritmo di Centratura Dinamica**:
-  Ricalcola le coordinate orizzontali $X = \lfloor (i - (N+1)/2) \cdot \text{step} + 0.5 \rfloor$ attorno all'asse $X = 0$, scalando il passo tra 29px (9 icone) e 52px (3 icone), garantendo zero sovrapposizioni e confinamento perfetto entro 264px.
+  Ricalcola dinamicamente la spaziatura orizzontale in base al numero effettivo di icone attive (da 3 a 9), distribuendole simmetricamente attorno all'asse centrale senza sovrapposizioni e mantenendo la riga perfettamente proporzionata alla larghezza complessiva dell'HUD.
 
 ### 4.5 Risoluzione Conflitti Statistiche di Raid
 Il modulo `builder/components/stats.py` impedisce la duplicazione di buff raid della stessa categoria:
@@ -150,6 +151,10 @@ Il modulo `builder/components/stats.py` impedisce la duplicazione di buff raid d
 - **Spell Crit 5%**: *Improved Scorch*, *Winter's Chill* e *Shadow and Flame* conteggiati una sola volta.
 - **All Crit 3%**: *Heart of the Crusader*, *Master Poisoner* e *Totem of Wrath* conteggiati una sola volta.
 - **Hit 3%**: *Misery* e *Improved Faerie Fire* conteggiati una sola volta.
+
+### 4.6 Castbar e Convenzioni di Struttura (`16 - Castbar`)
+- **Castbar con Icona Spell Integrata**: Include l'icona dell'incantesimo attivo posizionata sul bordo sinistro della barra, timer di cast e barra di latenza di rete (*Safe Zone*).
+- **Numerazione Continua dei Componenti**: Tutti i componenti primari del gruppo root seguono la sequenza continua `01`–`18`, garantendo perfetta corrispondenza tra i moduli generati da `builder/`, la stringa importabile e il simulatore web.
 
 ---
 
