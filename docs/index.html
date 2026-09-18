@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fire Mage 3.3.5a AM — Simulatore HUD & Showcase Interattivo 1:1</title>
+    <title>Fire Mage 3.3.5a AM — HUD Simulator & 1:1 Interactive Showcase</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -213,7 +213,7 @@
             width: 100%;
             max-width: 900px;
             height: 520px;
-            background: #020305;
+            background: #020305 url('lich_king_bg.png') center bottom / cover no-repeat;
             border-radius: 8px;
             border: 2px solid #1a2232;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 100px rgba(0, 0, 0, 0.95);
@@ -226,46 +226,15 @@
             position: absolute;
             inset: 0;
             background: 
-                radial-gradient(circle at 50% 65%, rgba(20, 24, 35, 0.4) 0%, rgba(2, 3, 6, 0.95) 80%),
-                linear-gradient(180deg, rgba(80, 70, 60, 0.22) 0%, rgba(30, 32, 40, 0.65) 60%, rgba(6, 8, 12, 0.96) 100%),
-                repeating-radial-gradient(circle at 50% 70%, rgba(70, 75, 85, 0.15) 0, rgba(70, 75, 85, 0.15) 40px, rgba(40, 45, 55, 0.15) 41px, rgba(40, 45, 55, 0.15) 80px);
-            opacity: 0.65;
+                radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.05) 0%, rgba(2, 4, 8, 0.45) 100%),
+                linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(2, 4, 8, 0.7) 100%);
             pointer-events: none;
         }
         .wow-dummy {
-            position: absolute;
-            top: 45px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 34px;
-            height: 110px;
-            background: rgba(120, 90, 60, 0.12);
-            border-radius: 4px;
-            pointer-events: none;
+            display: none;
         }
         .wow-player-silhouette {
-            position: absolute;
-            top: 155px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 44px;
-            height: 76px;
-            background: radial-gradient(circle at 50% 30%, rgba(90, 110, 170, 0.35) 0%, rgba(20, 25, 40, 0.65) 80%);
-            border-radius: 22px 22px 8px 8px;
-            box-shadow: 0 0 18px rgba(0,0,0,0.85);
-            pointer-events: none;
-        }
-        .wow-player-silhouette::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 56px;
-            height: 14px;
-            background: rgba(0,0,0,0.6);
-            border-radius: 50%;
-            filter: blur(4px);
+            display: none;
         }
 
         /* Floating Combat Text Layer */
@@ -368,7 +337,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 6px;
-            margin-left: 102px; /* Allineato sull'asse orizzontale della Castbar (264px) */
+            margin-left: 102px; /* Aligned with horizontal axis of Castbar (264px) */
             min-height: 0;
             transition: all 0.2s ease;
         }
@@ -376,10 +345,10 @@
             display: none !important;
         }
 
-        /* 3. 16 - Castbar (Sopra la Hot Streak Bar, allineata con la colonna destra) */
+        /* 3. 16 - Castbar (Above Hot Streak Bar, aligned with right column) */
         .castbar-wrap {
             width: 278px;
-            margin-left: 102px; /* 88px colonna sinistra + 4px gap = 92px */
+            margin-left: 102px; /* 88px left column + 14px gap = 102px */
             margin-bottom: 3px;
             display: block;
             cursor: pointer;
@@ -447,14 +416,14 @@
             z-index: 2;
         }
 
-        /* 4. BASE GRID DEL HUD: Colonna Sinistra (88px) + Colonna Destra (264px) */
+        /* 4. HUD BASE GRID: Left Column (88px) + Right Column (264px) */
         .hud-base-grid {
             display: flex;
-            align-items: flex-end; /* Allinea il fondo di Stats col fondo della Fila Utility! */
+            align-items: flex-end; /* Aligns bottom of Stats with bottom of Utility Row */
             gap: 14px;
         }
 
-        /* --- COLONNA SINISTRA (88px) --- */
+        /* --- LEFT COLUMN (88px) --- */
         .left-col {
             width: 88px;
             display: flex;
@@ -462,7 +431,7 @@
             gap: 13px;
         }
 
-        /* 3 Buff Lunghi (Molten, Intellect, Focus Magic) */
+        /* 3 Long Buffs (Molten, Intellect, Focus Magic) */
         .three-buffs-row {
             display: flex;
             gap: 2px;
@@ -499,7 +468,7 @@
         .stat-val-white { color: #ffffff; font-family: 'Share Tech Mono', monospace; font-size: 10.5px; transition: color 0.3s; }
         .stat-val-white.bump { color: #ffd200; text-shadow: 0 0 6px #ffd200; }
 
-        /* --- COLONNA DESTRA (264px) --- */
+        /* --- RIGHT COLUMN (264px) --- */
         .center-col {
             width: 278px;
             display: flex;
@@ -959,7 +928,7 @@
             color: #e2e8f0;
         }
 
-        /* Guida Architetturale */
+        /* Architectural Guide */
         .compare-box {
             width: 100%;
             max-width: 900px;
@@ -991,6 +960,39 @@
         .compare-item strong { color: #fff; font-size: 12.5px; }
         .compare-item p { color: #8896a6; font-size: 11.5px; margin-top: 3px; }
 
+        /* In-game Scale & Customization Disclaimer Banner */
+        .disclaimer-banner {
+            background: rgba(255, 119, 0, 0.08);
+            border: 1px solid rgba(255, 119, 0, 0.3);
+            border-left: 4px solid var(--fire-orange);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .disclaimer-banner .disclaimer-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-top: 1px;
+        }
+        .disclaimer-banner strong {
+            color: #ff9933;
+        }
+        .disclaimer-banner code {
+            background: #182030;
+            color: #ffd100;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+        }
+
         /* Istruzioni di Importazione */
         .import-guide-box {
             width: 100%;
@@ -1019,34 +1021,274 @@
         .guide-steps li {
             margin-left: 20px;
         }
+
+        /* Tier Selector Bar */
+        .tier-bar-card {
+            width: 100%;
+            background: #101522;
+            border: 1px solid #1f283a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        }
+        .tier-bar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tier-bar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+        .tier-icon {
+            font-size: 15px;
+        }
+        .tier-badge {
+            background: rgba(255, 119, 0, 0.15);
+            border: 1px solid rgba(255, 119, 0, 0.45);
+            color: #ff9933;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 12px;
+            border-radius: 12px;
+            letter-spacing: 0.3px;
+        }
+        .tier-btn-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .btn-tier {
+            background: #151b27;
+            color: #94a3b8;
+            border: 1px solid #222c3e;
+            padding: 9px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            touch-action: manipulation;
+        }
+        .btn-tier:hover {
+            background: #1c2536;
+            color: #fff;
+            border-color: #3b4b68;
+            transform: translateY(-1px);
+        }
+        .btn-tier.active {
+            background: linear-gradient(135deg, rgba(255, 119, 0, 0.28), rgba(255, 51, 0, 0.16));
+            color: #fff;
+            border-color: #ff7700;
+            box-shadow: 0 0 14px rgba(255, 119, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        .btn-tier-tag {
+            font-size: 9.5px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 800;
+        }
+        .btn-tier.active .btn-tier-tag {
+            color: #ffaa55;
+        }
+        .tier-desc-text {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.45;
+            padding-top: 6px;
+            border-top: 1px solid #1a2232;
+        }
+
+        /* Disabled button for unequipped tier */
+        .btn-act.disabled {
+            opacity: 0.45;
+            pointer-events: none;
+            background: #0f131a !important;
+            border-color: #1a202c !important;
+            color: #64748b !important;
+        }
+
+        /* Adattamento Mobile Avanzato per Smartphone */
+        @media (max-width: 768px) {
+            header {
+                padding: 16px 12px 10px;
+            }
+            h1 {
+                font-size: 21px;
+            }
+            .subtitle {
+                font-size: 12.5px;
+                margin-bottom: 10px;
+            }
+            .action-bar {
+                gap: 6px;
+            }
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 11px;
+                flex: 1 1 calc(50% - 6px);
+                justify-content: center;
+                text-align: center;
+            }
+            .workspace {
+                padding: 0 10px 40px;
+                gap: 12px;
+            }
+            .tier-btn-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .commentary-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 13px;
+            }
+            header {
+                padding: 12px 8px 6px;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            .badge-header {
+                font-size: 9.5px;
+                padding: 3px 10px;
+            }
+            .subtitle {
+                font-size: 11.5px;
+                line-height: 1.4;
+            }
+            .nav-btn {
+                flex: 1 1 100%;
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+            .viewport-frame {
+                height: 380px;
+                border-radius: 6px;
+            }
+            .hud-master-stage {
+                transform: translateX(-50%) scale(0.85);
+                transform-origin: bottom center;
+                bottom: 24px;
+            }
+            .controls-card {
+                padding: 12px 10px;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .card-header h3 {
+                font-size: 15px;
+            }
+            .btn-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .btn-grid-3 {
+                gap: 5px;
+            }
+            .btn-act {
+                min-height: 38px;
+                padding: 6px 6px;
+                font-size: 11px;
+            }
+            .group-box {
+                padding: 10px 12px;
+            }
+            .tier-bar-card {
+                padding: 10px 12px;
+            }
+            .tier-bar-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .tier-desc-text {
+                font-size: 11px;
+            }
+            .toast-msg {
+                width: 90%;
+                text-align: center;
+                font-size: 12px;
+                padding: 10px 16px;
+            }
+            .compare-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .viewport-frame {
+                height: 340px;
+            }
+            .hud-master-stage {
+                transform: translateX(-50%) scale(0.76);
+                transform-origin: bottom center;
+                bottom: 16px;
+            }
+            .btn-act {
+                font-size: 10.5px;
+                padding: 5px 4px;
+            }
+            .btn-grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .btn-tier {
+                font-size: 11px;
+                padding: 7px 4px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="badge-header">World of Warcraft 3.3.5a (WotLK) • WeakAuras Suite</div>
-        <h1>Fire Mage <span>3.3.5a AM</span> — Showcase & Simulatore HUD 1:1</h1>
+        <h1>Fire Mage <span>3.3.5a AM</span> — 1:1 HUD Showcase &amp; Simulator</h1>
         <p class="subtitle">
-            Simulatore interattivo con tutti i bottoni funzionanti e testati. Nessuna sovrapposizione: gli elementi crescono ordinatamente
-            verso l'alto in base agli eventi. Include monili BiS da Fire (DFO e CTS), orologio dei cooldown e simulazione raid live.
+            Interactive raid simulator featuring fully test-verified controls. Zero-overlap layout: alerts and dynamic procs stack upwards
+            naturally during combat. Includes BiS Fire Mage trinkets (DFO &amp; CTS), real-time stats engine, and live cooldown tracking.
         </p>
         
         <!-- Navigation Buttons -->
         <div class="action-bar">
             <button class="nav-btn primary" id="btnCopyWa" onclick="copyImportString()">
-                📋 Copia Stringa WeakAuras (!WA:1!)
+                📋 Copy WeakAuras String (!WA:1!)
             </button>
             <button class="nav-btn secondary" id="btnAutoPlay" onclick="toggleAutoPlay()">
-                ▶ Avvia Dimostrazione Combattimento Raid
+                ▶ Start Raid Combat Demo
             </button>
             <button class="nav-btn active" id="btnModeScreenshot" onclick="setMode('SCREENSHOT')">
-                📸 Foto 1 (Combat: Hot Streak & 7 Procs)
+                📸 Screenshot 1 (Combat: Hot Streak &amp; 7 Procs)
             </button>
             <button class="nav-btn" id="btnModeIdle" onclick="setMode('IDLE')">
-                💤 Foto 2 (Idle: Fuori Combattimento)
+                💤 Screenshot 2 (Idle: Out of Combat)
             </button>
             <button class="nav-btn" id="btnModeLive" onclick="setMode('LIVE')">
-                ⚡ Sandbox Interattivo Libero
+                ⚡ Free Interactive Sandbox
             </button>
         </div>
     </header>
@@ -1056,10 +1298,10 @@
         <!-- Live Commentary Banner -->
         <div class="commentary-banner" id="commentaryBanner">
             <div class="commentary-text">
-                <span class="commentary-tag" id="commentaryTag">Stato Screenshot 1</span>
-                <span id="commentaryMsg">Visualizzazione esatta della Foto 1: Hot Streak, 7 procs attivi, Castbar a 1.4s e mana al 38.77%.</span>
+                <span class="commentary-tag" id="commentaryTag">Screenshot 1 Mode</span>
+                <span id="commentaryMsg">Exact visual state of Screenshot 1: Hot Streak active, 7 procs displayed, 1.4s Castbar, and 38.77% Mana.</span>
             </div>
-            <div class="commentary-progress" id="commentaryProgress">Foto 1</div>
+            <div class="commentary-progress" id="commentaryProgress">Screenshot 1</div>
         </div>
 
         <!-- WoW In-Game Screen Viewport -->
@@ -1069,16 +1311,16 @@
             <div class="wow-player-silhouette"></div>
             <div class="combat-text-layer" id="fctLayer"></div>
 
-            <!-- HUD MASTER STAGE (Ancorato in basso, cresce verso l'alto senza sovrapporsi!) -->
+            <!-- HUD MASTER STAGE (Anchored to bottom, expands upwards without overlapping!) -->
             <div class="hud-master-stage" id="hudStage">
 
-                <!-- 1. 17 - Alerts (In cima al HUD) -->
-                <div class="alert-box" id="alertBox" onclick="castPyroAction()" title="Hot Streak Attivo! Clicca per lanciare Pyroblast!">
+                <!-- 1. 17 - Alerts (Top of HUD) -->
+                <div class="alert-box" id="alertBox" onclick="castPyroAction()" title="Hot Streak Active! Click to cast Instant Pyroblast!">
                     <div class="alert-line1">HOT STREAK!</div>
                     <div class="alert-line2">PYROBLAST READY!</div>
                 </div>
 
-                <!-- 2. 01 - Procs Dynamic Group (Sopra la Castbar, centrato) -->
+                <!-- 2. 01 - Procs Dynamic Group (Above Castbar, centered) -->
                 <div class="procs-bar" id="procsBar">
                     <!-- 1. Tier 10 (Pushing the Limit +12% Haste) -->
                     <div class="wa-box size-34 pixel-glow" id="procT10" onclick="triggerT10()" title="Tier 10: Pushing the Limit (+12% Haste)">
@@ -1086,23 +1328,23 @@
                         <div class="tag-timer urgent" id="t10Timer"></div>
                     </div>
                     <!-- 2. Hot Streak -->
-                    <div class="wa-box size-34 pixel-glow" id="procHotStreak" onclick="castPyroAction()" title="Hot Streak Proc (Pyroblast Istantaneo)">
+                    <div class="wa-box size-34 pixel-glow" id="procHotStreak" onclick="castPyroAction()" title="Hot Streak Proc (Instant Pyroblast)">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_hotstreak.jpg" alt="Hot Streak">
                         <div class="tag-timer" id="hsTimer"></div>
                     </div>
                     <!-- 3. Clearcasting / Arcane Concentration -->
-                    <div class="wa-box size-34 pixel-glow" id="procClearcasting" onclick="toggleClearcasting()" title="Clearcasting (Prossima magia gratuita)">
+                    <div class="wa-box size-34 pixel-glow" id="procClearcasting" onclick="toggleClearcasting()" title="Clearcasting (Next spell mana cost 0)">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_shadow_manaburn.jpg" alt="Clearcasting">
                         <div class="tag-timer" id="ccTimer"></div>
                     </div>
-                    <!-- 4. Ignite (Debuff rolling 4s da colpi critici) -->
-                    <div class="wa-box size-34 pixel-glow" id="procIgnite" onclick="applyIgnite()" title="Ignite: Debuff rolling 4s da colpi critici">
+                    <!-- 4. Ignite (4s rolling critical strike debuff) -->
+                    <div class="wa-box size-34 pixel-glow" id="procIgnite" onclick="applyIgnite()" title="Ignite: 4s rolling critical strike debuff">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_incinerate.jpg" alt="Ignite">
                         <div class="cd-swipe" id="swipeIgnite"></div>
                         <div class="tag-timer" id="igniteTimer">4.0s</div>
                     </div>
                     <!-- 5. Scorch / Improved Scorch (+5% Crit) -->
-                    <div class="wa-box size-34" id="procScorch" onclick="applyScorch()" title="Scorch (+5% Spell Crit Debuff)">
+                    <div class="wa-box size-34" id="procScorch" onclick="applyScorch()" title="Improved Scorch (+5% Spell Crit Debuff)">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_soulburn.jpg" alt="Scorch">
                         <div class="cd-swipe" id="swipeScorch"></div>
                         <div class="tag-timer" id="scorchTimer"></div>
@@ -1113,15 +1355,15 @@
                         <div class="cd-swipe" id="swipeLb"></div>
                         <div class="tag-timer" id="lbTimer"></div>
                     </div>
-                    <!-- 7. Molten Fury (Target <= 35% HP in foto 1) -->
-                    <div class="wa-box size-34 pixel-glow" id="procMoltenFury" onclick="toggleMoltenFury()" title="Molten Fury: Bersaglio <= 35% HP">
+                    <!-- 7. Molten Fury (Target <= 35% HP in Screenshot 1) -->
+                    <div class="wa-box size-34 pixel-glow" id="procMoltenFury" onclick="toggleMoltenFury()" title="Molten Fury: Target &lt;= 35% HP">
                         <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_moltenblood.jpg" alt="Molten Fury">
                         <div class="tag-center">35%</div>
                     </div>
                 </div>
 
-                <!-- 3. 16 - Castbar (Sopra la Hot Streak Bar, allineata con la colonna destra) -->
-                <div class="castbar-wrap" id="castbarWrap" onclick="castSpellAction('Fireball', true)" title="Clicca per lanciare Fireball">
+                <!-- 3. 16 - Castbar (Above Hot Streak Bar, aligned with right column) -->
+                <div class="castbar-wrap" id="castbarWrap" onclick="castSpellAction('Fireball', true)" title="Click to cast Fireball">
                     <div class="castbar-container" id="castbarContainer">
                         <div class="castbar-icon" id="castIcon"></div>
                         <div class="castbar-fill" id="castFill"></div>
@@ -1131,33 +1373,33 @@
                     </div>
                 </div>
 
-                <!-- 4. BASE GRID DEL HUD: Colonna Sinistra (88px) + Colonna Destra (264px) -->
+                <!-- 4. HUD BASE GRID: Left Column (88px) + Right Column (264px) -->
                 <div class="hud-base-grid">
 
-                    <!-- Colonna Sinistra (88px): 3 Buffs + Stats Panel -->
+                    <!-- Left Column (88px): 3 Long Buffs + Stats Panel -->
                     <div class="left-col">
-                        <!-- 3 Buffs Lunghi (28x28px ciascuno, total width = 88px) -->
+                        <!-- 3 Long Buffs (28x28px each, total width = 88px) -->
                         <div class="three-buffs-row">
                             <!-- 02 - Molten Armor -->
-                            <div class="wa-box desaturated" id="boxMolten" onclick="toggleMolten()" title="02 - Molten Armor (Clicca per attivare/disattivare)">
+                            <div class="wa-box desaturated" id="boxMolten" onclick="toggleMolten()" title="02 - Molten Armor (Click to toggle)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/ability_mage_moltenarmor.jpg" alt="Molten Armor">
                                 <div class="tag-off" id="tagMoltenOff">OFF</div>
                             </div>
                             <!-- 03 - Arcane Intellect -->
-                            <div class="wa-box desaturated" id="boxIntellect" onclick="toggleIntellect()" title="03 - Arcane Intellect (Clicca per attivare/disattivare)">
+                            <div class="wa-box desaturated" id="boxIntellect" onclick="toggleIntellect()" title="03 - Arcane Intellect (Click to toggle)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_holy_magicalsentry.jpg" alt="Intellect">
                                 <div class="tag-off" id="tagIntOff">OFF</div>
                             </div>
                             <!-- 04 - Focus Magic -->
-                            <div class="wa-box desaturated" id="boxFocusMagic" onclick="cycleFmState()" title="04 - Focus Magic (Clicca per cambiare stato)">
+                            <div class="wa-box desaturated" id="boxFocusMagic" onclick="cycleFmState()" title="04 - Focus Magic (Click to cycle state)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_arcane_studentofmagic.jpg" alt="Focus Magic">
                                 <div class="tag-off" id="tagFmOff">OFF</div>
                                 <div class="tag-timer urgent" id="tagFmTimer" style="display:none;"></div>
                             </div>
                         </div>
 
-                        <!-- 18 - Stats Panel in Tempo Reale (88x52px) -->
-                        <div class="stats-panel-box" id="statsBox" title="18 - Stats Panel: Calcolo in tempo reale di SP, Crit, Haste e Hit">
+                        <!-- 18 - Real-Time Stats Panel (88x52px) -->
+                        <div class="stats-panel-box" id="statsBox" title="18 - Stats Panel: Real-time calculation of SP, Crit, Haste, and Hit">
                             <div class="stat-line">
                                 <span class="stat-lbl-sp">SP:</span>
                                 <span class="stat-val-white" id="statSP">2874</span>
@@ -1177,10 +1419,10 @@
                         </div>
                     </div>
 
-                    <!-- Colonna Destra (264px): Hot Streak Bar + Mana Bar + Utility Row -->
+                    <!-- Right Column (264px): Hot Streak Bar + Mana Bar + Utility Row -->
                     <div class="center-col">
-                        <!-- 15 - Hot Streak Bar (Doppio Segmento Decoppiato: 278px sopra la Mana Bar) -->
-                        <div class="hotstreak-container" id="hotStreakBar" onclick="castPyroAction()" title="15 - Hot Streak Bar: Sinistra = 1° Critico (Persistente), Destra = Proc Hot Streak (10s)">
+                        <!-- 15 - Hot Streak Bar (Decoupled Dual-Segment: 278px above Mana Bar) -->
+                        <div class="hotstreak-container" id="hotStreakBar" onclick="castPyroAction()" title="15 - Hot Streak Bar: Left = 1st Direct Crit (Persistent), Right = Hot Streak Proc (10s)">
                             <div class="hs-segment-left" id="hsSegmentLeft"></div>
                             <div class="hs-segment-right" id="hsSegmentRight"></div>
                             <div class="hs-ticks">
@@ -1189,52 +1431,52 @@
                         </div>
 
                         <!-- 14 - Mana Bar (264x14px) -->
-                        <div class="manabar-container" id="manabarContainer" onclick="cycleManaState()" title="14 - Mana Bar: Clicca per cambiare livello">
+                        <div class="manabar-container" id="manabarContainer" onclick="cycleManaState()" title="14 - Mana Bar: Click to cycle mana level">
                             <div class="manabar-fill" id="manaFill"></div>
                             <div class="manabar-text" id="manaText">38.77%</div>
                         </div>
 
-                        <!-- Fila Utility Inferiore (7 Icone da 34px, 264px totali) -->
+                        <!-- Bottom Utility Row (7 Icons at 34px, 264px total) -->
                         <div class="utility-row-bar">
                             <!-- 05 - Trinket 1: Dislodged Foreign Object (DFO) -->
-                            <div class="wa-box size-34" id="utilTrinket1" onclick="useTrinket1()" title="05 - Trinket 1: Dislodged Foreign Object (DFO - Clicca per avviare proc/cooldown)">
+                            <div class="wa-box size-34" id="utilTrinket1" onclick="useTrinket1()" title="05 - Trinket 1: Dislodged Foreign Object (DFO - Click to trigger proc/cooldown)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/inv_jewelry_trinket_01.jpg" alt="DFO">
                                 <div class="cd-swipe" id="swipeT1"></div>
                                 <div class="tag-timer" id="tagT1Timer"></div>
                             </div>
                             <!-- 06 - Trinket 2: Charred Twilight Scale (CTS) -->
-                            <div class="wa-box size-34" id="utilTrinket2" onclick="useTrinket2()" title="06 - Trinket 2: Charred Twilight Scale (CTS - Clicca per avviare proc/cooldown)">
+                            <div class="wa-box size-34" id="utilTrinket2" onclick="useTrinket2()" title="06 - Trinket 2: Charred Twilight Scale (CTS - Click to trigger proc/cooldown)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_rubysanctum2.jpg" alt="CTS">
                                 <div class="cd-swipe" id="swipeT2"></div>
                                 <div class="tag-timer" id="tagT2Timer"></div>
                             </div>
                             <!-- 07 - Cloak (Lightweave Embroidery) -->
-                            <div class="wa-box size-34" id="utilCloak" onclick="triggerCloak()" title="07 - Cloak: Ricamo di Fuoco Lucente (Clicca per avviare)">
+                            <div class="wa-box size-34" id="utilCloak" onclick="triggerCloak()" title="07 - Cloak: Lightweave Embroidery (Click to trigger)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_cape_18.jpg" alt="Cloak">
                                 <div class="cd-swipe" id="swipeCloak"></div>
                                 <div class="tag-timer" id="tagCloakTimer"></div>
                             </div>
-                            <!-- 08 - Tier 8 2P (Praxis / Student of Magic: mani con fiamma blu) -->
+                            <!-- 08 - Tier 8 2P (Praxis / Student of Magic: hands with blue flame) -->
                             <div class="wa-box size-34" id="utilTier8" onclick="triggerT8()" title="08 - Tier 8 2P: Praxis (+350 Spell Power)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_arcane_studentofmagic.jpg" alt="Tier 8">
                                 <div class="cd-swipe" id="swipeT8"></div>
                                 <div class="tag-timer" id="tagT8Timer"></div>
                             </div>
-                            <!-- 10 - Mana Gem (Gemma di Zaffiro brillante con contatore cariche) -->
-                            <div class="wa-box size-34" id="utilManaGem" onclick="useManaGem()" title="10 - Mana Gem (Clicca per consumare, recupera +3300 Mana)">
-                                <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg" alt="Mana Gem">
+                            <!-- 10 - Mana Gem (Sapphire gem with charge count) -->
+                            <div class="wa-box size-34" id="utilManaGem" onclick="useManaGem()" title="10 - Mana Gem (Click to use, restores +3300 Mana)">
+                                <img id="imgManaGem" src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg" alt="Mana Gem">
                                 <div class="cd-swipe" id="swipeGem"></div>
                                 <div class="tag-timer" id="tagGemTimer">1.4</div>
                                 <div class="tag-stack" id="tagGemStack" style="color:#ff3333;">0</div>
                             </div>
-                            <!-- 11 - Combustion (Sigillo dorato di fuoco) -->
-                            <div class="wa-box size-34" id="utilCombustion" onclick="cycleCombustion()" title="11 - Combustion (Clicca per aggiungere stack, +10% Crit/stack)">
+                            <!-- 11 - Combustion (Golden seal of fire) -->
+                            <div class="wa-box size-34" id="utilCombustion" onclick="cycleCombustion()" title="11 - Combustion (Click to add stack, +10% Crit/stack)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_fire_sealoffire.jpg" alt="Combustion">
                                 <div class="cd-swipe" id="swipeCombustion"></div>
                                 <div class="tag-stack" id="tagCombustStack"></div>
                                 <div class="tag-timer" id="timerCombustion"></div>
                             </div>
-                            <!-- 12 - Mirror Image (3 volti arcani blu) -->
+                            <!-- 12 - Mirror Image (3 blue arcane faces) -->
                             <div class="wa-box size-34" id="utilMirror" onclick="useMirrorImage()" title="12 - Mirror Image (3 min CD)">
                                 <img src="https://wow.zamimg.com/images/wow/icons/large/spell_magic_lesserinvisibilty.jpg" alt="Mirror Image">
                                 <div class="cd-swipe" id="swipeMirror"></div>
@@ -1251,113 +1493,145 @@
         <!-- Interactive Sandbox Controls -->
         <div class="controls-card">
             <div class="card-header">
-                <h3>🎮 Banco di Controllo &amp; Sandbox Dinamico</h3>
+                <h3>🎮 Control Deck &amp; Dynamic Sandbox</h3>
                 <div class="card-header-badge">
                     <span class="badge-dot"></span>
-                    <span>27 Controlli Interattivi Collegati al HUD</span>
+                    <span>31 Interactive HUD Controls</span>
+                </div>
+            </div>
+
+            <!-- Tier Set Preset Selector (WotLK Gearing) -->
+            <div class="tier-bar-card">
+                <div class="tier-bar-header">
+                    <div class="tier-bar-title">
+                        <span class="tier-icon">🛡️</span>
+                        <strong>Tier Set Preset (WotLK Gearing):</strong>
+                    </div>
+                    <span class="tier-badge" id="tierBadge">👑 Solo T10 (BiS ICC)</span>
+                </div>
+                <div class="tier-btn-grid">
+                    <button class="btn-tier" id="btnTierT7" onclick="setTierConfig('T7')">
+                        <span class="btn-tier-tag">Phase 1 (Naxx)</span>
+                        <strong>T7 (2P Surge)</strong>
+                    </button>
+                    <button class="btn-tier" id="btnTierT7T8" onclick="setTierConfig('T7_T8')">
+                        <span class="btn-tier-tag">Phase 2 (Ulduar)</span>
+                        <strong>T7(2) + T8(2)</strong>
+                    </button>
+                    <button class="btn-tier" id="btnTierT8T10" onclick="setTierConfig('T8_T10')">
+                        <span class="btn-tier-tag">Phase 3 (Progression)</span>
+                        <strong>T8(2) + T10(2)</strong>
+                    </button>
+                    <button class="btn-tier active" id="btnTierT10" onclick="setTierConfig('T10')">
+                        <span class="btn-tier-tag">Phase 4 (BiS ICC)</span>
+                        <strong>Solo T10 (4P)</strong>
+                    </button>
+                </div>
+                <div class="tier-desc-text" id="tierDesc">
+                    Solo T10 BiS Setup: Pushing the Limit (+12% Haste) and Quad Core (+18% mirror image damage) active. T7 and T8 unequipped.
                 </div>
             </div>
 
             <div class="card-grid">
-                <!-- 1. Rotazione Incantesimi -->
+                <!-- 1. Spell Rotation -->
                 <div class="group-box">
                     <div class="group-header">
-                        <h4>🔥 Rotazione &amp; Magie</h4>
-                        <span class="group-header-pill">6 Azioni</span>
+                        <h4>🔥 Spell Rotation</h4>
+                        <span class="group-header-pill">6 Actions</span>
                     </div>
 
-                    <span class="ctrl-sub-label">Incantesimo Primario (Castbar)</span>
+                    <span class="ctrl-sub-label">Primary Spell (Castbar)</span>
                     <div class="btn-grid-2">
                         <button class="btn-act btn-main" id="btnCastCrit" onclick="castSpellAction('Fireball', true)">🔥 Fireball (Crit!)</button>
-                        <button class="btn-act" id="btnCastNorm" onclick="castSpellAction('Fireball', false)">Fireball (Normale)</button>
+                        <button class="btn-act" id="btnCastNorm" onclick="castSpellAction('Fireball', false)">Fireball (Hit)</button>
                     </div>
 
-                    <span class="ctrl-sub-label">DoT &amp; Debuff Bersaglio</span>
+                    <span class="ctrl-sub-label">Target DoTs &amp; Debuffs</span>
                     <div class="btn-grid-3">
                         <button class="btn-act" id="btnLbAct" onclick="applyLivingBomb()">💣 Living Bomb</button>
                         <button class="btn-act" id="btnScorchAct" onclick="castSpellAction('Scorch', true)">🔥 Cast Scorch</button>
                         <button class="btn-act" id="btnIgniteAct" onclick="applyIgnite()">🔥 Ignite</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Spike Danno Istantaneo (Proc)</span>
+                    <span class="ctrl-sub-label">Instant Damage Spike (Proc)</span>
                     <div class="btn-row-full">
-                        <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Pyroblast Istantaneo</button>
+                        <button class="btn-act btn-pyro" id="btnPyroAct" onclick="castPyroAction()">☄️ Instant Pyroblast</button>
                     </div>
                 </div>
 
-                <!-- 2. Cooldown & Burst (Trinket) -->
+                <!-- 2. Cooldowns & Burst (Trinkets) -->
                 <div class="group-box">
                     <div class="group-header">
-                        <h4>⚡ Cooldown &amp; Burst</h4>
-                        <span class="group-header-pill">5 CD / Trinket</span>
+                        <h4>⚡ Cooldowns &amp; Burst</h4>
+                        <span class="group-header-pill">5 CDs / Trinkets</span>
                     </div>
 
-                    <span class="ctrl-sub-label">Abilità Magiche Maggiori</span>
+                    <span class="ctrl-sub-label">Major Abilities</span>
                     <div class="btn-grid-2">
                         <button class="btn-act" id="btnCombustCycle" onclick="cycleCombustion()">Combustion: 0 Stacks</button>
                         <button class="btn-act" id="btnMirrorAct" onclick="useMirrorImage()">👥 Mirror Image</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Monili Endgame BiS (ICD 45s)</span>
+                    <span class="ctrl-sub-label">BiS Endgame Trinkets (45s ICD)</span>
                     <div class="btn-grid-2">
                         <button class="btn-act" id="btnDfoAct" onclick="useTrinket1()">💎 DFO (Rotface)</button>
                         <button class="btn-act" id="btnCtsAct" onclick="useTrinket2()">🔥 CTS (Halion)</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Incantamento Sartoria / Ingegneria</span>
+                    <span class="ctrl-sub-label">Tailoring / Engineering Enchant</span>
                     <div class="btn-row-full">
-                        <button class="btn-act" id="btnCloakAct" onclick="triggerCloak()">🪡 Mantello (Lightweave)</button>
+                        <button class="btn-act" id="btnCloakAct" onclick="triggerCloak()">🪡 Cloak (Lightweave)</button>
                     </div>
                 </div>
 
-                <!-- 3. Buff, Proc & Scenari -->
+                <!-- 3. Buffs, Procs & Scenarios -->
                 <div class="group-box">
                     <div class="group-header">
-                        <h4>✨ Buff, Proc &amp; Scenari</h4>
-                        <span class="group-header-pill">10 Dinamiche</span>
+                        <h4>✨ Buffs, Procs &amp; Scenarios</h4>
+                        <span class="group-header-pill">10 Controls</span>
                     </div>
 
-                    <span class="ctrl-sub-label">Aura del Mago &amp; Statistiche</span>
+                    <span class="ctrl-sub-label">Mage Armors &amp; Intellect</span>
                     <div class="btn-grid-2">
                         <button class="btn-act" id="btnMoltenToggle" onclick="toggleMolten()">Molten: OFF</button>
                         <button class="btn-act" id="btnIntToggle" onclick="toggleIntellect()">Intell.: OFF</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Focus Magic (Scambio Raid)</span>
+                    <span class="ctrl-sub-label">Focus Magic (Raid Trade)</span>
                     <div class="btn-grid-3">
                         <button class="btn-act active" id="btnFmOff" onclick="setFmState('OFF')">FM: OFF</button>
-                        <button class="btn-act" id="btnFmAlly" onclick="setFmState('ALLY')">FM: Alleato</button>
+                        <button class="btn-act" id="btnFmAlly" onclick="setFmState('ALLY')">FM: Ally</button>
                         <button class="btn-act" id="btnFmProc" onclick="setFmState('PROC')">FM: Proc 10s</button>
                     </div>
 
                     <span class="ctrl-sub-label">Rolling Hot Streak &amp; Tier Procs</span>
                     <div class="btn-grid-2">
-                        <button class="btn-act" id="btnToggleStreak" onclick="toggleCritStreak()">🔥 1° Crit (Sinistra)</button>
-                        <button class="btn-act" id="btnForceHs" onclick="forceHotStreakReady()">⚡ Proc Hot Streak</button>
+                        <button class="btn-act" id="btnToggleStreak" onclick="toggleCritStreak()">🔥 1st Crit (Left Bar)</button>
+                        <button class="btn-act" id="btnForceHs" onclick="forceHotStreakReady()">⚡ Hot Streak Proc</button>
                         <button class="btn-act" id="btnT10Toggle" onclick="triggerT10()">⚡ Proc T10 (+12%)</button>
                         <button class="btn-act" id="btnT8Toggle" onclick="triggerT8()">✨ Proc T8 (+350 SP)</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Fase Bersaglio Finale</span>
+                    <span class="ctrl-sub-label">Target Execute Phase</span>
                     <div class="btn-row-full">
                         <button class="btn-act active" id="btnMoltenFuryToggle" onclick="toggleMoltenFury()">🩸 Target &le; 35% (Molten Fury)</button>
                     </div>
                 </div>
 
-                <!-- 4. Gestione Mana (Test) -->
+                <!-- 4. Mana & Resources Management -->
                 <div class="group-box">
                     <div class="group-header">
-                        <h4>💧 Gestione Mana &amp; Risorse</h4>
-                        <span class="group-header-pill">6 Controlli</span>
+                        <h4>💧 Mana &amp; Resources</h4>
+                        <span class="group-header-pill">6 Controls</span>
                     </div>
 
-                    <span class="ctrl-sub-label">Gemme di Mana (Consumabili)</span>
+                    <span class="ctrl-sub-label">Mana Gems (Consumables)</span>
                     <div class="btn-grid-2">
-                        <button class="btn-act" id="btnManaGemAct" onclick="useManaGem()">💎 Usa Gemma</button>
-                        <button class="btn-act" id="btnRefillGems" onclick="refillManaGems()">🔄 Ricarica 3 Gemme</button>
+                        <button class="btn-act" id="btnManaGemAct" onclick="useManaGem()">💎 Use Mana Gem</button>
+                        <button class="btn-act" id="btnRefillGems" onclick="refillManaGems()">🔄 Conjure 3 Gems</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Soglie Mana Rapide (Preset)</span>
+                    <span class="ctrl-sub-label">Quick Mana Presets</span>
                     <div class="btn-grid-4">
                         <button class="btn-act" id="btnManaFull" onclick="setManaPct(100.0)">100%</button>
                         <button class="btn-act" id="btnMana56" onclick="setManaPct(56.27)">56%</button>
@@ -1365,54 +1639,62 @@
                         <button class="btn-act" id="btnMana38" onclick="setManaPct(38.77)">38%</button>
                     </div>
 
-                    <span class="ctrl-sub-label">Monitor Risorse WeakAuras</span>
+                    <span class="ctrl-sub-label">WeakAuras Resource Monitor</span>
                     <div class="status-mini-box">
-                        <span>Soglia Alert: <strong>&le; 40%</strong></span>
-                        <span>Foto 1: <strong>38.77%</strong></span>
-                        <span>Foto 2: <strong>56.27%</strong></span>
+                        <span>Alert Threshold: <strong>&le; 40%</strong></span>
+                        <span>Screenshot 1: <strong>38.77%</strong></span>
+                        <span>Screenshot 2: <strong>56.27%</strong></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Architettura & Componenti della Suite -->
+        <!-- Architectural Summary & Suite Proportions -->
         <div class="compare-box">
-            <h5>📐 Architettura e Proporzioni della Suite WeakAuras</h5>
+            <h5>📐 Suite Architecture &amp; In-Game Proportions</h5>
+            
+            <div class="disclaimer-banner">
+                <span class="disclaimer-icon">💡</span>
+                <div>
+                    <strong>Interactive Preview Note:</strong> This web showcase is an illustrative example. In World of Warcraft, UI scale, icon sizing, and visual proportions vary depending on your monitor resolution and graphics settings, and remain <strong>100% customizable</strong> at any time via the <code>/wa</code> options panel.
+                </div>
+            </div>
+
             <div class="compare-grid">
                 <div class="compare-item">
-                    <strong>1. Nessuna Sovrapposizione (Espansione Verticale)</strong>
-                    <p>La base inferiore (Stats a sinistra, Fila Utility a destra), la barra del Mana e la barra di Hot Streak sono calibrate e stabili. Quando si attiva la Castbar, i Procs o l'Alert di Hot Streak, questi crescono ordinatamente verso l'alto senza mai coprire le barre inferiori.</p>
+                    <strong>1. Zero-Overlap Vertical Stacking</strong>
+                    <p>Core elements (Stats, Mana Bar, Utility Row) remain anchored. Alerts, Procs, and the Castbar expand smoothly upwards during combat without obscuring any active timers.</p>
                 </div>
                 <div class="compare-item">
-                    <strong>2. Monili Endgame BiS (DFO & CTS)</strong>
-                    <p>Icone ufficiali dei due migliori trinket da Fire Mage: <code>Dislodged Foreign Object</code> (Rotface ICC 25HC) e <code>Charred Twilight Scale</code> (Halion RS 25HC), completi di tracciamento software degli Internal Cooldown (ICD a 45s).</p>
+                    <strong>2. BiS Endgame Trinkets (DFO &amp; CTS)</strong>
+                    <p>Dedicated tracking for <code>Dislodged Foreign Object</code> and <code>Charred Twilight Scale</code>, complete with accurate 45s Internal Cooldown (ICD) clock swipes.</p>
                 </div>
                 <div class="compare-item">
-                    <strong>3. 01 - Procs Dynamic Group (Reattivo)</strong>
-                    <p>Gruppo dinamico sopra la Castbar: ospita fino a 7 icone (Tier 10, Hot Streak, Clearcasting, Living Bomb, Ignite, Scorch e Molten Fury). Le icone non attive si contraggono a larghezza 0 e il gruppo si ricentra automaticamente.</p>
+                    <strong>3. Dynamic Procs Group (Auto-Centering)</strong>
+                    <p>Responsive cluster hosting Tier 10, Hot Streak, Clearcasting, Living Bomb, Ignite, Scorch, and Molten Fury (&le;35% HP). Inactive procs collapse cleanly.</p>
                 </div>
                 <div class="compare-item">
-                    <strong>4. 15 - Barra Hot Streak a 2 Segmenti Decoppiata (Rolling Streak)</strong>
-                    <p>Traccia in tempo reale il 1° critico (50% arancione a sinistra, persistente nel tempo e fuori combat) e il proc Hot Streak (50% a destra con swipe 10s e Pixel Glow dorato). Posizionata sopra la barra del mana, con segmenti indipendenti per il Rolling Hot Streak.</p>
+                    <strong>4. Decoupled 2-Segment Hot Streak</strong>
+                    <p>Left segment tracks your persistent 1st direct crit (never expires out of combat). Right segment tracks the 10s Hot Streak proc with golden Pixel Glow and instant Pyroblast alert.</p>
                 </div>
                 <div class="compare-item">
-                    <strong>5. 18 - Pannello Statistiche a 4 Righe in Tempo Reale</strong>
-                    <p>Calcolo esatto di SP, Crit, Haste e Hit: si aggiorna istantaneamente quando proccano Molten Armor, Focus Magic, Combustion (+10% Crit/stack), Tier 10 (+12% Haste) o Tier 8 (+350 SP).</p>
+                    <strong>5. 4-Row Live Stats Engine</strong>
+                    <p>Real-time calculation of Spell Power, Crit, Haste, and Hit, dynamically updating as armors, trinket procs, raid buffs, and tier bonuses activate.</p>
                 </div>
                 <div class="compare-item">
-                    <strong>6. Gemma di Mana & Utility con Orologio Cooldown</strong>
-                    <p>Orologio circolare d'ombra (conic-gradient) che simula fedelmente lo swipe nativo di World of Warcraft con countdown numerico dei secondi residui.</p>
+                    <strong>6. WotLK Tier Set Progression</strong>
+                    <p>Supports T7 (Mana Surge on gem), T8 (Praxis SP in utility row), and T10 (Pushing the Limit haste + Quad Core damage) with one-click presets.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Istruzioni per Importare la Stringa -->
+        <!-- How to Import WeakAuras String -->
         <div class="import-guide-box">
-            <h4>📥 Come Importare la Suite in World of Warcraft 3.3.5a</h4>
+            <h4>📥 How to Import into World of Warcraft 3.3.5a</h4>
             <ol class="guide-steps">
-                <li>Clicca sul pulsante in alto <strong>"📋 Copia Stringa WeakAuras (!WA:1!)"</strong>.</li>
-                <li>In gioco su WoW 3.3.5a, apri WeakAuras digitando in chat <code>/wa</code> e premi Invio.</li>
-                <li>Seleziona <strong>"Importa"</strong> in alto a sinistra, incolla con <code>Ctrl + V</code> e conferma cliccando su <strong>"Update"</strong> (o "Aggiorna").</li>
+                <li>Click the <strong>"📋 Copy WeakAuras String (!WA:1!)"</strong> button at the top.</li>
+                <li>In-game on WoW 3.3.5a, open WeakAuras by typing <code>/wa</code> in chat and press Enter.</li>
+                <li>Click <strong>"Import"</strong> in the top-left menu, paste with <code>Ctrl + V</code>, and confirm by clicking <strong>"Import"</strong> (or "Update").</li>
             </ol>
         </div>
 
@@ -1424,20 +1706,20 @@
     <!-- Toast Notification -->
     <div class="toast-msg" id="toastMsg">
         <span>✅</span>
-        <span id="toastText">Stringa WeakAuras (!WA:1!) copiata negli appunti!</span>
+        <span id="toastText">WeakAuras string (!WA:1!) copied to clipboard!</span>
     </div>
 
     <script>
-        // Stato Globale del Simulatore
+        // Global Simulator State
         const sim = {
             mode: 'SCREENSHOT', // 'SCREENSHOT', 'IDLE', 'LIVE', 'AUTOPLAY'
             sp: 2874,
             baseCrit: 42.12,
             baseHaste: 33.27,
             hit: 11.67,
-            // Hot Streak Decoppiato & Indipendente
-            hsStreak: 0, // 0 o 1 (Segmento Sinistro: 1° critico diretto persistente)
-            hsProc: true, // boolean (Segmento Destro: buff Hot Streak 10s con glow)
+            // Decoupled & Independent Hot Streak
+            hsStreak: 0, // 0 or 1 (Left Segment: persistent 1st direct crit)
+            hsProc: true, // boolean (Right Segment: 10s Hot Streak buff with glow)
             hsProcTimer: null,
             hsProcRemaining: 10,
             molten: 'OFF',
@@ -1448,6 +1730,11 @@
             manaPct: 38.77,
             manaGems: 0,
             targetExecute: true,
+            tierConfig: 'T8_T10',
+            t7Equipped: false,
+            t8Equipped: true,
+            t10Equipped: true,
+            t7ManaSurgeActive: false,
             t10Active: true,
             t8Active: false,
             dfoActive: false,
@@ -1462,7 +1749,7 @@
             timers: {}
         };
 
-        // Getter/Setter di compatibilita per hotStreak (2 se proc attivo, altrimenti hsStreak)
+        // Backward-compatibility Getter/Setter for hotStreak (2 if proc active, else hsStreak)
         Object.defineProperty(sim, 'hotStreak', {
             get: function() { return this.hsProc ? 2 : this.hsStreak; },
             set: function(val) {
@@ -1498,7 +1785,7 @@
             }
         }
 
-        // Copia Stringa WeakAuras negli Appunti
+        // Copy WeakAuras String to Clipboard
         function copyImportString() {
             const textarea = document.getElementById('hiddenWaString');
             textarea.select();
@@ -1506,14 +1793,14 @@
             
             try {
                 navigator.clipboard.writeText(textarea.value).then(() => {
-                    showToast('Stringa WeakAuras (!WA:1!) copiata negli appunti! Incollala in-game con /wa');
+                    showToast('WeakAuras string (!WA:1!) copied to clipboard! Paste it in-game with /wa');
                 }).catch(() => {
                     document.execCommand('copy');
-                    showToast('Stringa WeakAuras copiata negli appunti!');
+                    showToast('WeakAuras string copied to clipboard!');
                 });
             } catch(e) {
                 document.execCommand('copy');
-                showToast('Stringa WeakAuras copiata!');
+                showToast('WeakAuras string copied!');
             }
         }
 
@@ -1524,7 +1811,7 @@
             setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        // Calcolo e Render Dinamico Statistiche
+        // Dynamic Stats Calculation & Rendering
         function renderStats() {
             let sp = sim.sp;
             let crit = sim.baseCrit;
@@ -1535,8 +1822,9 @@
             if (sim.intellect === 'ACTIVE') crit += 1.20;
             if (sim.focusMagic === 'PROC') crit += 3.00;
             if (sim.combustion > 0) crit += (sim.combustion * 10.0);
-            if (sim.t10Active) haste += 12.0;
-            if (sim.t8Active) sp += 350;
+            if (sim.t10Active && sim.t10Equipped) haste += 12.0;
+            if (sim.t8Active && sim.t8Equipped) sp += 350;
+            if (sim.t7ManaSurgeActive && sim.t7Equipped) sp += 225;
             if (sim.dfoActive) sp += 605;
             if (sim.ctsActive) sp += 763;
 
@@ -1546,7 +1834,7 @@
             document.getElementById('statHit').textContent = hit.toFixed(2) + '%';
 
             const hasteEl = document.getElementById('statHaste');
-            if (sim.t10Active) {
+            if (sim.t10Active && sim.t10Equipped) {
                 hasteEl.classList.add('bump');
             } else {
                 hasteEl.classList.remove('bump');
@@ -1563,7 +1851,7 @@
             setTimeout(() => fct.remove(), isCrit ? 1200 : 1000);
         }
 
-        // Gestione Mana Bar
+        // Mana Bar Management
         function setManaPct(pct) {
             sim.manaPct = Math.max(0, Math.min(100, pct));
             const fill = document.getElementById('manaFill');
@@ -1593,7 +1881,7 @@
             else setManaPct(100.0);
         }
 
-        // Render Hot Streak UI (Decoppiato: Sinistra 1° Crit, Destra Proc 10s)
+        // Render Hot Streak UI (Decoupled: Left 1st Crit, Right Proc 10s)
         function renderHotStreakUI() {
             const segLeft = document.getElementById('hsSegmentLeft');
             const segRight = document.getElementById('hsSegmentRight');
@@ -1676,10 +1964,10 @@
         function toggleCritStreak() {
             sim.hsStreak = sim.hsStreak === 1 ? 0 : 1;
             renderHotStreakUI();
-            spawnFCT(sim.hsStreak === 1 ? '🔥 1° CRITICO ATTIVO (SEGMENTO 1)' : '1° Critico Spento', sim.hsStreak === 1);
+            spawnFCT(sim.hsStreak === 1 ? '🔥 1st CRIT ACTIVE (SEGMENT 1)' : '1st Crit Inactive', sim.hsStreak === 1);
         }
 
-        // Gestione Debuff Ignite (Target debuff da critici, 4s rolling)
+        // Ignite Debuff Management (Target debuff from crits, 4s rolling)
         function applyIgnite(force) {
             if (force === undefined) {
                 sim.igniteActive = !sim.igniteActive;
@@ -1705,7 +1993,7 @@
                         if (timer) timer.textContent = rem.toFixed(1) + 's';
                     }
                 }, 100);
-                spawnFCT('🔥 Ignite Applicato (4s Dot)', true);
+                spawnFCT('🔥 Ignite Applied (4s DoT)', true);
             } else {
                 if (swipe) swipe.classList.remove('active');
                 if (timer) timer.textContent = '';
@@ -1713,7 +2001,7 @@
             updateProcsVisibility();
         }
 
-        // Aggiorna Visibilità Dinamica Procs (Dynamic Group: Tier 10, Hot Streak, CC, Ignite, Scorch, LB, Molten Fury)
+        // Update Dynamic Procs Visibility (Dynamic Group: Tier 10, Hot Streak, CC, Ignite, Scorch, LB, Molten Fury)
         function updateProcsVisibility() {
             const t10 = document.getElementById('procT10');
             const hs = document.getElementById('procHotStreak');
@@ -1723,7 +2011,8 @@
             const lb = document.getElementById('procLivingBomb');
             const fury = document.getElementById('procMoltenFury');
 
-            t10.className = 'wa-box size-34' + (sim.t10Active ? ' pixel-glow' : ' proc-hidden');
+            const showT10 = sim.t10Active && sim.t10Equipped;
+            t10.className = 'wa-box size-34' + (showT10 ? ' pixel-glow' : ' proc-hidden');
             hs.className = 'wa-box size-34' + (sim.hsProc ? ' pixel-glow' : ' proc-hidden');
             cc.className = 'wa-box size-34' + (sim.clearcastingActive ? ' pixel-glow' : ' proc-hidden');
             ignite.className = 'wa-box size-34' + (sim.igniteActive ? ' pixel-glow' : ' proc-hidden');
@@ -1732,7 +2021,7 @@
             fury.className = 'wa-box size-34' + (sim.targetExecute ? ' pixel-glow' : ' proc-hidden');
 
             const procsBar = document.getElementById('procsBar');
-            const anyActive = sim.t10Active || sim.hsProc || sim.clearcastingActive || sim.igniteActive || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT' || sim.lbActive;
+            const anyActive = showT10 || sim.hsProc || sim.clearcastingActive || sim.igniteActive || sim.scorchActive || sim.targetExecute || sim.mode === 'SCREENSHOT' || sim.lbActive;
             
             if (anyActive && sim.mode !== 'IDLE') {
                 procsBar.classList.remove('hidden');
@@ -1750,15 +2039,111 @@
             }
 
             const btnT10 = document.getElementById('btnT10Toggle');
-            if (btnT10) btnT10.classList.toggle('active', sim.t10Active);
+            if (btnT10) {
+                btnT10.classList.toggle('active', showT10);
+                btnT10.classList.toggle('disabled', !sim.t10Equipped);
+                btnT10.textContent = sim.t10Equipped ? (sim.t10Active ? '⚡ Proc T10: ACTIVE (+12%)' : '⚡ Proc T10 (+12%)') : '⚡ T10 Not Equipped';
+            }
+            const btnT8 = document.getElementById('btnT8Toggle');
+            if (btnT8) {
+                btnT8.classList.toggle('active', sim.t8Active && sim.t8Equipped);
+                btnT8.classList.toggle('disabled', !sim.t8Equipped);
+                btnT8.textContent = sim.t8Equipped ? (sim.t8Active ? '✨ Proc T8: ACTIVE (+350 SP)' : '✨ Proc T8 (+350 SP)') : '✨ T8 Not Equipped';
+            }
             const btnFury = document.getElementById('btnMoltenFuryToggle');
             if (btnFury) {
                 btnFury.classList.toggle('active', sim.targetExecute);
-                btnFury.innerHTML = sim.targetExecute ? '🩸 Target &le; 35% (Molten Fury)' : 'Bersaglio &gt; 35% (Fury OFF)';
+                btnFury.innerHTML = sim.targetExecute ? '🩸 Target &le; 35% (Molten Fury)' : 'Target &gt; 35% (Fury OFF)';
             }
         }
 
-        // Switch Modalità
+        // Tier Set Configuration Management
+        function setTierConfig(cfg) {
+            sim.tierConfig = cfg;
+            clearSimTimer('t7surge');
+            sim.t7ManaSurgeActive = false;
+            const imgGem = document.getElementById('imgManaGem');
+            if (imgGem) imgGem.src = 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg';
+            const boxGem = document.getElementById('utilManaGem');
+            if (boxGem) boxGem.classList.remove('pixel-glow');
+
+            if (cfg === 'T7') {
+                sim.t7Equipped = true;
+                sim.t8Equipped = false;
+                sim.t10Equipped = false;
+            } else if (cfg === 'T7_T8') {
+                sim.t7Equipped = true;
+                sim.t8Equipped = true;
+                sim.t10Equipped = false;
+            } else if (cfg === 'T8_T10') {
+                sim.t7Equipped = false;
+                sim.t8Equipped = true;
+                sim.t10Equipped = true;
+            } else { // 'T10'
+                sim.t7Equipped = false;
+                sim.t8Equipped = false;
+                sim.t10Equipped = true;
+            }
+
+            // Update T8 visibility in utility row
+            const utilT8 = document.getElementById('utilTier8');
+            if (utilT8) {
+                utilT8.style.display = sim.t8Equipped ? 'block' : 'none';
+                if (!sim.t8Equipped) {
+                    sim.t8Active = false;
+                    clearSimTimer('t8');
+                    const swipeT8 = document.getElementById('swipeT8');
+                    if (swipeT8) swipeT8.classList.remove('active');
+                    const tagT8 = document.getElementById('tagT8Timer');
+                    if (tagT8) tagT8.textContent = '';
+                }
+            }
+
+            // If T10 is not equipped, turn off T10 proc
+            if (!sim.t10Equipped) {
+                sim.t10Active = false;
+                clearSimTimer('t10');
+                const t10Timer = document.getElementById('t10Timer');
+                if (t10Timer) t10Timer.textContent = '';
+            }
+
+            // Update Tier button classes
+            const bT7 = document.getElementById('btnTierT7');
+            const bT7T8 = document.getElementById('btnTierT7T8');
+            const bT8T10 = document.getElementById('btnTierT8T10');
+            const bT10Btn = document.getElementById('btnTierT10');
+            if (bT7) bT7.className = 'btn-tier' + (cfg === 'T7' ? ' active' : '');
+            if (bT7T8) bT7T8.className = 'btn-tier' + (cfg === 'T7_T8' ? ' active' : '');
+            if (bT8T10) bT8T10.className = 'btn-tier' + (cfg === 'T8_T10' ? ' active' : '');
+            if (bT10Btn) bT10Btn.className = 'btn-tier' + (cfg === 'T10' ? ' active' : '');
+
+            // Update badge and description
+            const badge = document.getElementById('tierBadge');
+            const desc = document.getElementById('tierDesc');
+
+            if (cfg === 'T7') {
+                if (badge) badge.textContent = '🛡️ T7 (Naxxramas)';
+                if (desc) desc.textContent = 'T7 Setup: Mana Gem grants Mana Surge (+225 SP for 15s). T8 & T10 unequipped.';
+                spawnFCT('Tier: T7 (Mana Surge)', false);
+            } else if (cfg === 'T7_T8') {
+                if (badge) badge.textContent = '⚔️ T7(2) + T8(2) (Ulduar)';
+                if (desc) desc.textContent = 'T7(2) + T8(2) Setup: Mana Surge (+225 SP) on Gem and Praxis (+350 SP) in utility row. T10 unequipped.';
+                spawnFCT('Tier: T7(2) + T8(2)', false);
+            } else if (cfg === 'T8_T10') {
+                if (badge) badge.textContent = '🔥 T8(2) + T10(2) (Progression)';
+                if (desc) desc.textContent = 'T8(2) + T10(2) Setup: Praxis (+350 SP) in utility row and Pushing the Limit (+12% Haste) active in procs group.';
+                spawnFCT('Tier: T8(2) + T10(2)', false);
+            } else {
+                if (badge) badge.textContent = '👑 Solo T10 (BiS ICC)';
+                if (desc) desc.textContent = 'Solo T10 BiS Setup: Pushing the Limit (+12% Haste) and Quad Core (+18% Mirror Image damage) active. T7 & T8 unequipped.';
+                spawnFCT('Tier: Solo T10 (BiS)', false);
+            }
+
+            updateProcsVisibility();
+            renderStats();
+        }
+
+        // Switch Mode
         function setMode(mode) {
             stopAutoPlay();
             clearAllSimTimers();
@@ -1772,7 +2157,7 @@
             const hotStreakBar = document.getElementById('hotStreakBar');
 
             if (mode === 'SCREENSHOT') {
-                // STATO ESATTO FOTO 1: Hot Streak, 7 Procs, Castbar 1.4s, Mana 38.77%
+                // EXACT PHOTO 1 STATE: Hot Streak, 7 Procs, Castbar 1.4s, Mana 38.77%
                 sim.sp = 2874;
                 sim.baseCrit = 42.12;
                 sim.baseHaste = 33.27;
@@ -1804,7 +2189,7 @@
                 setBuffUI('boxIntellect', 'tagIntOff', 'OFF');
                 setFmState('OFF');
 
-                // Utility timers dello screenshot 1
+                // Screenshot 1 utility timers
                 document.getElementById('tagGemTimer').textContent = '1.4';
                 document.getElementById('tagGemStack').textContent = '0';
                 document.getElementById('tagGemStack').style.color = '#ff3333';
@@ -1812,12 +2197,13 @@
                 const ignTimer = document.getElementById('igniteTimer');
                 if (ignTimer) ignTimer.textContent = '4.0s';
 
+                setTierConfig('T8_T10');
                 renderHotStreakUI();
                 updateProcsVisibility();
                 renderStats();
-                setCommentary('Stato Screenshot (Foto 1)', 'Visualizzazione esatta della Foto 1: Hot Streak, 7 proc attivi, Castbar a 1.4s e mana al 38.77%.', 'Foto 1');
+                setCommentary('Screenshot State (Photo 1)', 'Exact replication of Photo 1: Hot Streak, 7 active procs, Castbar at 1.4s, and mana at 38.77%.', 'Photo 1');
             } else if (mode === 'IDLE') {
-                // STATO ESATTO FOTO 2: Fuori Combattimento, Nessun Proc, Nessun Castbar, Mana 56.27%
+                // EXACT PHOTO 2 STATE: Out of Combat, No Procs, No Castbar, Mana 56.27%
                 sim.hsStreak = 0;
                 sim.hsProc = false;
                 sim.hsProcRemaining = 0;
@@ -1849,12 +2235,13 @@
                 const ignSwipe = document.getElementById('swipeIgnite');
                 if (ignSwipe) ignSwipe.classList.remove('active');
 
+                setTierConfig('T10');
                 renderHotStreakUI();
                 updateProcsVisibility();
                 renderStats();
-                setCommentary('Stato Fuori Combattimento (Foto 2)', 'Nessun proc né castbar attivi. Il HUD si contrae pulito senza elementi orfani.', 'Foto 2');
+                setCommentary('Out of Combat State (Photo 2)', 'No active procs or castbar. The HUD contracts cleanly with zero orphan elements.', 'Photo 2');
             } else {
-                // MODALITÀ SANDBOX LIBERA
+                // FREE SANDBOX MODE
                 sim.hsStreak = 0;
                 sim.hsProc = false;
                 sim.hsProcRemaining = 0;
@@ -1877,10 +2264,11 @@
                 setManaPct(100.0);
                 refillManaGems();
 
+                setTierConfig('T10');
                 renderHotStreakUI();
                 updateProcsVisibility();
                 renderStats();
-                setCommentary('Modalità Sandbox Libera', 'Lancia magie, clicca sulle icone dei monili DFO/CTS o testa i buff con totale interattività.', 'Sandbox');
+                setCommentary('Free Sandbox Mode', 'Cast spells, click DFO/CTS trinket icons, or test buffs with full interactivity.', 'Sandbox');
             }
 
             const bMolten = document.getElementById('btnMoltenToggle');
@@ -1999,14 +2387,14 @@
                 sim.combustion = 0;
                 document.getElementById('swipeCombustion').classList.remove('active');
                 document.getElementById('timerCombustion').textContent = '';
-                spawnFCT('Combustion: Azzerata (CD Cancellato)', false);
+                spawnFCT('Combustion: Reset (CD Cleared)', false);
             } else if (sim.combustion >= 0 && sim.combustion < 3) {
                 sim.combustion += 1;
                 spawnFCT('Combustion: ' + sim.combustion + ' Stacks', false);
             } else if (sim.combustion === 3) {
                 // Go to CD
                 sim.combustion = -1;
-                spawnFCT('Combustion: In Cooldown (2m)', false);
+                spawnFCT('Combustion: On Cooldown (2m)', false);
                 
                 const swipe = document.getElementById('swipeCombustion');
                 const timer = document.getElementById('timerCombustion');
@@ -2031,7 +2419,7 @@
                 }, 1000);
             }
 
-            let btnText = sim.combustion === -1 ? 'Combustion: In CD' : 'Combustion: ' + sim.combustion + ' Stacks';
+            let btnText = sim.combustion === -1 ? 'Combustion: On CD' : 'Combustion: ' + sim.combustion + ' Stacks';
             document.getElementById('btnCombustCycle').textContent = btnText;
             document.getElementById('tagCombustStack').textContent = (sim.combustion > 0) ? sim.combustion : '';
             
@@ -2086,9 +2474,9 @@
             sim.targetExecute = !sim.targetExecute;
             const btn = document.getElementById('btnMoltenFuryToggle');
             btn.className = 'btn-act' + (sim.targetExecute ? ' active' : '');
-            btn.textContent = sim.targetExecute ? '🩸 Bersaglio <= 35% (Fury ON)' : 'Bersaglio > 35% (Fury OFF)';
+            btn.textContent = sim.targetExecute ? '🩸 Target <= 35% (Fury ON)' : 'Target > 35% (Fury OFF)';
             updateProcsVisibility();
-            spawnFCT('Molten Fury: ' + (sim.targetExecute ? 'ATTIVO (<35% HP)' : 'OFF'), false);
+            spawnFCT('Molten Fury: ' + (sim.targetExecute ? 'ACTIVE (<35% HP)' : 'OFF'), false);
         }
 
         // Incinerate / Fire proc
@@ -2098,6 +2486,10 @@
 
         // Proc Tier 10 (Pushing the Limit +12% Haste)
         function triggerT10() {
+            if (!sim.t10Equipped) {
+                spawnFCT('T10 Not Equipped!', false);
+                return;
+            }
             clearSimTimer('t10');
             sim.t10Active = true;
             updateProcsVisibility();
@@ -2109,7 +2501,7 @@
             
             sim.timers['t10'] = setInterval(() => {
                 rem -= 0.1;
-                if (rem <= 0 || !sim.t10Active) {
+                if (rem <= 0 || !sim.t10Active || !sim.t10Equipped) {
                     clearSimTimer('t10');
                     sim.t10Active = false;
                     t10Timer.textContent = '';
@@ -2123,6 +2515,10 @@
 
         // Proc Tier 8 (Praxis +350 SP)
         function triggerT8() {
+            if (!sim.t8Equipped) {
+                spawnFCT('T8 Not Equipped!', false);
+                return;
+            }
             clearSimTimer('t8');
             sim.t8Active = true;
             renderStats();
@@ -2134,7 +2530,7 @@
             let rem = 15.0;
             sim.timers['t8'] = setInterval(() => {
                 rem -= 0.5;
-                if (rem <= 0 || !sim.t8Active) {
+                if (rem <= 0 || !sim.t8Active || !sim.t8Equipped) {
                     clearSimTimer('t8');
                     sim.t8Active = false;
                     tagT8.textContent = '';
@@ -2219,42 +2615,76 @@
         function useManaGem() {
             if (sim.manaGems > 0) {
                 clearSimTimer('gem');
+                clearSimTimer('t7surge');
                 sim.manaGems--;
                 setManaPct(sim.manaPct + 25);
-                spawnFCT('+3300 Mana', false);
                 document.getElementById('tagGemStack').textContent = sim.manaGems;
                 document.getElementById('tagGemStack').style.color = sim.manaGems === 0 ? '#ff3333' : '#ffd700';
 
                 const tag = document.getElementById('tagGemTimer');
                 const swipe = document.getElementById('swipeGem');
+                const img = document.getElementById('imgManaGem');
+                const box = document.getElementById('utilManaGem');
                 swipe.classList.add('active');
+
+                if (sim.t7Equipped) {
+                    sim.t7ManaSurgeActive = true;
+                    renderStats();
+                    spawnFCT('+3300 Mana & Mana Surge (+225 SP T7)!', true);
+                    if (img) img.src = 'https://wow.zamimg.com/images/wow/icons/large/spell_arcane_manasurge.jpg';
+                    if (box) box.classList.add('pixel-glow');
+                    tag.textContent = '15s';
+                    let remSurge = 15;
+                    sim.timers['t7surge'] = setInterval(() => {
+                        remSurge--;
+                        if (remSurge <= 0 || !sim.t7ManaSurgeActive || !sim.t7Equipped) {
+                            clearSimTimer('t7surge');
+                            sim.t7ManaSurgeActive = false;
+                            if (img) img.src = 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg';
+                            if (box) box.classList.remove('pixel-glow');
+                            renderStats();
+                        }
+                    }, 1000);
+                } else {
+                    spawnFCT('+3300 Mana', false);
+                    tag.textContent = '2:00';
+                }
+
                 let rem = 120;
-                tag.textContent = '2:00';
                 sim.timers['gem'] = setInterval(() => {
                     rem--;
                     if (rem <= 0) {
                         clearSimTimer('gem');
                         swipe.classList.remove('active');
                         tag.textContent = '';
-                    } else {
+                        if (img) img.src = 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg';
+                        if (box) box.classList.remove('pixel-glow');
+                    } else if (!sim.t7ManaSurgeActive) {
                         const m = Math.floor(rem / 60);
                         const s = rem % 60;
                         tag.textContent = m > 0 ? `${m}:${s < 10 ? '0' : ''}${s}` : `${s}s`;
                     }
                 }, 1000);
             } else {
-                spawnFCT('Gemma Vuota (0) - Clicca Ricarica 3 Gemme!', false);
+                spawnFCT('Mana Gem Empty (0) - Click Conjure 3 Gems!', false);
             }
         }
 
         function refillManaGems() {
             clearSimTimer('gem');
+            clearSimTimer('t7surge');
+            sim.t7ManaSurgeActive = false;
             sim.manaGems = 3;
             document.getElementById('tagGemStack').textContent = '3';
             document.getElementById('tagGemStack').style.color = '#38bdf8';
             document.getElementById('tagGemTimer').textContent = '';
             document.getElementById('swipeGem').classList.remove('active');
-            spawnFCT('Gemme Ricaricate: 3', false);
+            const img = document.getElementById('imgManaGem');
+            if (img) img.src = 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_gem_sapphire_02.jpg';
+            const box = document.getElementById('utilManaGem');
+            if (box) box.classList.remove('pixel-glow');
+            renderStats();
+            spawnFCT('Mana Gems Conjured: 3', false);
         }
 
         // Use Mirror Image
@@ -2264,7 +2694,11 @@
             const tag = document.getElementById('tagMirrorTimer');
             swipe.classList.add('active');
             tag.textContent = '3:00';
-            spawnFCT('Mirror Image (3 Immagini Evocate)!', false);
+            if (sim.tierConfig === 'T10') {
+                spawnFCT('👥 Mirror Image (+18% Damage T10 Quad Core)!', true);
+            } else {
+                spawnFCT('👥 Mirror Image (3 Images Summoned)', false);
+            }
             sim.timers['mirror'] = setTimeout(() => {
                 swipe.classList.remove('active');
                 tag.textContent = '';
@@ -2277,7 +2711,7 @@
             clearSimTimer('lb');
             sim.lbActive = true;
             updateProcsVisibility();
-            spawnFCT('Living Bomb Applicata!', false);
+            spawnFCT('Living Bomb Applied!', false);
             
             const swipe = document.getElementById('swipeLb');
             const tag = document.getElementById('lbTimer');
@@ -2305,7 +2739,7 @@
         // Force Hot Streak Ready (Pulsante di comodità)
         function forceHotStreakReady() {
             triggerHotStreakProc();
-            spawnFCT('⚡ HOT STREAK PRONTO (DESTRA)!', true);
+            spawnFCT('⚡ HOT STREAK READY (RIGHT)!', true);
         }
 
         // Cast Spell Action (Fireball, Scorch, ecc.)
@@ -2332,7 +2766,7 @@
 
             castIcon.style.backgroundImage = `url('${iconUrl}')`;
 
-            let currentHaste = sim.baseHaste + (sim.t10Active ? 12.0 : 0);
+            let currentHaste = sim.baseHaste + ((sim.t10Active && sim.t10Equipped) ? 12.0 : 0);
             let duration = Math.round(baseDuration / (1 + (currentHaste / 100)));
 
             let elapsed = 0;
@@ -2347,7 +2781,7 @@
                     clearInterval(interval);
                     sim.isCasting = false;
                     castFill.style.width = '0%';
-                    castName.textContent = 'Pronto';
+                    castName.textContent = 'Ready';
                     castTime.textContent = '';
 
                     setManaPct(sim.manaPct - 3.2);
@@ -2360,22 +2794,23 @@
                         applyScorch(true);
                     }
 
-                    // Gestione Hot Streak Decoppiato & Rolling Streak
+                    // Hot Streak Decoupled & Rolling Streak Handling
                     if (isCrit) {
                         applyIgnite(true);
-                        if (!sim.t10Active && Math.random() < 0.35) triggerT10();
+                        if (sim.t10Equipped && !sim.t10Active && Math.random() < 0.35) triggerT10();
+                        if (sim.t8Equipped && !sim.t8Active && Math.random() < 0.25) triggerT8();
                         if (!sim.dfoActive && Math.random() < 0.25) useTrinket1();
 
                         if (sim.hsStreak === 0) {
-                            // 1° Critico: accende la mezza barra di sinistra
+                            // 1st Crit: lights up left half-bar
                             sim.hsStreak = 1;
                         } else {
-                            // 2° Critico consecutivo: azzera sinistra e attiva/rinnova proc Hot Streak (destra)
+                            // 2nd consecutive crit: resets left and activates/renews Hot Streak proc (right)
                             sim.hsStreak = 0;
                             triggerHotStreakProc();
                         }
                     } else {
-                        // Colpo non critico: spezza la streak (sinistra torna a 0), MA NON altera la barra destra se già proccata!
+                        // Non-crit: breaks rolling streak (left resets to 0), but DOES NOT affect right bar if already active!
                         sim.hsStreak = 0;
                     }
 
@@ -2393,26 +2828,31 @@
             }, intervalTime);
         }
 
-        // Cast Pyroblast Istantaneo (Hot Streak)
+        // Cast Instant Pyroblast (Hot Streak)
         function castPyroAction(callback) {
             if (!sim.hsProc) {
-                spawnFCT('Richiede Hot Streak Attivo!', false);
+                spawnFCT('Requires Active Hot Streak!', false);
                 return;
             }
             const dmg = Math.floor(19500 + Math.random() * 4500);
             spawnFCT('🔥 PYROBLAST CRIT: ' + dmg, true);
             
-            // Consuma il proc Hot Streak (barra destra).
-            // NOTA IMPORTANTE: sim.hsStreak (barra sinistra) NON viene azzerata! Resta attiva se c'era un crit precedente!
+            // Consumes Hot Streak proc (right bar).
+            // IMPORTANT NOTE: sim.hsStreak (left bar) is NOT reset! Remains active if a previous crit was rolling!
             cancelHotStreakProc();
             setManaPct(sim.manaPct - 1.5);
             renderHotStreakUI();
+
+            // Proc 2P Tier 10 (Pushing the Limit): triggers on Hot Streak consumption!
+            if (sim.t10Equipped && !sim.t10Active) {
+                triggerT10();
+            }
 
             if (callback) setTimeout(callback, 800);
         }
 
         // -------------------------------------------------------------
-        // Modalità Auto-Play (Dimostrazione Guidata Raid)
+        // Auto-Play Mode (Guided Raid Demo)
         // -------------------------------------------------------------
         function toggleAutoPlay() {
             if (sim.autoPlayTimer) {
@@ -2425,7 +2865,7 @@
         function startAutoPlay() {
             setMode('LIVE');
             sim.mode = 'AUTOPLAY';
-            document.getElementById('btnAutoPlay').textContent = '⏹ Ferma Dimostrazione';
+            document.getElementById('btnAutoPlay').textContent = '⏹ Stop Demo';
             document.getElementById('btnAutoPlay').classList.add('active');
             sim.autoPlayStep = 0;
             runAutoPlayStep();
@@ -2436,49 +2876,49 @@
                 clearTimeout(sim.autoPlayTimer);
                 sim.autoPlayTimer = null;
             }
-            document.getElementById('btnAutoPlay').textContent = '▶ Avvia Dimostrazione Combattimento Raid';
+            document.getElementById('btnAutoPlay').textContent = '▶ Start Raid Combat Demo';
             document.getElementById('btnAutoPlay').classList.remove('active');
         }
 
         function runAutoPlayStep() {
             const steps = [
                 () => {
-                    setCommentary('Passo 1/6 • Inizio Rotazione', 'Il Mago applica Living Bomb sul boss: compare nei Procs sopra la castbar.', '1/6');
+                    setCommentary('Step 1/6 • Rotation Opener', 'Mage applies Living Bomb on the boss: displays in Procs row above the castbar.', '1/6');
                     applyLivingBomb();
                     sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1600);
                 },
                 () => {
-                    setCommentary('Passo 2/6 • Cast Fireball (1° Colpo)', 'Lancio di Fireball: la Castbar si apre ordinatamente sopra la Hot Streak Bar.', '2/6');
+                    setCommentary('Step 2/6 • Cast Fireball (1st Strike)', 'Casting Fireball: Castbar opens neatly above the Hot Streak Bar.', '2/6');
                     castSpellAction('Fireball', true, () => {
-                        setCommentary('Passo 2/6 • 1° Critico Diretto (Segmento Sinistro)', '1° Critico! La mezza barra sinistra si accende in arancione persistente.', '2/6');
+                        setCommentary('Step 2/6 • 1st Direct Crit (Left Segment)', '1st Crit! The left half-bar lights up in persistent orange.', '2/6');
                         sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1200);
                     });
                 },
                 () => {
-                    setCommentary('Passo 3/6 • Secondo Cast Fireball', 'Secondo cast consecutivo... alla ricerca del 2° colpo critico per il proc...', '3/6');
+                    setCommentary('Step 3/6 • Second Fireball Cast', 'Second consecutive cast... fishing for the 2nd critical strike to proc Hot Streak...', '3/6');
                     castSpellAction('Fireball', true, () => {
-                        setCommentary('Passo 3/6 • HOT STREAK PRONTO (Segmento Destro)!', '2° Critico! La barra sinistra torna a 0 e si attiva la barra destra con timer 10s e Pixel Glow!', '3/6');
+                        setCommentary('Step 3/6 • HOT STREAK READY (Right Segment)!', '2nd Crit! Left bar resets to 0 and right bar triggers with 10s timer & Pixel Glow!', '3/6');
                         sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1400);
                     });
                 },
                 () => {
-                    setCommentary('Passo 4/6 • Lancio Pyroblast Istantaneo', 'Lancio immediato di Pyroblast istantaneo devastante!', '4/6');
+                    setCommentary('Step 4/6 • Instant Pyroblast Launch', 'Instant cast of a devastating Pyroblast!', '4/6');
                     castPyroAction(() => {
-                        setCommentary('Passo 4/6 • Pyroblast Consumato', 'Pyroblast consuma il proc di destra. La barra sinistra resta indipendente per i futuri critici!', '4/6');
+                        setCommentary('Step 4/6 • Pyroblast Consumed', 'Pyroblast consumes right-side proc. Left bar remains decoupled for future rolling crits!', '4/6');
                         sim.autoPlayTimer = setTimeout(runAutoPlayStep, 1200);
                     });
                 },
                 () => {
-                    setCommentary('Passo 5/6 • Proc Monili Endgame & T10', 'Proccano DFO (+SP), CTS (+763 SP) e Tier 10 (+12% Haste). Guarda il pannello Stats!', '5/6');
+                    setCommentary('Step 5/6 • Endgame Trinket & T10 Procs', 'DFO (+SP), CTS (+763 SP), and Tier 10 (+12% Haste) proc simultaneously. Notice the Stats panel!', '5/6');
                     useTrinket1();
                     useTrinket2();
                     triggerT10();
                     sim.autoPlayTimer = setTimeout(runAutoPlayStep, 2500);
                 },
                 () => {
-                    setCommentary('Passo 6/6 • Rotazione Conclusa', 'Dimostrazione completata! La suite WeakAuras ha gestito perfettamente ogni evento con zero sovrapposizioni.', '6/6');
+                    setCommentary('Step 6/6 • Rotation Complete', 'Demonstration finished! The WeakAuras suite smoothly handled every event with zero overlap.', '6/6');
                     sim.autoPlayTimer = setTimeout(() => {
-                        setCommentary('Dimostrazione Terminata', 'Puoi cliccare Copia Stringa WeakAuras in alto per usarla subito nel tuo gioco.', 'Fine');
+                        setCommentary('Demo Completed', 'Click "Copy WeakAuras String" at the top to import it directly into World of Warcraft.', 'End');
                         stopAutoPlay();
                     }, 3000);
                 }
@@ -2492,7 +2932,7 @@
             }
         }
 
-        // Inizializza con lo stato dello screenshot 1
+        // Initialize with Screenshot 1 state
         window.addEventListener('DOMContentLoaded', () => {
             setMode('SCREENSHOT');
         });
