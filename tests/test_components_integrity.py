@@ -81,6 +81,15 @@ class TestComponentsIntegrity(unittest.TestCase):
                 for child_id in a["controlledChildren"]:
                     self.assertIn(child_id, all_ids, f"Gruppo {a['id']} referenzia figlio inesistente: {child_id}")
 
+    def test_castbar_spell_icon_enabled(self):
+        """Verifica che 08 - Castbar abbia l'icona della spell attiva abilitata a sinistra."""
+        tree = build_wa_tree()
+        castbar = next((a for a in tree["c"] if a.get("id") == "08 - Castbar"), None)
+        self.assertIsNotNone(castbar, "08 - Castbar non trovata nell'albero")
+        self.assertTrue(castbar.get("icon"), "L'icona della spell sulla castbar deve essere True")
+        self.assertEqual(castbar.get("icon_side"), "LEFT", "L'icona della spell deve essere posizionata a sinistra (LEFT)")
+        self.assertEqual(castbar.get("iconSource"), -1, "iconSource deve essere -1 (automatico da trigger/spell)")
+
 
 if __name__ == "__main__":
     unittest.main()

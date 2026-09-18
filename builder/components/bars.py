@@ -8,7 +8,7 @@ Gestisce le barre centrali sincronizzate a 278px di larghezza:
 2. 08 - Castbar (278x20px a y = +8):
    - Barra di lancio nativa WeakAuras (texture Blizzard, colore azzurro [0.0, 0.77, 1.0]).
    - Mostra il nome dell'incantesimo a sinistra (%n) e il tempo rimanente a destra (%p).
-   - Priva di icona per mantenere un perfetto allineamento orizzontale a 278px identico alla barra del mana.
+   - Icona della spell attiva a sinistra (icon: True, icon_side: LEFT, iconSource: -1).
 """
 from builder.core.helpers import make_subtext
 from builder.core.constants import TEXTURE_STATUSBAR
@@ -101,7 +101,9 @@ def build_bars_auras() -> list[dict]:
             "barColor": [0.0, 0.77, 1.0, 1.0],
             "backgroundColor": [0.15, 0.15, 0.15, 0.8],
             "texture": "Blizzard",
-            "icon": False,
+            "icon": True,
+            "icon_side": "LEFT",
+            "iconSource": -1,
             "icon_color": [1, 1, 1, 1],
             "triggers": {
                 1: {
