@@ -1,6 +1,6 @@
-# Fire Mage 3.3.5a AM — Handoff Tecnico
+# Class Mage (TTW Fire) — Handoff Tecnico
 
-Manuale di riferimento tecnico per lo sviluppo, la manutenzione e l'estensione della suite **Fire Mage 3.3.5a AM** per World of Warcraft 3.3.5a (*WotLK Build 12340*).
+Manuale di riferimento tecnico per lo sviluppo, la manutenzione e l'estensione della suite **Class Mage (TTW Fire)** per World of Warcraft 3.3.5a (*WotLK Build 12340*).
 
 ---
 

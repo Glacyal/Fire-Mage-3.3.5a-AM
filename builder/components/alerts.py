@@ -17,7 +17,7 @@ def build_alerts_auras() -> list[dict]:
         {
             "id": "17 - Alerts",
             "uid": "FMHUD_ALERTS_GRP",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "group",
             "internalVersion": 52,
             "xOffset": 0,

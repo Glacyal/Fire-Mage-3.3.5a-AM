@@ -1,5 +1,5 @@
 """
-High-Performance Multi-Threaded & Multi-Core Test Runner per Fire Mage 3.3.5a AM.
+High-Performance Multi-Threaded & Multi-Core Test Runner per Class Mage (TTW Fire).
 Sfrutta appieno i core della CPU (multiprocessing / ProcessPoolExecutor) per eseguire
 in parallelo tutti gli script di test della suite, riducendo i tempi di esecuzione e
 garantendo la totale indipendenza dei processi.

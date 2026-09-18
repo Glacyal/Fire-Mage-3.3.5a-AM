@@ -16,7 +16,7 @@ from builder.tree import build_wa_tree
 def test_tree_structure():
     tree = build_wa_tree()
     print(f"Master group: {tree['d']['id']}")
-    assert tree['d']['id'] == "Fire Mage 3.3.5a AM", f"Unexpected master ID: {tree['d']['id']}"
+    assert tree['d']['id'] == "Class Mage (TTW Fire)", f"Unexpected master ID: {tree['d']['id']}"
     
     children_ids = [c['id'] for c in tree['c']]
     print(f"Total children count: {len(children_ids)}")

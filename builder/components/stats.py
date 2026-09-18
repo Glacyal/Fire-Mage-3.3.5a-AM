@@ -227,7 +227,7 @@ def build_stats_auras() -> list[dict]:
         {
             "id": "18 - Stats Panel",
             "uid": "FMHUD_STATS_GRP",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "group",
             "internalVersion": 52,
             "xOffset": -190,

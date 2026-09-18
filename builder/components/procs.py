@@ -25,7 +25,7 @@ def build_procs_auras() -> list[dict]:
         {
             "id": "01 - Procs",
             "uid": "FMHUD_PROCS_DG",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "dynamicgroup",
             "internalVersion": 52,
             "grow": "HORIZONTAL",

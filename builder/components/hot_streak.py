@@ -192,7 +192,7 @@ def build_hotstreak_auras() -> list[dict]:
         {
             "id": "15 - Hot Streak Bar",
             "uid": "FMHUD_HOTSTREAK_BAR_GRP",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "group",
             "internalVersion": 52,
             "xOffset": 0,

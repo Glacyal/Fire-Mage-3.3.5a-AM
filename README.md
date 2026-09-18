@@ -1,4 +1,4 @@
-# Fire Mage 3.3.5a AM — WeakAuras Suite
+# Class Mage (TTW Fire) — WeakAuras Suite
 
 [![WoW Version](https://img.shields.io/badge/World%20of%20Warcraft-3.3.5a%20(12340)-orange.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)
 [![WeakAuras](https://img.shields.io/badge/WeakAuras-4.0.0-blue.svg)](https://github.com/Glacyal/Fire-Mage-3.3.5a-AM)

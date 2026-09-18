@@ -901,7 +901,7 @@ SHARED_CORE_BOOTSTRAP_LUA = r"""function()
         lastRowUpdate = now
 
         if not WeakAuras or not WeakAuras.regions then return end
-        local groupObj = WeakAuras.regions["Fire Mage 3.3.5a AM"]
+        local groupObj = WeakAuras.regions["Class Mage (TTW Fire)"]
         local group = groupObj and (groupObj.region or (groupObj.GetPoint and groupObj))
         if not group then return end
 
@@ -1420,7 +1420,7 @@ def build_utility_auras() -> list[dict]:
         {
             "id": "05 - Trinket 1",
             "uid": "FMHUD_TRINKET1",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": -116,
@@ -1461,7 +1461,7 @@ def build_utility_auras() -> list[dict]:
         {
             "id": "06 - Trinket 2",
             "uid": "FMHUD_TRINKET2",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": -87,
@@ -1502,7 +1502,7 @@ def build_utility_auras() -> list[dict]:
         {
             "id": "07 - Cloak",
             "uid": "FMHUD_CLOAK",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": -58,
@@ -1544,7 +1544,7 @@ def build_utility_auras() -> list[dict]:
         {
             "id": "08 - Tier 8",
             "uid": "FMHUD_TIER8",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": -29,
@@ -1593,7 +1593,7 @@ end"""
         {
             "id": "09 - Gloves",
             "uid": "FMHUD_GLOVES",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": 0,
@@ -1635,7 +1635,7 @@ end"""
         {
             "id": "10 - Mana Gem",
             "uid": "FMHUD_MANAGEM",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": 29,
@@ -1702,7 +1702,7 @@ end"""
         {
             "id": "11 - Combustion",
             "uid": "FMHUD_COMBUSTION",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": 58,
@@ -1747,7 +1747,7 @@ end"""
         {
             "id": "12 - Mirror Image",
             "uid": "FMHUD_MIRRORIMAGE",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": 87,
@@ -1792,7 +1792,7 @@ end"""
         {
             "id": "13 - Boots",
             "uid": "FMHUD_BOOTS",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "icon",
             "internalVersion": 52,
             "xOffset": 116,

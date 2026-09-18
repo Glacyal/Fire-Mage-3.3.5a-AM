@@ -1,7 +1,7 @@
 """
-Costruttore dell'Albero Gerarchico Completo WeakAuras (Fire Mage 3.3.5a AM)
+Costruttore dell'Albero Gerarchico Completo WeakAuras (Class Mage (TTW Fire))
 ==========================================================================
-Assembla i 7 componenti indipendenti sotto il gruppo master 'Fire Mage 3.3.5a AM',
+Assembla i 7 componenti indipendenti sotto il gruppo master 'Class Mage (TTW Fire)',
 applicando le condizioni di caricamento di classe e talento su tutti i nodi foglia.
 """
 import copy
@@ -34,7 +34,7 @@ def build_wa_tree() -> dict:
         "v": 2000,
         "w": "4.0.0",
         "d": {
-            "id": "Fire Mage 3.3.5a AM",
+            "id": "Class Mage (TTW Fire)",
             "uid": "FMHUD_ROOT",
             "regionType": "group",
             "internalVersion": 52,

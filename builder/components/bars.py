@@ -27,7 +27,7 @@ def build_bars_auras() -> list[dict]:
         {
             "id": "14 - Mana Bar",
             "uid": "FMHUD_MANABAR",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "aurabar",
             "internalVersion": 52,
             "width": 278,
@@ -91,7 +91,7 @@ def build_bars_auras() -> list[dict]:
         {
             "id": "16 - Castbar",
             "uid": "FMHUD_CASTBAR",
-            "parent": "Fire Mage 3.3.5a AM",
+            "parent": "Class Mage (TTW Fire)",
             "regionType": "aurabar",
             "internalVersion": 52,
             "width": 278,
