@@ -33,6 +33,7 @@ TEST_SCRIPTS = [
     "test_html_simultaneous.py",
     "test_components_integrity.py",
     "test_hotstreak_decoupled.py",
+    "test_multi_living_bomb.py",
     "test_string_sync.py",
 ]
 

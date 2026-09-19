@@ -21,7 +21,7 @@ Visualizza e interagisci con l'HUD direttamente dal browser senza installare nul
 
 ## 🌟 Caratteristiche Principali
 
-Tutti i componenti del pacchetto sono organizzati con una numerazione sequenziale ordinata (da **01** a **18**):
+Tutti i componenti del pacchetto sono organizzati con una numerazione sequenziale ordinata (da **01** a **19**):
 
 ### 1. Barra Hot Streak a Doppio Segmento (`15 - Hot Streak Bar`)
 Posizionata visivamente a schermo subito sopra la barra del mana, è suddivisa in **due metà indipendenti**:
@@ -72,6 +72,15 @@ Aggiorna in tempo reale i valori effettivi tenendo conto di equipaggiamento, tal
 - **Haste %**: Calcola il valore reale combinando rating, *Bloodlust*, totem, talenti e bonus set.
 - **Hit %**: Precisione con talenti, aura Draenei e debuff boss, con indicatore verde **`(Cap)`** al raggiungimento del 17%.
 
+### 7. Multi-Target Living Bomb Tracker (`19 - Multi-Target Living Bomb`)
+Colonna verticale dinamica posizionata sul lato destro dell'HUD (`xOffset = 165, yOffset = 45`) per monitorare fino a 5 Living Bomb attive contemporaneamente su bersagli diversi:
+- **Ordinamento Intelligente per Scadenza**: La Living Bomb più vicina all'esplosione (minor tempo residuo) occupa sempre la prima posizione in alto (#1), seguita in ordine cronologico da #2, #3, #4, #5.
+- **Timer con Allerta Rossa**:
+  - Quando mancano $\le 3$ secondi all'esplosione, il conto alla rovescia si colora di rosso acceso con 1 decimale (`|cFFFF4444%.1fs|r`) per allertare il giocatore di preparare la ri-applicazione.
+  - Per tempi $> 3$ secondi, mostra i secondi interi bianchi (`%.0fs`).
+- **Motore Real-Time Disaccoppiato**: Frame dedicato `FMHUD_LBFrame` con rilevamento istantaneo del cast (`UNIT_SPELLCAST_SUCCEEDED`), ascolto del combat log multi-bersaglio (`SPELL_AURA_APPLIED/REFRESH/REMOVED`, `UNIT_DIED`) e sincronizzazione con il server via `UnitDebuff`.
+- **Ritiro Naturale delle Icone**: Quando una bomba esplode o il bersaglio muore, l'icona svanisce e la colonna si contrae automaticamente verso l'alto.
+
 ---
 
 ## ⚙️ Struttura Modulare del Progetto (`builder/`)
@@ -94,25 +103,28 @@ Fire Mage 3.3.5a AM/
 │   │   ├── utility.py               # 05-13 - Monili, Mantello, T8, Guanti, Gemma, Combustion, Copie, Stivali
 │   │   ├── bars.py                  # 14 - Mana Bar & 16 - Castbar
 │   │   ├── alerts.py                # 17 - Alerts (avvisi testuali centrali)
-│   │   └── stats.py                 # 18 - Stats Panel (pannello statistiche in tempo reale)
-│   └── tree.py                      # Albero complessivo del gruppo (18 nodi principali, 37 aure)
+│   │   ├── stats.py                 # 18 - Stats Panel (pannello statistiche in tempo reale)
+│   │   └── multi_lb.py              # 19 - Multi-Target Living Bomb Tracker (colonna destra fino a 5 target)
+│   └── tree.py                      # Albero complessivo del gruppo (19 nodi principali, 43 aure)
 ├── docs/
 │   └── index.html                   # Simulatore web interattivo
 ├── tests/                           # Suite di test automatici
 │   ├── run_parallel_tests.py        # Esecutore parallelo multi-core
 │   ├── test_all_utility_cases.py    # Test esaustivo su tutte le combinazioni della riga utility
-│   ├── test_components_integrity.py # Verifica integrità strutturale e numerazione 01-18
+│   ├── test_components_integrity.py # Verifica integrità strutturale e numerazione 01-19
 │   ├── test_equip_switch.py         # Test centratura dinamica durante i cambi di equipaggiamento
 │   ├── test_hotstreak_decoupled.py  # Test logica di persistenza Hot Streak e posizionamento
 │   ├── test_html_simultaneous.py    # Test di consistenza del simulatore web
 │   ├── test_lua.py                  # Controllo sintassi dei blocchi Lua inclusi
+│   ├── test_multi_living_bomb.py    # Verifica integrità, triggers e ordinamento del Multi-Target LB
 │   ├── test_showcase.py             # Controllo interattività del simulatore
 │   ├── test_stats_panel.py          # Verifica formule e moltiplicatori del pannello statistiche
 │   ├── test_string_sync.py          # Verifica corrispondenza tra builder e IMPORT_STRING.txt
 │   └── test_tree_layout.py          # Verifica gerarchia e ordinamento dell'albero
 ├── generate.py                      # Script di compilazione della stringa finale
 ├── IMPORT_STRING.txt                # Stringa WeakAuras pronta per l'importazione
-└── ANALISI_DIMENSIONE_STRINGA.txt   # Analisi tecnica di peso e tempi di importazione
+└── scripts/
+    └── sync_docs.py                 # Sincronizzazione automatica di IMPORT_STRING.txt in docs/index.html
 ```
 
 ---
@@ -129,7 +141,7 @@ Fire Mage 3.3.5a AM/
 
 | Client / Piattaforma | Versione WeakAuras | Compatibilità | Note |
 | :--- | :--- | :---: | :--- |
-| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 4.0.0** | ✅ **100% Nativa** | Sviluppata e collaudata su WeakAuras 4.0.0 (`internalVersion: 52`). Importazione rapida e priva di blocchi (~43 KB). |
+| **WotLK 3.3.5a (Build 12340)** | **WeakAuras 4.0.0** | ✅ **100% Nativa** | Sviluppata e collaudata su WeakAuras 4.0.0 (`internalVersion: 52`). Importazione rapida e priva di blocchi (~48 KB). |
 | **WotLK Classic / Cata Classic** | WeakAuras 5.x (Blizzard) | ⚠️ **Parziale** | Struttura compatibile, ma richiede l'adattamento delle chiamate Lua del Combat Log (`CombatLogGetCurrentEventInfo`). |
 | **Retail** | WeakAuras 5.x | ❌ **Non Compatibile** | Meccaniche e abilità della classe sostanzialmente differenti. |
 
@@ -137,7 +149,7 @@ Fire Mage 3.3.5a AM/
 
 ## 🧪 Validazione & Test Suite
 
-Il progetto include una suite di 11 test automatici eseguibili sia in parallelo per una verifica rapida, sia in modalità standard:
+Il progetto include una suite di 12 test automatici eseguibili sia in parallelo per una verifica rapida, sia in modalità standard:
 
 ```bash
 # Esecuzione parallela multi-core della suite completa

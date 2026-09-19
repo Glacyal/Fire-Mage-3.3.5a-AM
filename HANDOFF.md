@@ -30,7 +30,7 @@ Fire Mage 3.3.5a AM/
 ├── GEMINI.md                        # Regole di progetto, comandi CP e MODELLO
 │
 ├── builder/                         # Pacchetto Python modulare per la generazione dell'HUD
-│   ├── tree.py                      # Assemblatore dell'albero gerarchico (37 aure WeakAuras)
+│   ├── tree.py                      # Assemblatore dell'albero gerarchico (43 aure WeakAuras, 19 nodi principali)
 │   ├── core/                        # Moduli core di serializzazione e codifica
 │   │   ├── constants.py             # Load conditions (Mage 68), texture, font Expressway
 │   │   ├── serializer.py            # Serializzatore AceSerializer-3.0 puro (^1...^^)
@@ -44,7 +44,8 @@ Fire Mage 3.3.5a AM/
 │       ├── utility.py               # 05-13 - Utility Row (Monili, Mantello, T8, Guanti, Gemma, Combustion, Copie, Stivali)
 │       ├── bars.py                  # 14 - Mana Bar & 16 - Castbar
 │       ├── alerts.py                # 17 - Alerts (avvisi testuali centrali)
-│       └── stats.py                 # 18 - Stats Panel (SP, Crit, Haste, Hit con cap resolution)
+│       ├── stats.py                 # 18 - Stats Panel (SP, Crit, Haste, Hit con cap resolution)
+│       └── multi_lb.py              # 19 - Multi-Target Living Bomb Tracker (fino a 5 target)
 │
 ├── docs/                            # Documentazione e anteprima interattiva per GitHub Pages
 │   └── index.html                   # Simulatore interattivo HTML/CSS/JS (proporzioni 1:1)
@@ -52,12 +53,13 @@ Fire Mage 3.3.5a AM/
 └── tests/                           # Suite di test automatici e paralleli
     ├── run_parallel_tests.py        # Test runner parallelo multi-processore (ProcessPoolExecutor)
     ├── test_all_utility_cases.py    # Verifica esaustiva 64 combinazioni riga utility
-    ├── test_components_integrity.py # Verifica integrità strutturale moduli (37 aure)
+    ├── test_components_integrity.py # Verifica integrità strutturale moduli (43 aure, sequenza 01-19)
     ├── test_equip_switch.py         # Test transizioni e centratura universale da 3 a 9 icone
     ├── test_hotstreak_decoupled.py  # Test logica Hot Streak persistente e decoppiata
     ├── test_html_simultaneous.py    # Stress test concorrenza simulatore web
     ├── test_showcase.py             # Audit 100% interattività e handler DOM
     ├── test_lua.py                  # Validazione sintassi codice Lua
+    ├── test_multi_living_bomb.py    # Verifica integrità, trigger e ordinamento Multi-Target LB
     ├── test_tree_layout.py          # Verifica gerarchia e proporzioni albero WA
     ├── test_focus_magic.py          # Test stati e transizioni Focus Magic
     └── test_stats_panel.py          # Test calcolo statistiche e conflitti raid
@@ -154,7 +156,24 @@ Il modulo `builder/components/stats.py` impedisce la duplicazione di buff raid d
 
 ### 4.6 Castbar e Convenzioni di Struttura (`16 - Castbar`)
 - **Castbar con Icona Spell Integrata**: Include l'icona dell'incantesimo attivo posizionata sul bordo sinistro della barra, timer di cast e barra di latenza di rete (*Safe Zone*).
-- **Numerazione Continua dei Componenti**: Tutti i componenti primari del gruppo root seguono la sequenza continua `01`–`18`, garantendo perfetta corrispondenza tra i moduli generati da `builder/`, la stringa importabile e il simulatore web.
+- **Numerazione Continua dei Componenti**: Tutti i componenti primari del gruppo root seguono la sequenza continua `01`–`19`, garantendo perfetta corrispondenza tra i moduli generati da `builder/`, la stringa importabile e il simulatore web.
+
+### 4.7 Multi-Target Living Bomb Tracker (`19 - Multi-Target Living Bomb`)
+- **Posizione & Layout**: Dynamic Group verticale posizionato a destra dell'HUD (`xOffset = 165, yOffset = 45`, `grow = "DOWN"`, `space = 3`, icone 24x24 px).
+- **Architettura Autonoma e Disaccoppiata (`SHARED_MULTILB_LUA`)**:
+  - Il componente non dipende in alcun modo da `utility.py` né dall'esecuzione del Trinket 1: si auto-inizializza all'attivazione del trigger di `Living Bomb Tracker 1` creando il frame dedicato `_G.FMHUD_LBFrame`.
+  - **Doppio Canale di Tracciamento**:
+    1. `UNIT_SPELLCAST_SUCCEEDED`: inserimento istantaneo a zero latenza appena il giocatore completa il cast di Living Bomb sul bersaglio attuale.
+    2. `COMBAT_LOG_EVENT_UNFILTERED`: gestisce il multi-target esteso (`SPELL_AURA_APPLIED`, `SPELL_AURA_REFRESH`), la rimozione (`SPELL_AURA_REMOVED`, `SPELL_AURA_DISPEL`) e la morte dei mob (`UNIT_DIED`, `UNIT_DESTROYED`).
+    3. `UNIT_AURA` & `PLAYER_TARGET_CHANGED`: scansione autoritativa dei debuff reali del server via `UnitDebuff(unit, i)` per sincronizzare l'esatto `expirationTime` al millisecondo.
+  - **Ticker `OnUpdate` (0.15s)**: purga naturale delle bombe scadute a fine dei 12 secondi ed emissione dell'evento `WeakAuras.ScanEvents("FMHUD_LB_UPDATE")`.
+- **Ordinamento Intelligente per Scadenza (FIFO Inverso)**:
+  - Le bombe attive sono ordinate in modo che l'icona #1 mostri sempre la bomba con **minor tempo residuo all'esplosione**, seguita da #2, #3, #4 e #5.
+- **Formattazione Timer**:
+  - Tempo residuo $\le 3\text{s}$: testo rosso con 1 decimale (`|cFFFF4444%.1fs|r`) per allertare il giocatore del tick di esplosione imminente.
+  - Tempo residuo $> 3\text{s}$: testo bianco con secondi interi (`%.0fs`).
+- **Meccanica WotLK & Tetto Teorico**:
+  - Su WotLK 3.3.5a ufficiale (Retail) Blizzard **non vi era alcun cap di 3 bersagli** (rimosso nella patch 3.1.2/3.1.3 di Ulduar). Il limite teorico di bombe contemporanee per un singolo mago è tra **8** (a GCD base 1.5s) e **12** (a GCD cap di 1.0s sotto Bloodlust/Heroism). Il tracker a 5 icone copre in modo eccellente e compatto oltre il 90% delle situazioni reali di raid.
 
 ---
 

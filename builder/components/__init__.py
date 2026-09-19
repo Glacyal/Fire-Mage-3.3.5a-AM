@@ -11,6 +11,7 @@ from builder.components.bars import build_bars_auras
 from builder.components.hot_streak import build_hotstreak_auras
 from builder.components.alerts import build_alerts_auras
 from builder.components.stats import build_stats_auras
+from builder.components.multi_lb import build_multi_lb_auras
 
 __all__ = [
     "build_procs_auras",
@@ -20,4 +21,5 @@ __all__ = [
     "build_hotstreak_auras",
     "build_alerts_auras",
     "build_stats_auras",
+    "build_multi_lb_auras",
 ]

@@ -24,6 +24,7 @@ from builder.components import (
     build_hotstreak_auras,
     build_alerts_auras,
     build_stats_auras,
+    build_multi_lb_auras,
 )
 
 
@@ -39,6 +40,7 @@ class TestComponentsIntegrity(unittest.TestCase):
             ("hotstreak", build_hotstreak_auras()),
             ("alerts", build_alerts_auras()),
             ("stats", build_stats_auras()),
+            ("multi_lb", build_multi_lb_auras()),
         ]
         for name, auras in components:
             self.assertIsInstance(auras, list, f"Componente {name} non restituisce una lista")
@@ -50,10 +52,10 @@ class TestComponentsIntegrity(unittest.TestCase):
                 self.assertIn("regionType", a, f"Elemento in {name} privo di 'regionType'")
 
     def test_total_aura_count_and_uniqueness(self):
-        """Verifica il conteggio totale delle aure (37) e l'unicità di ID e UID."""
+        """Verifica il conteggio totale delle aure (43) e l'unicità di ID e UID."""
         tree = build_wa_tree()
         children = tree["c"]
-        self.assertEqual(len(children), 37, f"Previste 37 aure, trovate {len(children)}")
+        self.assertEqual(len(children), 43, f"Previste 43 aure, trovate {len(children)}")
 
         seen_ids = set()
         seen_uids = set()
@@ -91,10 +93,10 @@ class TestComponentsIntegrity(unittest.TestCase):
         self.assertEqual(castbar.get("iconSource"), -1, "iconSource deve essere -1 (automatico da trigger/spell)")
 
     def test_controlled_children_continuous_numbering(self):
-        """Verifica che tutte le 18 voci abbiano numerazione sequenziale continua da 01 a 18."""
+        """Verifica che tutte le 19 voci abbiano numerazione sequenziale continua da 01 a 19."""
         tree = build_wa_tree()
         children = tree["d"]["controlledChildren"]
-        self.assertEqual(len(children), 18, f"Previsti 18 controlledChildren, trovati {len(children)}")
+        self.assertEqual(len(children), 19, f"Previsti 19 controlledChildren, trovati {len(children)}")
         for i, child_id in enumerate(children, start=1):
             expected_prefix = f"{i:02d} - "
             self.assertTrue(
